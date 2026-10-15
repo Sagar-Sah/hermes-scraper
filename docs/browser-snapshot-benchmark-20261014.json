@@ -1,0 +1,26 @@
+{
+  "baseline": "a01ac7d",
+  "samples": 15,
+  "iterations_per_sample": 20,
+  "supplier_requests": 0,
+  "results": [
+    {
+      "fixture": "small",
+      "controls": 8,
+      "radio_choices": 24,
+      "snapshots_identical": true,
+      "baseline_median_ms": 0.28,
+      "optimized_median_ms": 0.19,
+      "speedup": 1.474
+    },
+    {
+      "fixture": "large",
+      "controls": 82,
+      "radio_choices": 640,
+      "snapshots_identical": true,
+      "baseline_median_ms": 9.06,
+      "optimized_median_ms": 4.515,
+      "speedup": 2.007
+    }
+  ]
+}

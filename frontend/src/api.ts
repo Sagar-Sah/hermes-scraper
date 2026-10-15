@@ -1,3 +1,8 @@
+export interface ExecutionCapacity {
+  product_task_limit: number; browser_page_limit: number; effective_browser_page_limit: number;
+  active_browser_workers?: number; waiting_for_browser_workers?: number;
+  maximum_configured_limit: number; browser_setting: string; restart_required: boolean; scope: string;
+}
 export type RunStatus = 'queued' | 'discovering' | 'running' | 'harvesting' | 'verifying' | 'paused' | 'completed' | 'failed' | 'cancelled' | string;
 export interface Product {
   id: string; url: string; title: string; status: RunStatus; row_count: number;

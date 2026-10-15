@@ -21,6 +21,7 @@ from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from sqlalchemy import select, update, func
 
 from .config import settings
+from .browser_capacity import browser_workload
 from .store import (
     Store,
     Run,
@@ -2879,6 +2880,7 @@ def health():
         "version": "0.1.0",
         "authentication_required": bool(settings.api_token),
         "browser_session_persistence": settings.persist_browser_sessions,
+        "execution_capacity": {**settings.execution_capacity(), **browser_workload.snapshot()},
     }
 
 

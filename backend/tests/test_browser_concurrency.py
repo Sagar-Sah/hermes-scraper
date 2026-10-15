@@ -11,9 +11,9 @@ from crawler.store import Permit, Store
 from crawler.transport import RateLimiter
 
 
-def test_browser_page_capacity_is_explicit_and_defaults_to_one(tmp_path, monkeypatch):
+def test_browser_page_capacity_is_explicit_and_defaults_to_four(tmp_path, monkeypatch):
     monkeypatch.delenv("ATLAS_BROWSER_PRODUCT_CONCURRENCY", raising=False)
-    assert Settings(data_dir=tmp_path).browser_product_concurrency == 1
+    assert Settings(data_dir=tmp_path).browser_product_concurrency == 4
     monkeypatch.setenv("ATLAS_BROWSER_PRODUCT_CONCURRENCY", "3")
     assert Settings(data_dir=tmp_path).browser_product_concurrency == 3
     monkeypatch.setenv("ATLAS_BROWSER_PRODUCT_CONCURRENCY", "0")
