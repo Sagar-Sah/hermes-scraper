@@ -1,0 +1,349 @@
+{
+  "source_url": "https://www.b2sign.com/snap-poster-hanger",
+  "source_collection_id": "a85076bcb58942a89685bb89e627a567",
+  "source_evidence_sha256": "198ceed519c9bb9024dfb0a94fac472b78fc903ad38795b6fdc9093ff63dbc13",
+  "source_bundle_sha256": "c41d0a9ae2290bab7005b6bece2d124153cad0b682851ae106ab00b657c1b4d3",
+  "projection": "public option/rule data; decorative media omitted",
+  "item": {
+    "id": 51,
+    "url": "/snap-poster-hanger",
+    "title": "Snap Poster Hanger",
+    "attrs": {
+      "attrs": [
+        {
+          "component": "button",
+          "key": "hardware",
+          "label": "",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "ph",
+              "label": "Graphic + Hanger"
+            },
+            {
+              "component": "select",
+              "key": "h",
+              "label": "Hanger Only",
+              "visible": false
+            },
+            {
+              "component": "select",
+              "key": "go",
+              "label": "Graphic Only"
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "key": "poster_width",
+          "label": "Graphic Width",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "24",
+              "label": "24\""
+            },
+            {
+              "component": "select",
+              "key": "36",
+              "label": "36\""
+            },
+            {
+              "component": "select",
+              "key": "48",
+              "label": "48\""
+            }
+          ]
+        },
+        {
+          "component": "size",
+          "key": "size",
+          "label": "Size",
+          "options": [
+            {
+              "component_props": {
+                "range": [
+                  "18",
+                  "19",
+                  "20",
+                  "21",
+                  "22",
+                  "23",
+                  "24",
+                  "25",
+                  "26",
+                  "27",
+                  "28",
+                  "29",
+                  "30",
+                  "31",
+                  "32",
+                  "33",
+                  "34",
+                  "35",
+                  "36",
+                  "37",
+                  "38",
+                  "39",
+                  "40",
+                  "41",
+                  "42",
+                  "43",
+                  "44",
+                  "45",
+                  "46",
+                  "47",
+                  "48",
+                  "49",
+                  "50",
+                  "51",
+                  "52",
+                  "53",
+                  "54",
+                  "55",
+                  "56",
+                  "57",
+                  "58",
+                  "59",
+                  "60",
+                  "61",
+                  "62",
+                  "63",
+                  "64",
+                  "65",
+                  "66",
+                  "67",
+                  "68",
+                  "69",
+                  "70",
+                  "71",
+                  "72",
+                  "73",
+                  "74",
+                  "75",
+                  "76",
+                  "77",
+                  "78",
+                  "79",
+                  "80",
+                  "81",
+                  "82",
+                  "83",
+                  "84",
+                  "85",
+                  "86",
+                  "87",
+                  "88",
+                  "89",
+                  "90",
+                  "91",
+                  "92",
+                  "93",
+                  "94",
+                  "95",
+                  "96",
+                  "97",
+                  "98",
+                  "99",
+                  "100"
+                ]
+              },
+              "default": true,
+              "key": "height",
+              "label": "Graphic Height"
+            }
+          ],
+          "visible": [
+            {
+              "key": "hardware",
+              "logic": "and",
+              "op": "in",
+              "value": [
+                "ph",
+                "go"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "key": "sides",
+          "label": "Graphic",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "1",
+              "label": "Single Sided"
+            },
+            {
+              "component": "select",
+              "key": "2",
+              "label": "Double Sided"
+            }
+          ],
+          "visible": [
+            {
+              "key": "hardware",
+              "logic": "and",
+              "op": "in",
+              "value": [
+                "ph",
+                "go"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "key": "material",
+          "label": "Material",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "double_white_popup",
+              "label": "Double White Popup"
+            }
+          ],
+          "visible": [
+            {
+              "key": "hardware",
+              "logic": "and",
+              "op": "in",
+              "value": [
+                "ph",
+                "go"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "key": "lamination",
+          "label": "Lamination",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "UV",
+              "label": "UV Printed"
+            }
+          ],
+          "visible": false
+        }
+      ],
+      "designproof": true,
+      "turnaround": [
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 200
+            }
+          ],
+          "options": [
+            {
+              "key": "v5",
+              "label": "5 Business Days"
+            }
+          ]
+        },
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 100
+            }
+          ],
+          "options": [
+            {
+              "key": "v3",
+              "label": "3 Business Days"
+            }
+          ]
+        },
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 10
+            }
+          ],
+          "options": [
+            {
+              "key": "v1",
+              "label": "Next Day"
+            }
+          ]
+        },
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 0
+            }
+          ],
+          "options": [
+            {
+              "key": "v1",
+              "label": "Next Day"
+            },
+            {
+              "key": "v0",
+              "label": "Same Day",
+              "visible": [
+                {
+                  "op": "group",
+                  "value": [
+                    {
+                      "key": "_business_day",
+                      "value": false
+                    },
+                    {
+                      "key": "_time",
+                      "logic": "or",
+                      "op": "<",
+                      "value": "12:00:00"
+                    },
+                    {
+                      "key": "_time",
+                      "logic": "or",
+                      "op": ">=",
+                      "value": "16:00:00"
+                    }
+                  ]
+                },
+                {
+                  "op": "group",
+                  "value": [
+                    {
+                      "key": "_size",
+                      "op": "=",
+                      "value": null
+                    },
+                    {
+                      "key": "_size",
+                      "logic": "or_not",
+                      "op": "outside",
+                      "value": "120x120"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "fields": {
+      "hide_sqft": true
+    }
+  }
+}

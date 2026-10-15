@@ -1,0 +1,537 @@
+{
+  "schema": 1,
+  "source_url": "https://www.b2sign.com/pole-banner-set",
+  "bundle_url": "https://www.b2sign.com/build/assets/app-496df72e.js",
+  "bundle_sha256": "c41d0a9ae2290bab7005b6bece2d124153cad0b682851ae106ab00b657c1b4d3",
+  "item_id": 31,
+  "title": "Pole Banner Set",
+  "attrs": {
+    "attrs": [
+      {
+        "key": "hardware",
+        "label": "",
+        "component": "button",
+        "options": [
+          {
+            "key": "p",
+            "label": "Banner + Hardware",
+            "component": "select",
+            "component_props": {},
+            "default": true
+          },
+          {
+            "key": "0",
+            "label": "Banner Only",
+            "component": "select",
+            "component_props": {}
+          },
+          {
+            "key": "h",
+            "label": "Hardware Only",
+            "component": "select",
+            "component_props": {}
+          }
+        ],
+        "action": []
+      },
+      {
+        "key": "_size",
+        "label": "Size",
+        "component": "size",
+        "options": [
+          {
+            "key": "width",
+            "label": "Width",
+            "component": "select",
+            "component_props": {
+              "range": [
+                "18",
+                "24",
+                "30"
+              ]
+            }
+          },
+          {
+            "key": "height",
+            "label": "Height",
+            "component": "select",
+            "component_props": {
+              "range": [
+                "24",
+                "25",
+                "26",
+                "27",
+                "28",
+                "29",
+                "30",
+                "31",
+                "32",
+                "33",
+                "34",
+                "35",
+                "36",
+                "37",
+                "38",
+                "39",
+                "40",
+                "41",
+                "42",
+                "43",
+                "44",
+                "45",
+                "46",
+                "47",
+                "48",
+                "49",
+                "50",
+                "51",
+                "52",
+                "53",
+                "54",
+                "55",
+                "56",
+                "57",
+                "58",
+                "59",
+                "60",
+                "61",
+                "62",
+                "63",
+                "64",
+                "65",
+                "66",
+                "67",
+                "68",
+                "69",
+                "70",
+                "71",
+                "72",
+                "73",
+                "74",
+                "75",
+                "76",
+                "77",
+                "78",
+                "79",
+                "80",
+                "81",
+                "82",
+                "83",
+                "84",
+                "85",
+                "86",
+                "87",
+                "88",
+                "89",
+                "90",
+                "91",
+                "92",
+                "93",
+                "94",
+                "95",
+                "96"
+              ]
+            }
+          }
+        ],
+        "component_props": {
+          "cross": true
+        },
+        "visible": [
+          {
+            "key": "hardware",
+            "value": "h",
+            "op": "!=",
+            "logic": "and"
+          }
+        ],
+        "action": [
+          {
+            "type": "change",
+            "match": [
+              {
+                "op": "starts_with",
+                "key": "_size",
+                "index": 1,
+                "logic": "and",
+                "value": "18"
+              }
+            ],
+            "change": [
+              {
+                "key": "pole_width",
+                "value": "18"
+              }
+            ]
+          },
+          {
+            "type": "change",
+            "match": [
+              {
+                "op": "starts_with",
+                "key": "_size",
+                "index": 1,
+                "logic": "and",
+                "value": "24"
+              }
+            ],
+            "change": [
+              {
+                "key": "pole_width",
+                "value": "24"
+              }
+            ]
+          },
+          {
+            "type": "change",
+            "match": [
+              {
+                "op": "starts_with",
+                "key": "_size",
+                "index": 1,
+                "logic": "and",
+                "value": "30"
+              }
+            ],
+            "change": [
+              {
+                "key": "pole_width",
+                "value": "30"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "pole_width",
+        "label": "Width",
+        "component": "select",
+        "options": [
+          {
+            "key": "18",
+            "label": "18\"",
+            "component": "select",
+            "default": true
+          },
+          {
+            "key": "24",
+            "label": "24\"",
+            "component": "select"
+          },
+          {
+            "key": "30",
+            "label": "30\"",
+            "component": "select"
+          }
+        ],
+        "visible": [
+          {
+            "key": "hardware",
+            "value": "h",
+            "op": "=",
+            "logic": "and"
+          }
+        ]
+      },
+      {
+        "key": "sides",
+        "label": "Graphic",
+        "component": "select",
+        "options": [
+          {
+            "key": "2",
+            "label": "Double Sided",
+            "component": "select",
+            "default": true
+          }
+        ],
+        "visible": [
+          {
+            "key": "hardware",
+            "value": "h",
+            "op": "!=",
+            "logic": "and"
+          }
+        ]
+      },
+      {
+        "key": "material",
+        "label": "Material",
+        "component": "select",
+        "options": [
+          {
+            "key": "18oz_blockout_vinyl_banner",
+            "label": "18oz. Blockout Vinyl Banner",
+            "component": "select",
+            "default": true
+          }
+        ],
+        "visible": [
+          {
+            "key": "hardware",
+            "value": "h",
+            "op": "!=",
+            "logic": "and"
+          }
+        ]
+      },
+      {
+        "key": "polepocket",
+        "label": "Pole Pocket",
+        "component": "select",
+        "options": [
+          {
+            "key": "2/TB",
+            "label": "2\" - Top and Bottom",
+            "component": "select",
+            "default": true
+          }
+        ],
+        "visible": [
+          {
+            "key": "hardware",
+            "value": "h",
+            "op": "!=",
+            "logic": "and"
+          }
+        ]
+      },
+      {
+        "key": "hem",
+        "label": "Hem",
+        "component": "select",
+        "options": [
+          {
+            "key": "0",
+            "label": "No Hem",
+            "component": "select",
+            "default": true
+          }
+        ],
+        "visible": false
+      },
+      {
+        "key": "grommet",
+        "label": "Grommet",
+        "component": "select",
+        "options": [
+          {
+            "key": "C",
+            "label": "4 Corner Only",
+            "component": "select",
+            "default": true
+          }
+        ],
+        "visible": [
+          {
+            "key": "hardware",
+            "value": "h",
+            "op": "!=",
+            "logic": "and"
+          }
+        ]
+      },
+      {
+        "key": "windslit",
+        "label": "Windslit",
+        "component": "select",
+        "options": [
+          {
+            "key": "0",
+            "label": "No Windslits",
+            "component": "select",
+            "default": true
+          },
+          {
+            "key": "1",
+            "label": "Standard Windslits",
+            "component": "select"
+          },
+          {
+            "key": "1",
+            "label": "1",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "2",
+            "label": "2",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "3",
+            "label": "3",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "4",
+            "label": "4",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "5",
+            "label": "5",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "6",
+            "label": "6",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "7",
+            "label": "7",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "8",
+            "label": "8",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "9",
+            "label": "9",
+            "component": "select",
+            "visible": false
+          },
+          {
+            "key": "10",
+            "label": "10",
+            "component": "select",
+            "visible": false
+          }
+        ],
+        "visible": [
+          {
+            "key": "hardware",
+            "value": "h",
+            "op": "!=",
+            "logic": "and"
+          }
+        ]
+      }
+    ],
+    "designproof": true,
+    "turnaround": [
+      {
+        "match": [
+          {
+            "key": "_qty",
+            "value": 200,
+            "op": ">"
+          }
+        ],
+        "options": [
+          {
+            "key": "v5",
+            "label": "5 Business Days"
+          }
+        ]
+      },
+      {
+        "match": [
+          {
+            "key": "_qty",
+            "value": 100,
+            "op": ">"
+          }
+        ],
+        "options": [
+          {
+            "key": "v3",
+            "label": "3 Business Days"
+          }
+        ]
+      },
+      {
+        "match": [
+          {
+            "key": "_qty",
+            "value": 10,
+            "op": ">"
+          }
+        ],
+        "options": [
+          {
+            "key": "v1",
+            "label": "Next Day"
+          }
+        ]
+      },
+      {
+        "match": [
+          {
+            "key": "_qty",
+            "value": 0,
+            "op": ">"
+          }
+        ],
+        "options": [
+          {
+            "key": "v1",
+            "label": "Next Day"
+          },
+          {
+            "key": "v0",
+            "label": "Same Day",
+            "visible": [
+              {
+                "op": "group",
+                "value": [
+                  {
+                    "key": "_business_day",
+                    "value": false
+                  },
+                  {
+                    "key": "_time",
+                    "value": "12:00:00",
+                    "op": "<",
+                    "logic": "or"
+                  },
+                  {
+                    "key": "_time",
+                    "value": "16:00:00",
+                    "op": ">=",
+                    "logic": "or"
+                  }
+                ]
+              },
+              {
+                "op": "group",
+                "value": [
+                  {
+                    "key": "_size",
+                    "value": null,
+                    "op": "="
+                  },
+                  {
+                    "key": "_size",
+                    "value": "120x120",
+                    "op": "outside",
+                    "logic": "or_not"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "source_offsets": {
+    "quote_request": 223959,
+    "initializer": 228543,
+    "display_total": 223610
+  },
+  "notes": [
+    "Offsets are character positions in the pinned minified source.",
+    "No prices, customer information, or account data are included."
+  ]
+}

@@ -1,0 +1,2318 @@
+{
+  "source": "Browser-captured public Printograph Business Cards responses; no request headers or credentials",
+  "captures": {
+    "base_prices": {
+      "evidence_id": "b7014f7f63ff42b5a6c12a213dec302a",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/prices?itemId=null&cid=",
+      "raw_sha256": "86e6438dfba7a7115df3d17259bdaac35b306735ff11c3319621ae498a796ed1",
+      "data": {
+        "items": [
+          {
+            "quantity": 50,
+            "markupPrice": "4.69",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 100,
+            "markupPrice": "8.61",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 250,
+            "markupPrice": "9.45",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 500,
+            "markupPrice": "11.48",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 1000,
+            "markupPrice": "14.00",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 2500,
+            "markupPrice": "32.20",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 5000,
+            "markupPrice": "46.20",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 10000,
+            "markupPrice": "80.50",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 15000,
+            "markupPrice": "114.73",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 20000,
+            "markupPrice": "148.89",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 25000,
+            "markupPrice": "182.98",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 30000,
+            "markupPrice": "217.00",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 35000,
+            "markupPrice": "250.95",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 40000,
+            "markupPrice": "284.83",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 45000,
+            "markupPrice": "318.64",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 50000,
+            "markupPrice": "352.38",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 55000,
+            "markupPrice": "386.05",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 60000,
+            "markupPrice": "419.65",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 65000,
+            "markupPrice": "453.18",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 70000,
+            "markupPrice": "486.64",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 75000,
+            "markupPrice": "520.03",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 80000,
+            "markupPrice": "553.35",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 85000,
+            "markupPrice": "586.60",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 90000,
+            "markupPrice": "619.78",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 95000,
+            "markupPrice": "652.89",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          },
+          {
+            "quantity": 100000,
+            "markupPrice": "685.93",
+            "listPrice": null,
+            "packageASubItemPrice": null
+          }
+        ]
+      },
+      "recorded_response_hash": "e773dd6e92a75ba51432e85198223c1eec51294d624cbd624791b2f32f65c6be",
+      "observed_at": 1790364315.751162
+    },
+    "quantity_support": {
+      "evidence_id": "0c2242d2b23d4209a9030856eeb2eb2e",
+      "url": "https://www.printograph.com/service/rest/v1/products/quantities?productType=1&includeTurnaround=true&size=101&orientation=1&paper=1&color=2",
+      "raw_sha256": "4a17b104d4dbb95465059e4db449d72710f786e89090fd3d078eaff2879155c9",
+      "data": {
+        "items": [
+          {
+            "quantity": 50,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 100,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 250,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 500,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 1000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 2500,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 5000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 10000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 15000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 20000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 25000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 30000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 35000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 40000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 45000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 50000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 55000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 60000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 65000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 70000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 75000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 80000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 85000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 90000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 95000,
+            "turnaroundList": [
+              1
+            ]
+          },
+          {
+            "quantity": 100000,
+            "turnaroundList": [
+              1
+            ]
+          }
+        ]
+      },
+      "recorded_response_hash": "a1e258b410efda9ea91929d98532902ff346dfb7495ab6c4759897410b21a775",
+      "observed_at": 1790364309.642009
+    },
+    "option_quantity_support": {
+      "evidence_id": "3d7e5568de904775b9a83638e5a6b3d8",
+      "url": "https://www.printograph.com/service/rest/v1/products/options/quantities?optionIds=2,5&includeTurnaround=true&productType=1&size=101&orientation=1&paper=1&color=2",
+      "raw_sha256": "5059181003b13a0aae4ff0aaafa80df593c049600e682a931af732c04e37805d",
+      "data": {
+        "2": [
+          {
+            "quantity": 25,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 50,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 100,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 250,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 500,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 1000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 2500,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 5000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 10000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 15000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 20000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 25000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 30000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 35000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 40000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 45000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 50000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 55000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 60000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 65000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 70000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 75000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 80000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 85000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 90000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 95000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 100000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          }
+        ],
+        "5": [
+          {
+            "quantity": 25,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 50,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 100,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 250,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 500,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 1000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 2500,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 5000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 10000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 15000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 20000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 25000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 30000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 35000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 40000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 45000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 50000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 55000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 60000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 65000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 70000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 75000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 80000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 85000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 90000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 95000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          },
+          {
+            "quantity": 100000,
+            "turnaroundList": [
+              1,
+              3
+            ]
+          }
+        ]
+      },
+      "recorded_response_hash": "489850abd25a4a946a327694d1dc4c5789a903b360f528e17eefb51da0d99e79",
+      "observed_at": 1790364313.859522
+    },
+    "option_catalog": {
+      "evidence_id": "19c3beb6ca904e45bce438c69c7e5c39",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/options?requestValues=true&eddm=false",
+      "raw_sha256": "466a73310239a3692cea2284e15f538f82099d77ad0ba8f6978f7ae8afc5001e",
+      "data": {
+        "items": [
+          {
+            "id": 100000102,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "INSTANT_PROOF",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 31,
+              "label": "Instant Processing Proof"
+            },
+            "group": {
+              "id": 1,
+              "label": "Proof Type"
+            }
+          },
+          {
+            "id": 100000104,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": false,
+            "name": "ROUND_CORNERS",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 2,
+              "label": "Round Corners"
+            },
+            "group": {
+              "id": 2,
+              "label": "Round Corners"
+            }
+          },
+          {
+            "id": 100581420,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "DESIGN_SERVICE_1",
+            "supportedByIOP": false,
+            "supportedByOD": false,
+            "type": {
+              "id": 41,
+              "label": "Design Service: Silver Package"
+            },
+            "group": {
+              "id": 13,
+              "label": "Design Service"
+            }
+          },
+          {
+            "id": 100581421,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "DESIGN_SERVICE_2",
+            "supportedByIOP": false,
+            "supportedByOD": false,
+            "type": {
+              "id": 42,
+              "label": "Design Service: Gold Package"
+            },
+            "group": {
+              "id": 13,
+              "label": "Design Service"
+            }
+          },
+          {
+            "id": 100581422,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "DESIGN_SERVICE_3",
+            "supportedByIOP": false,
+            "supportedByOD": false,
+            "type": {
+              "id": 43,
+              "label": "Design Service: Platinum Package"
+            },
+            "group": {
+              "id": 13,
+              "label": "Design Service"
+            }
+          },
+          {
+            "id": 101857042,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": true,
+            "name": "MANUAL_SOFT_PROOF",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 1,
+              "label": "Manually Processed, PDF Proof 24 Hrs."
+            },
+            "group": {
+              "id": 1,
+              "label": "Proof Type"
+            }
+          },
+          {
+            "id": 101925130,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": true,
+            "name": "MANUAL_NO_PROOF",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 36,
+              "label": "Manually Processed, No Proof"
+            },
+            "group": {
+              "id": 1,
+              "label": "Proof Type"
+            }
+          },
+          {
+            "id": 103132720,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": false,
+            "name": "UV_COATING_FRONT",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 5,
+              "label": "High Gloss UV Coating Front"
+            },
+            "group": {
+              "id": 4,
+              "label": "High Gloss UV Coating"
+            }
+          }
+        ]
+      },
+      "recorded_response_hash": "4749cd9e6aed49cdc501163538e015dfdf1d69b203385a3df670c64f2c22b9b8",
+      "observed_at": 1790364313.373108
+    },
+    "previous_option_catalog": {
+      "evidence_id": "3c4ebbda64e741e8b4d4654e48ea4853",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000001/options?requestValues=true&eddm=false",
+      "raw_sha256": "bcbbc3bf617c920c2968e62dcaa7e6c0d5d9a8ac60056eeb8fcdb14f91738e3d",
+      "data": {
+        "items": [
+          {
+            "id": 100000002,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "INSTANT_PROOF",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 31,
+              "label": "Instant Processing Proof"
+            },
+            "group": {
+              "id": 1,
+              "label": "Proof Type"
+            }
+          },
+          {
+            "id": 100000004,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": false,
+            "name": "ROUND_CORNERS",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 2,
+              "label": "Round Corners"
+            },
+            "group": {
+              "id": 2,
+              "label": "Round Corners"
+            }
+          },
+          {
+            "id": 100581300,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "DESIGN_SERVICE_1",
+            "supportedByIOP": false,
+            "supportedByOD": false,
+            "type": {
+              "id": 41,
+              "label": "Design Service: Silver Package"
+            },
+            "group": {
+              "id": 13,
+              "label": "Design Service"
+            }
+          },
+          {
+            "id": 100581301,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "DESIGN_SERVICE_2",
+            "supportedByIOP": false,
+            "supportedByOD": false,
+            "type": {
+              "id": 42,
+              "label": "Design Service: Gold Package"
+            },
+            "group": {
+              "id": 13,
+              "label": "Design Service"
+            }
+          },
+          {
+            "id": 100581302,
+            "anyQuantityOrdered": true,
+            "quantityDependentPrice": false,
+            "name": "DESIGN_SERVICE_3",
+            "supportedByIOP": false,
+            "supportedByOD": false,
+            "type": {
+              "id": 43,
+              "label": "Design Service: Platinum Package"
+            },
+            "group": {
+              "id": 13,
+              "label": "Design Service"
+            }
+          },
+          {
+            "id": 101857022,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": true,
+            "name": "MANUAL_SOFT_PROOF",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 1,
+              "label": "Manually Processed, PDF Proof 24 Hrs."
+            },
+            "group": {
+              "id": 1,
+              "label": "Proof Type"
+            }
+          },
+          {
+            "id": 101925110,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": true,
+            "name": "MANUAL_NO_PROOF",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 36,
+              "label": "Manually Processed, No Proof"
+            },
+            "group": {
+              "id": 1,
+              "label": "Proof Type"
+            }
+          },
+          {
+            "id": 103132700,
+            "anyQuantityOrdered": false,
+            "quantityDependentPrice": false,
+            "name": "UV_COATING_FRONT",
+            "supportedByIOP": true,
+            "supportedByOD": true,
+            "type": {
+              "id": 5,
+              "label": "High Gloss UV Coating Front"
+            },
+            "group": {
+              "id": 4,
+              "label": "High Gloss UV Coating"
+            }
+          }
+        ]
+      },
+      "recorded_response_hash": "96b88b09ccdb1aa9952acb392f089935308a8f65a647046910e91a587a89e144",
+      "observed_at": 1790364310.265619
+    },
+    "rounded_corner_prices": {
+      "evidence_id": "26adc90e73144057aec6f695621a9065",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/options/100000104/prices",
+      "raw_sha256": "214512918e639be2d4ddc571526a94e53d0cc44977541bb0f405c63b0be3d27d",
+      "data": {
+        "items": [
+          {
+            "quantity": 25,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 250,
+            "markupPrice": "5.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 500,
+            "markupPrice": "7.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 1000,
+            "markupPrice": "11.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 2500,
+            "markupPrice": "31.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 5000,
+            "markupPrice": "60.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 10000,
+            "markupPrice": "100.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 15000,
+            "markupPrice": "130.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 20000,
+            "markupPrice": "160.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 25000,
+            "markupPrice": "190.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 30000,
+            "markupPrice": "220.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 35000,
+            "markupPrice": "250.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 40000,
+            "markupPrice": "280.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 45000,
+            "markupPrice": "310.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50000,
+            "markupPrice": "340.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 55000,
+            "markupPrice": "370.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 60000,
+            "markupPrice": "400.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 65000,
+            "markupPrice": "430.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 70000,
+            "markupPrice": "460.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 75000,
+            "markupPrice": "490.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 80000,
+            "markupPrice": "520.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 85000,
+            "markupPrice": "550.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 90000,
+            "markupPrice": "580.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 95000,
+            "markupPrice": "610.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100000,
+            "markupPrice": "640.00",
+            "listPrice": null
+          }
+        ]
+      },
+      "recorded_response_hash": "d5c88eab217bfff36c20423eeaff807fe44cc29e6d2f5a18d28941ef7e4d71a1",
+      "observed_at": 1790364320.2909498
+    },
+    "manual_proof_prices": {
+      "evidence_id": "e03ec52c677a4fd9b1c0129c301bf8c6",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/options/101857042/prices",
+      "raw_sha256": "45e28b771cc8054fb4443b8be82d0a7c33af051f1199f2f4063c770c9c9a5f46",
+      "data": {
+        "items": [
+          {
+            "quantity": 25,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 250,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 500,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 1000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 2500,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 5000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 10000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 15000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 20000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 25000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 30000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 35000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 40000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 45000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 55000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 60000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 65000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 70000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 75000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 80000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 85000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 90000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 95000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100000,
+            "markupPrice": "4.00",
+            "listPrice": null
+          }
+        ]
+      },
+      "recorded_response_hash": "ffe8ea1bd45bcf5f4344c8b0a00ea6d922d8b31cc767eda464034ec42e0e2ecc",
+      "observed_at": 1790364316.228966
+    },
+    "manual_no_proof_prices": {
+      "evidence_id": "2dd386809bce4a28ae028ecd3e10d66a",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/options/101925130/prices",
+      "raw_sha256": "4a9f2fa134b11100c64fac1e0c22621f53020472e4dc0f9e245ef436c1fbeca1",
+      "data": {
+        "items": [
+          {
+            "quantity": 25,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 250,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 500,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 1000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 2500,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 5000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 10000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 15000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 20000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 25000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 30000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 35000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 40000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 45000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 55000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 60000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 65000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 70000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 75000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 80000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 85000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 90000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 95000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100000,
+            "markupPrice": "3.00",
+            "listPrice": null
+          }
+        ]
+      },
+      "recorded_response_hash": "cec6fd3296393c3ff027c3000e7c7fabaa29d90d7be15117fd4cb057c894623f",
+      "observed_at": 1790364318.7699158
+    },
+    "design_silver_prices": {
+      "evidence_id": "c9e6f53ff3914f718cda8428b112d8c0",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/options/100581420/prices",
+      "raw_sha256": "e3a4621eb45932da574d05dac712573d015d45607a2b0f2e0951548625ee6acf",
+      "data": {
+        "items": [
+          {
+            "quantity": 50,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 250,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 500,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 1000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 2500,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 5000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 10000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 15000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 20000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 25000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 30000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 35000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 40000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 45000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 55000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 60000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 65000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 70000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 75000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 80000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 85000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 90000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 95000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100000,
+            "markupPrice": "49.00",
+            "listPrice": null
+          }
+        ]
+      },
+      "recorded_response_hash": "74a8ce59a7dc787819c908078488cd4d4aef37fb4847437dc181a3a5fe17f99b",
+      "observed_at": 1790364319.270804
+    },
+    "design_gold_prices": {
+      "evidence_id": "69729aaa191b41ecbec2180269322153",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/options/100581421/prices",
+      "raw_sha256": "b10f72ae3adc28f133ce51ec9bc7f902df0a0248e4041f9152a590dcceb07a7b",
+      "data": {
+        "items": [
+          {
+            "quantity": 50,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 250,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 500,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 1000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 2500,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 5000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 10000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 15000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 20000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 25000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 30000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 35000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 40000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 45000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 55000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 60000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 65000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 70000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 75000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 80000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 85000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 90000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 95000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100000,
+            "markupPrice": "59.00",
+            "listPrice": null
+          }
+        ]
+      },
+      "recorded_response_hash": "a160b06e8879dd8ad219f80b4b465e80c0f52c3985d2e6d753383cb21c41a54a",
+      "observed_at": 1790364321.308131
+    },
+    "design_platinum_prices": {
+      "evidence_id": "cd5604b176604880a0de99d7c05aa352",
+      "url": "https://www.printograph.com/service/rest/v1/products/100000021/options/100581422/prices",
+      "raw_sha256": "8278f37b78bb7b13e9a9737260d983ebf698600b80899bf85a59a90aa24f476f",
+      "data": {
+        "items": [
+          {
+            "quantity": 50,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 250,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 500,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 1000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 2500,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 5000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 10000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 15000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 20000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 25000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 30000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 35000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 40000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 45000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 50000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 55000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 60000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 65000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 70000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 75000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 80000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 85000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 90000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 95000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          },
+          {
+            "quantity": 100000,
+            "markupPrice": "79.00",
+            "listPrice": null
+          }
+        ]
+      },
+      "recorded_response_hash": "208c7f01507c5f1557fc6e69d7c5163bffe356b50703a48bfb5fe0d439a119ae",
+      "observed_at": 1790364320.785416
+    },
+    "dom_quote": {
+      "evidence_id": "00e99185f7a849b8b8d2df752211f31a",
+      "url": "https://www.printograph.com/products/business-cards/order",
+      "raw_sha256": "343ed320da43978ec20f44e880fbe9970d3a4d8e7504aea4c90eb25a85e78d13",
+      "data": {
+        "kind": "visible_product_quote",
+        "url": "https://www.printograph.com/products/business-cards/order",
+        "observed_at": 1790364322.6414452,
+        "title": "Business Cards",
+        "controls": [
+          {
+            "kind": "select",
+            "raw_key": "size",
+            "label": "Size",
+            "selector": "#size_bkb9fobrg",
+            "value": "101",
+            "selected_label": "2\" x 3.5\" U.S. Standard",
+            "choices": [
+              {
+                "value": "",
+                "label": "Please select an option",
+                "disabled": false,
+                "placeholder": true
+              },
+              {
+                "value": "101",
+                "label": "2\" x 3.5\" U.S. Standard",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "335",
+                "label": "1.75\" x 3\"",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "337",
+                "label": "1.75\" x 3.5\"",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "260",
+                "label": "2\" x 3\"",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "339",
+                "label": "2.17\" x 3.35\" European Standard",
+                "disabled": false,
+                "placeholder": false
+              }
+            ],
+            "key": "size"
+          },
+          {
+            "kind": "select",
+            "raw_key": "paper",
+            "label": "Paper",
+            "selector": "#paper_cxvuhmu13",
+            "value": "1",
+            "selected_label": "14 pt. Gloss",
+            "choices": [
+              {
+                "value": "",
+                "label": "Please select an option",
+                "disabled": false,
+                "placeholder": true
+              },
+              {
+                "value": "1",
+                "label": "14 pt. Gloss",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "2",
+                "label": "14 pt. Uncoated",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "7",
+                "label": "100 lb. Matte Cover",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "74",
+                "label": "13 pt. Premium Linen",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "10",
+                "label": "16 pt. Premium Matte",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "76",
+                "label": "18 pt. Premium Kraft",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "75",
+                "label": "18 pt. Ultra Premium Pearl",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "77",
+                "label": "18 pt. Ultra Premium Smooth White",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "31",
+                "label": "24 pt. Trifecta Green",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "32",
+                "label": "38 pt. Trifecta Black",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "66",
+                "label": "38 pt. Trifecta Blue",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "36",
+                "label": "38 pt. Trifecta Red",
+                "disabled": false,
+                "placeholder": false
+              }
+            ],
+            "key": "paper"
+          },
+          {
+            "kind": "select",
+            "raw_key": "color",
+            "label": "Color",
+            "selector": "#color_jj3e98ddv",
+            "value": "2",
+            "selected_label": "Full Color Front, Grayscale Back",
+            "choices": [
+              {
+                "value": "",
+                "label": "Please select an option",
+                "disabled": false,
+                "placeholder": true
+              },
+              {
+                "value": "1",
+                "label": "Full Color Front, No Back",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "2",
+                "label": "Full Color Front, Grayscale Back",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "3",
+                "label": "Full Color Both Sides",
+                "disabled": false,
+                "placeholder": false
+              }
+            ],
+            "key": "color"
+          },
+          {
+            "kind": "select",
+            "raw_key": "quantity",
+            "label": "Quantity",
+            "selector": "#quantity_qn5dvj4o7",
+            "value": "50",
+            "selected_label": "50",
+            "choices": [
+              {
+                "value": "0",
+                "label": "Please select an option",
+                "disabled": false,
+                "placeholder": true
+              },
+              {
+                "value": "50",
+                "label": "50",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "100",
+                "label": "100",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "250",
+                "label": "250",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "500",
+                "label": "500",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "1000",
+                "label": "1000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "2500",
+                "label": "2500",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "5000",
+                "label": "5000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "10000",
+                "label": "10000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "15000",
+                "label": "15000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "20000",
+                "label": "20000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "25000",
+                "label": "25000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "30000",
+                "label": "30000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "35000",
+                "label": "35000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "40000",
+                "label": "40000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "45000",
+                "label": "45000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "50000",
+                "label": "50000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "55000",
+                "label": "55000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "60000",
+                "label": "60000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "65000",
+                "label": "65000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "70000",
+                "label": "70000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "75000",
+                "label": "75000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "80000",
+                "label": "80000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "85000",
+                "label": "85000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "90000",
+                "label": "90000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "95000",
+                "label": "95000",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "100000",
+                "label": "100000",
+                "disabled": false,
+                "placeholder": false
+              }
+            ],
+            "key": "quantity"
+          },
+          {
+            "kind": "select",
+            "raw_key": "roundedCorners",
+            "label": "Rounded Corner",
+            "selector": "#roundedCorners_fe6y9tx0v",
+            "value": "",
+            "selected_label": "None",
+            "choices": [
+              {
+                "value": "",
+                "label": "None",
+                "disabled": false,
+                "placeholder": false
+              },
+              {
+                "value": "2",
+                "label": "Round Corners (+$3.00 )",
+                "disabled": false,
+                "placeholder": false
+              }
+            ],
+            "key": "roundedCorners"
+          },
+          {
+            "kind": "select",
+            "raw_key": "coating",
+            "label": "Coating",
+            "selector": "#coating_3di2ehniz",
+            "value": "5",
+            "selected_label": "High Gloss UV Coating Front",
+            "choices": [
+              {
+                "value": "5",
+                "label": "High Gloss UV Coating Front",
+                "disabled": false,
+                "placeholder": false
+              }
+            ],
+            "key": "coating"
+          },
+          {
+            "kind": "radio",
+            "raw_key": "orientation",
+            "label": "orientation",
+            "selector": "#orientation0",
+            "value": "1",
+            "selected_label": "Horizontal",
+            "choices": [
+              {
+                "value": "1",
+                "label": "Horizontal",
+                "selector": "#orientation0",
+                "label_selector": "#order-form > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > label:nth-of-type(1)"
+              },
+              {
+                "value": "2",
+                "label": "Vertical",
+                "selector": "#orientation1",
+                "label_selector": "#order-form > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > label:nth-of-type(1)"
+              }
+            ],
+            "key": "orientation"
+          }
+        ],
+        "subtotal_text": "$4.69",
+        "basis": "Subtotal (excludes shipping) :",
+        "product_type": "1",
+        "store_type": "broker",
+        "independent_cart_verification": false
+      },
+      "recorded_response_hash": "cc7f145c98907a4ae83af4d5c692fafbfcfc6379dd3dc6f0442f4ad1b9e74dc1",
+      "observed_at": 1790364322.643311
+    },
+    "product_lookup": {
+      "evidence_id": "c1ad2c5825774e31b3d8d9343c3b5b22",
+      "capture_note": "Later live default Business Cards pilot; original capture omitted this route. Request-start provenance is still synthesized in binding tests.",
+      "url": "https://www.printograph.com/service/rest/v1/products?productType=1&turnaround=1&size=101&orientation=1&paper=1&color=2",
+      "raw_sha256": "9e0fe66dde4add2abb75b7f0b50319c38bad250ed579ccd8a589deafe11c8700",
+      "recorded_response_hash": "bedc5ad031fcac388fd04e8c7e4dba2da57c4a916f3badd616cd69c8c7294152",
+      "observed_at": 1790366221.341805,
+      "data": {
+        "items": [
+          {
+            "id": 100000021
+          }
+        ]
+      }
+    }
+  },
+  "original_run_id": "ce354c188f4148f9929522cd54808a9f"
+}

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hermes-product-crawler"
+version = "0.1.0"
+description = "Durable, evidence-backed bulk product extraction"
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.115,<1", "uvicorn[standard]>=0.32,<1", "httpx>=0.28,<1", "sqlalchemy>=2,<3", "psycopg[binary]>=3.2,<4", "pydantic>=2.10,<3", "pyarrow>=18", "duckdb>=1.2,<2", "cryptography>=44", "boto3>=1.35", "beautifulsoup4>=4.12", "playwright>=1.50", "python-multipart>=0.0.20", "certifi>=2025", "truststore>=0.10,<1"]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-asyncio>=0.25", "respx>=0.22"]
+
+[tool.setuptools.packages.find]
+include = ["crawler*"]
+
+[tool.setuptools.package-data]
+crawler = ["contracts/*.json"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

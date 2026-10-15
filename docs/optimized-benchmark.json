@@ -1,0 +1,40 @@
+{
+  "run_id": "efc7967554364661b55e0164f0ddfd11",
+  "started_at": "2026-09-25T19:37:17.604362+00:00",
+  "elapsed_seconds": 417.422,
+  "observed_peak_rss_mib": 919.3,
+  "peak_rss_sampling_seconds": 5,
+  "max_observed_running_products": 99,
+  "row_count": 3000000,
+  "rows_per_second": 7187.0,
+  "status": "completed",
+  "fixture": true,
+  "supplier_requests": 0,
+  "products": 100,
+  "export_files": 202,
+  "export_bytes": 6568967116,
+  "machine": "macOS-15.5-arm64-arm-64bit",
+  "python": "3.11.3",
+  "database": "SQLite WAL",
+  "concurrency_cap": 100,
+  "includes_csv_parquet_exports": true,
+  "independent_verification": {
+    "rows": 3000000,
+    "products": 100,
+    "unique_configuration_rows": 3000000,
+    "synthetic_rows": 3000000,
+    "min_rows_per_product": 30000,
+    "max_rows_per_product": 30000,
+    "elapsed_seconds": 5.25,
+    "method": "DuckDB scan of the combined exported Parquet artifact"
+  },
+  "independent_csv_verification": {
+    "rows": 3000000,
+    "columns": 19,
+    "elapsed_seconds": 18.1,
+    "method": "Python streaming csv.reader over combined catalog CSV"
+  },
+  "generation_complete_by_seconds": 140.3,
+  "implementation_note": "Single-product exports reuse their combined CSV/Parquet pair. Subsequent correctness changes to semantic row identity and same-pass price-conflict detection were not part of this measured run.",
+  "concurrent_activity": "Bounded live browser pilot and development tests ran concurrently; 99 fixture product tasks were observed running at once within the global100-product limit."
+}

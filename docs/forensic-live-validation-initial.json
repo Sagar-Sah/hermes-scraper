@@ -1,0 +1,1303 @@
+{
+  "observed_at": "2026-09-26T02:48:27.991076+00:00",
+  "deployment_at": "2026-09-26T02:45:49.890431+00:00",
+  "run_id": "36c1c4b084664d36b7b32dbca7cf8f08",
+  "run": {
+    "status": "running",
+    "completed_products": 0,
+    "active_products": 3,
+    "attention_products": 0,
+    "row_count": 7510,
+    "legacy_row_count": 7427,
+    "scoped_row_count": 83,
+    "request_count": 23968,
+    "error_count": 0
+  },
+  "products": [
+    {
+      "id": "1f6e547e42d0493ab8d93e8a3222e941",
+      "title": "Business Cards",
+      "status": "running",
+      "row_count": 722,
+      "legacy_row_count": 693,
+      "scoped_row_count": 29,
+      "request_count": 8308,
+      "coverage_status": "partial",
+      "error": null
+    },
+    {
+      "id": "e851c0a35d06404dbedac29baca15810",
+      "title": "Club Flyers",
+      "status": "running",
+      "row_count": 757,
+      "legacy_row_count": 730,
+      "scoped_row_count": 27,
+      "request_count": 11305,
+      "coverage_status": "partial",
+      "error": null
+    },
+    {
+      "id": "4ccfd37ce02c411b97f478c643b3a481",
+      "title": "Roll Labels",
+      "status": "running",
+      "row_count": 6031,
+      "legacy_row_count": 6004,
+      "scoped_row_count": 27,
+      "request_count": 4355,
+      "coverage_status": "partial",
+      "error": null
+    }
+  ],
+  "events_since_deployment": {
+    "bulk_fallback": 3,
+    "bulk_quantity_warmup": 3,
+    "capabilities": 3,
+    "discovery": 3,
+    "legacy_rows_quarantined": 3,
+    "pricing_table_captured": 34,
+    "progress": 83,
+    "size_dependency_warmup": 2
+  },
+  "errors_since_deployment": [],
+  "recent_scoped_samples": {
+    "1f6e547e42d0493ab8d93e8a3222e941": [
+      {
+        "id": "07ab32eabcba13dda9b4e4295ed9b5d3b0c056cb92d54e5b9e6968025eb6f863",
+        "record_schema_version": 2,
+        "quantity": 250,
+        "subtotal": "12.19",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "business-cards",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "1",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "550e478632eb4706a47bdb57577e289e",
+          "2b686c764c354d95b3b3f05cd18fbda2",
+          "324b50395cb0474c8792f20210e37ac3",
+          "2135025fc8a44941bfb921d500384dfd",
+          "23830caaead0417dab5d136379380ad2",
+          "af79010b42d24089a4ed9d1ff82df13f",
+          "252fef108caf4264900c65568ee55e3e",
+          "2edcacc3a99d4ae2b4a7e79622dc6474",
+          "39f0686288c24787bbbf37ff0e4fb215",
+          "6a64e9be63ae494cad8ed42a677dab5e",
+          "4fcbb3997405404a97a0dbc0b9789f9d",
+          "6c9f83e5065c47a89106230843e1f879",
+          "7e8b136243134e9ba4a88464e989af1f",
+          "e10b925cfa80480ab70e29f4a02a2271",
+          "49f3e4148434483b85bcdc783b3b1fb5",
+          "9a1c7c85cab747bf9a12d1afea8d9bef",
+          "0ad997a6577546aaba4e8ac68fbcfd65",
+          "35e78bb47b8c433c956bb2f9fcb9588a",
+          "4ed3fa3325b44cf0a9ae13c27d4e4ea7",
+          "2d9dff188f844adcb249aa6124e51b89",
+          "a83685000fc94aa0a16e9598d6cbb270",
+          "ddace5c4222b48eb89b8c9926526a6e7",
+          "0e87a7924b6149b8b90760f084838b11",
+          "b7bd6d2ce2fa4f2caf64b0ccb031fa5a",
+          "2f9666658e084cefbe1f22da85cd7999",
+          "48c104ad55fc4622b54e4feeb0c1132d",
+          "11eb962c2ea346789b40e9e5e585d89d",
+          "e23e96d987564560ae4edff0390a9c83",
+          "48234302e8c942fea5ee0c1da3c5a8a8",
+          "0d5ba982dada4882b3b9581c2776de1e",
+          "74c719cdffe3497fb61a57801ee493f9",
+          "d164675b33bb4f60a63561a42064b2e6",
+          "8d250d4fa4cc47838acb1f2eae312628",
+          "10f98e4b556348dab0cf4f1cfa56e7a3",
+          "17114401beef43428fa321c0f8e3c48b",
+          "b398398334ab48e7a0b7c36465380208",
+          "8e8c5828d9b441cebafeefb6bf315fa0",
+          "3477f565b23a4b689b3a8121670d16ab",
+          "3ee111531c384ad990d2c521dfc2f831",
+          "e56f1a45de1440ccaf645319793a7521",
+          "48d5c1b0a3ce401e8a11de0d2fbc8171",
+          "728d53ca313f445f9bb882df2f62da68",
+          "b4892698a45f4f3e8f8ee25cfd7dca2d",
+          "3f2bbbd0ea994fa59bad90bbb995d48a",
+          "a1f4fd10ba7b44f19a0fd522531d5f99",
+          "a352fdc9c75443bc9a5150e276c764c7",
+          "573a787c70b943c6b9f426fb0313fb7e",
+          "c9558af88bea4ef6b4bda0f7c87e291f",
+          "900d941c8e83499983aaaa7a2c0c8e65",
+          "c958b80f855a49a891fb027206799bb7",
+          "b9dff295bc2c466dbb105ddb07029ef2",
+          "647d488b387a4a79a05e080b7b7aaeb0",
+          "ddacc73399c14f69b728baddff83e790",
+          "d3a2bf5954774ae59c68a46ea137e1a8",
+          "7bc7ec8803c54af68f083919fe629823",
+          "1a548b1bc7184be6abe7bd4de48fb42b",
+          "3dd7a21332164dcfa7fd3719192478ec",
+          "6eee31d1590f4d82ae0e534358dacbdf",
+          "e64fde03766743039dae0588e563ed18",
+          "84780b7e72c14cef8372183e8af32917"
+        ]
+      },
+      {
+        "id": "edee947891e891f0a6c18d34ae0f1aea851a33867d9b96868cd32bb945bcef72",
+        "record_schema_version": 2,
+        "quantity": 100,
+        "subtotal": "11.53",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "business-cards",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "1",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "550e478632eb4706a47bdb57577e289e",
+          "2b686c764c354d95b3b3f05cd18fbda2",
+          "324b50395cb0474c8792f20210e37ac3",
+          "2135025fc8a44941bfb921d500384dfd",
+          "23830caaead0417dab5d136379380ad2",
+          "af79010b42d24089a4ed9d1ff82df13f",
+          "252fef108caf4264900c65568ee55e3e",
+          "2edcacc3a99d4ae2b4a7e79622dc6474",
+          "39f0686288c24787bbbf37ff0e4fb215",
+          "6a64e9be63ae494cad8ed42a677dab5e",
+          "4fcbb3997405404a97a0dbc0b9789f9d",
+          "6c9f83e5065c47a89106230843e1f879",
+          "7e8b136243134e9ba4a88464e989af1f",
+          "e10b925cfa80480ab70e29f4a02a2271",
+          "49f3e4148434483b85bcdc783b3b1fb5",
+          "9a1c7c85cab747bf9a12d1afea8d9bef",
+          "0ad997a6577546aaba4e8ac68fbcfd65",
+          "35e78bb47b8c433c956bb2f9fcb9588a",
+          "4ed3fa3325b44cf0a9ae13c27d4e4ea7",
+          "2d9dff188f844adcb249aa6124e51b89",
+          "a83685000fc94aa0a16e9598d6cbb270",
+          "ddace5c4222b48eb89b8c9926526a6e7",
+          "0e87a7924b6149b8b90760f084838b11",
+          "b7bd6d2ce2fa4f2caf64b0ccb031fa5a",
+          "2f9666658e084cefbe1f22da85cd7999",
+          "48c104ad55fc4622b54e4feeb0c1132d",
+          "11eb962c2ea346789b40e9e5e585d89d",
+          "e23e96d987564560ae4edff0390a9c83",
+          "48234302e8c942fea5ee0c1da3c5a8a8",
+          "0d5ba982dada4882b3b9581c2776de1e",
+          "74c719cdffe3497fb61a57801ee493f9",
+          "d164675b33bb4f60a63561a42064b2e6",
+          "8d250d4fa4cc47838acb1f2eae312628",
+          "10f98e4b556348dab0cf4f1cfa56e7a3",
+          "17114401beef43428fa321c0f8e3c48b",
+          "b398398334ab48e7a0b7c36465380208",
+          "8e8c5828d9b441cebafeefb6bf315fa0",
+          "3477f565b23a4b689b3a8121670d16ab",
+          "3ee111531c384ad990d2c521dfc2f831",
+          "e56f1a45de1440ccaf645319793a7521",
+          "48d5c1b0a3ce401e8a11de0d2fbc8171",
+          "728d53ca313f445f9bb882df2f62da68",
+          "b4892698a45f4f3e8f8ee25cfd7dca2d",
+          "3f2bbbd0ea994fa59bad90bbb995d48a",
+          "a1f4fd10ba7b44f19a0fd522531d5f99",
+          "a352fdc9c75443bc9a5150e276c764c7",
+          "573a787c70b943c6b9f426fb0313fb7e",
+          "c9558af88bea4ef6b4bda0f7c87e291f",
+          "900d941c8e83499983aaaa7a2c0c8e65",
+          "c958b80f855a49a891fb027206799bb7",
+          "b9dff295bc2c466dbb105ddb07029ef2",
+          "647d488b387a4a79a05e080b7b7aaeb0",
+          "ddacc73399c14f69b728baddff83e790",
+          "d3a2bf5954774ae59c68a46ea137e1a8",
+          "7bc7ec8803c54af68f083919fe629823",
+          "1a548b1bc7184be6abe7bd4de48fb42b",
+          "3dd7a21332164dcfa7fd3719192478ec",
+          "6eee31d1590f4d82ae0e534358dacbdf",
+          "e64fde03766743039dae0588e563ed18",
+          "02919c727a2b4aa3b267727a8b011482"
+        ]
+      },
+      {
+        "id": "06cd51788aa36062d436602a89136d1c7e3dadddb4f90173405f62e1d2030201",
+        "record_schema_version": 2,
+        "quantity": 50,
+        "subtotal": "5.67",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "business-cards",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "1",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "550e478632eb4706a47bdb57577e289e",
+          "2b686c764c354d95b3b3f05cd18fbda2",
+          "324b50395cb0474c8792f20210e37ac3",
+          "2135025fc8a44941bfb921d500384dfd",
+          "23830caaead0417dab5d136379380ad2",
+          "af79010b42d24089a4ed9d1ff82df13f",
+          "252fef108caf4264900c65568ee55e3e",
+          "2edcacc3a99d4ae2b4a7e79622dc6474",
+          "39f0686288c24787bbbf37ff0e4fb215",
+          "6a64e9be63ae494cad8ed42a677dab5e",
+          "4fcbb3997405404a97a0dbc0b9789f9d",
+          "6c9f83e5065c47a89106230843e1f879",
+          "7e8b136243134e9ba4a88464e989af1f",
+          "e10b925cfa80480ab70e29f4a02a2271",
+          "49f3e4148434483b85bcdc783b3b1fb5",
+          "9a1c7c85cab747bf9a12d1afea8d9bef",
+          "0ad997a6577546aaba4e8ac68fbcfd65",
+          "35e78bb47b8c433c956bb2f9fcb9588a",
+          "4ed3fa3325b44cf0a9ae13c27d4e4ea7",
+          "2d9dff188f844adcb249aa6124e51b89",
+          "a83685000fc94aa0a16e9598d6cbb270",
+          "ddace5c4222b48eb89b8c9926526a6e7",
+          "0e87a7924b6149b8b90760f084838b11",
+          "b7bd6d2ce2fa4f2caf64b0ccb031fa5a",
+          "2f9666658e084cefbe1f22da85cd7999",
+          "48c104ad55fc4622b54e4feeb0c1132d",
+          "11eb962c2ea346789b40e9e5e585d89d",
+          "e23e96d987564560ae4edff0390a9c83",
+          "48234302e8c942fea5ee0c1da3c5a8a8",
+          "0d5ba982dada4882b3b9581c2776de1e",
+          "74c719cdffe3497fb61a57801ee493f9",
+          "d164675b33bb4f60a63561a42064b2e6",
+          "8d250d4fa4cc47838acb1f2eae312628",
+          "10f98e4b556348dab0cf4f1cfa56e7a3",
+          "17114401beef43428fa321c0f8e3c48b",
+          "b398398334ab48e7a0b7c36465380208",
+          "8e8c5828d9b441cebafeefb6bf315fa0",
+          "3477f565b23a4b689b3a8121670d16ab",
+          "3ee111531c384ad990d2c521dfc2f831",
+          "e56f1a45de1440ccaf645319793a7521",
+          "48d5c1b0a3ce401e8a11de0d2fbc8171",
+          "728d53ca313f445f9bb882df2f62da68",
+          "b4892698a45f4f3e8f8ee25cfd7dca2d",
+          "3f2bbbd0ea994fa59bad90bbb995d48a",
+          "a1f4fd10ba7b44f19a0fd522531d5f99",
+          "a352fdc9c75443bc9a5150e276c764c7",
+          "573a787c70b943c6b9f426fb0313fb7e",
+          "c9558af88bea4ef6b4bda0f7c87e291f",
+          "900d941c8e83499983aaaa7a2c0c8e65",
+          "c958b80f855a49a891fb027206799bb7",
+          "b9dff295bc2c466dbb105ddb07029ef2",
+          "647d488b387a4a79a05e080b7b7aaeb0",
+          "ddacc73399c14f69b728baddff83e790",
+          "d3a2bf5954774ae59c68a46ea137e1a8",
+          "7bc7ec8803c54af68f083919fe629823",
+          "1a548b1bc7184be6abe7bd4de48fb42b",
+          "3dd7a21332164dcfa7fd3719192478ec",
+          "6eee31d1590f4d82ae0e534358dacbdf",
+          "e64fde03766743039dae0588e563ed18",
+          "41d8f5968ad548c5a9a3b05889f78277"
+        ]
+      },
+      {
+        "id": "e98b1ac9337572ad3502f1e939e59fa399f25644f533336afd32289d5b56b540",
+        "record_schema_version": 2,
+        "quantity": 100000,
+        "subtotal": "632.03",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "business-cards",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "1",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "550e478632eb4706a47bdb57577e289e",
+          "2b686c764c354d95b3b3f05cd18fbda2",
+          "324b50395cb0474c8792f20210e37ac3",
+          "2135025fc8a44941bfb921d500384dfd",
+          "23830caaead0417dab5d136379380ad2",
+          "af79010b42d24089a4ed9d1ff82df13f",
+          "252fef108caf4264900c65568ee55e3e",
+          "2edcacc3a99d4ae2b4a7e79622dc6474",
+          "39f0686288c24787bbbf37ff0e4fb215",
+          "6a64e9be63ae494cad8ed42a677dab5e",
+          "4fcbb3997405404a97a0dbc0b9789f9d",
+          "6c9f83e5065c47a89106230843e1f879",
+          "7e8b136243134e9ba4a88464e989af1f",
+          "e10b925cfa80480ab70e29f4a02a2271",
+          "49f3e4148434483b85bcdc783b3b1fb5",
+          "9a1c7c85cab747bf9a12d1afea8d9bef",
+          "0ad997a6577546aaba4e8ac68fbcfd65",
+          "35e78bb47b8c433c956bb2f9fcb9588a",
+          "4ed3fa3325b44cf0a9ae13c27d4e4ea7",
+          "2d9dff188f844adcb249aa6124e51b89",
+          "a83685000fc94aa0a16e9598d6cbb270",
+          "ddace5c4222b48eb89b8c9926526a6e7",
+          "0e87a7924b6149b8b90760f084838b11",
+          "b7bd6d2ce2fa4f2caf64b0ccb031fa5a",
+          "2f9666658e084cefbe1f22da85cd7999",
+          "48c104ad55fc4622b54e4feeb0c1132d",
+          "11eb962c2ea346789b40e9e5e585d89d",
+          "e23e96d987564560ae4edff0390a9c83",
+          "48234302e8c942fea5ee0c1da3c5a8a8",
+          "0d5ba982dada4882b3b9581c2776de1e",
+          "74c719cdffe3497fb61a57801ee493f9",
+          "d164675b33bb4f60a63561a42064b2e6",
+          "8d250d4fa4cc47838acb1f2eae312628",
+          "10f98e4b556348dab0cf4f1cfa56e7a3",
+          "17114401beef43428fa321c0f8e3c48b",
+          "b398398334ab48e7a0b7c36465380208",
+          "8e8c5828d9b441cebafeefb6bf315fa0",
+          "3477f565b23a4b689b3a8121670d16ab",
+          "3ee111531c384ad990d2c521dfc2f831",
+          "e56f1a45de1440ccaf645319793a7521",
+          "48d5c1b0a3ce401e8a11de0d2fbc8171",
+          "728d53ca313f445f9bb882df2f62da68",
+          "b4892698a45f4f3e8f8ee25cfd7dca2d",
+          "704d9809c466466c8aa894ba111ab9a8"
+        ]
+      },
+      {
+        "id": "9db79197738b0258dcd0673b98ed632e37186cc38b89c3b72b003e275476408f",
+        "record_schema_version": 2,
+        "quantity": 95000,
+        "subtotal": "601.79",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "business-cards",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "1",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "550e478632eb4706a47bdb57577e289e",
+          "2b686c764c354d95b3b3f05cd18fbda2",
+          "324b50395cb0474c8792f20210e37ac3",
+          "2135025fc8a44941bfb921d500384dfd",
+          "23830caaead0417dab5d136379380ad2",
+          "af79010b42d24089a4ed9d1ff82df13f",
+          "252fef108caf4264900c65568ee55e3e",
+          "2edcacc3a99d4ae2b4a7e79622dc6474",
+          "39f0686288c24787bbbf37ff0e4fb215",
+          "6a64e9be63ae494cad8ed42a677dab5e",
+          "4fcbb3997405404a97a0dbc0b9789f9d",
+          "6c9f83e5065c47a89106230843e1f879",
+          "7e8b136243134e9ba4a88464e989af1f",
+          "e10b925cfa80480ab70e29f4a02a2271",
+          "49f3e4148434483b85bcdc783b3b1fb5",
+          "9a1c7c85cab747bf9a12d1afea8d9bef",
+          "0ad997a6577546aaba4e8ac68fbcfd65",
+          "35e78bb47b8c433c956bb2f9fcb9588a",
+          "4ed3fa3325b44cf0a9ae13c27d4e4ea7",
+          "2d9dff188f844adcb249aa6124e51b89",
+          "a83685000fc94aa0a16e9598d6cbb270",
+          "ddace5c4222b48eb89b8c9926526a6e7",
+          "0e87a7924b6149b8b90760f084838b11",
+          "b7bd6d2ce2fa4f2caf64b0ccb031fa5a",
+          "2f9666658e084cefbe1f22da85cd7999",
+          "48c104ad55fc4622b54e4feeb0c1132d",
+          "11eb962c2ea346789b40e9e5e585d89d",
+          "e23e96d987564560ae4edff0390a9c83",
+          "48234302e8c942fea5ee0c1da3c5a8a8",
+          "0d5ba982dada4882b3b9581c2776de1e",
+          "74c719cdffe3497fb61a57801ee493f9",
+          "d164675b33bb4f60a63561a42064b2e6",
+          "8d250d4fa4cc47838acb1f2eae312628",
+          "10f98e4b556348dab0cf4f1cfa56e7a3",
+          "17114401beef43428fa321c0f8e3c48b",
+          "b398398334ab48e7a0b7c36465380208",
+          "8e8c5828d9b441cebafeefb6bf315fa0",
+          "3477f565b23a4b689b3a8121670d16ab",
+          "3ee111531c384ad990d2c521dfc2f831",
+          "e56f1a45de1440ccaf645319793a7521",
+          "48d5c1b0a3ce401e8a11de0d2fbc8171",
+          "728d53ca313f445f9bb882df2f62da68",
+          "0d7e3b31af864d23b934715a947c8c47"
+        ]
+      }
+    ],
+    "e851c0a35d06404dbedac29baca15810": [
+      {
+        "id": "52caa30786c640c7ca06cbdb8c10428be5f7caa79fd2e03465cde621f2c7b862",
+        "record_schema_version": 2,
+        "quantity": 50,
+        "subtotal": "4.22",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "club-flyers",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "27",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "39594f5480674b1d8cd8e7578264dfbf",
+          "206b3c1125dc46d9b32db361d5973822",
+          "a7afa032ebaf4663af469a95cf38a303",
+          "ff4ea11fba4243d0a151e4e7f5dffb07",
+          "f79aa7f1e1d04350bc883a2822fc274c",
+          "6c3ab6f86809411d86c3d2c4ed2b1098",
+          "7e154a0335cd46648510c5b861c54c32",
+          "cf1e80ee019e40eda562ab9afdc2d170",
+          "e35f2caea6f64c6fb40408056102495d",
+          "07826afb8ffa4987bbe7fb2b32734076",
+          "c92e526466ab4792b8ae72456632a6e4",
+          "1ed5e2df8dfd43c1838d4d75b5f3f22a",
+          "83aeffb35e04455eaa5ad7fea2f2103b",
+          "919160bc1f0d4e2bb854855ba1345cb1",
+          "acbdb81ca8434e94a84abf17244624b3",
+          "599d0a3401f0498ebb8985f26f05bfc1",
+          "a810c7c4e1cb4726829db7ba98d5181f",
+          "36bfe05f335e46b3ad31b474c9e1eace",
+          "c83341e431d34f408545d1dcfc0169c0",
+          "effde7b6ae494ae489631fbb2d16f6e5",
+          "57858318f07d4d6faf408098ae928204",
+          "2fe4b8ecd5534d92a0b3972583daab80",
+          "d3509f9ff67941629f929369f37be63d",
+          "acdaf81f234c4b14aa60c76f60e0fcef",
+          "8253e7d4117f4491a13a606c5d62b8e2",
+          "6226026283c54074955c13bedf190fdb",
+          "ca33abea5d91410fa79cb145c98d3c93",
+          "53fe093cf1df45708cfd6ad2e83eec94",
+          "9bf5eebc54fd47e08c424d6c00d33fd5",
+          "12f3fa1127154a628e20f60e9cf5a555",
+          "579b1e943449416eaff0d68d5826d620",
+          "78fc13c5cac945819840e87ddda017d1",
+          "2a66a9f644c94d7c9fdb7e2893ca4b24",
+          "8f62be1e54ef4401a6e6530b17c11589",
+          "a19fefcd2be74b47ba284d1a939f4c3a",
+          "c8c09b034ddc46e08f8191ec01507830",
+          "0ebfebb7f9be42c48e81d79d1d790389",
+          "7cfa123e5d904159af19f06888fe41dd",
+          "b1baa36392a6432d8fd5ebfdfdb84049",
+          "c2b98f56dcb448698897434353f3f26c",
+          "0566a667afe7483c91b95e862c4127bd",
+          "cd8344dceb84492690933ad57b344a47",
+          "eac196a59b0a41d197eda6d71b6ef251",
+          "432b86ab209f453fa986888e899c38de",
+          "f7d1e0e50f8c4504b8a0deb2d857cd0a",
+          "8fca675444c549a6a8e7ab39a59091c7",
+          "5449453ffd3b4f9b93cc5107c61b361d",
+          "e95806c76bbe4f769d34d48e173f2fdc",
+          "c0639a4ed41e4e2b8c0c1af0a74de1fd",
+          "5ef1d882c98a460ea83d22e138ac71bc",
+          "54f19d1654cc472fb8a661ba4d59a1c7",
+          "b4c45e8427014b1eae2751652c7a097c",
+          "6081a4d2db834e16a62cf3206513f433",
+          "844d29fe6bd0470ca913376e41a3103e",
+          "c1a2ab12ab6b483c8777c340e6f47a1c",
+          "2eb6b569dc784feb84e2b9eb5b27816b",
+          "5190500a3ee5464ab285da5089c24423",
+          "cf469bfb81ea4351a459ba349a63c862",
+          "acc0815c1cd84a9fb708228155d384dd",
+          "f8b47f2fc8264fa68e1d8c1850611786",
+          "c76848ff00e54121ab5aaf49459ccb8f"
+        ]
+      },
+      {
+        "id": "7c820090ae6b8bfa66730d712313f603e810c75a1552908e4d97ea1b051a266c",
+        "record_schema_version": 2,
+        "quantity": 100000,
+        "subtotal": "1062.49",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "club-flyers",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "27",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "39594f5480674b1d8cd8e7578264dfbf",
+          "206b3c1125dc46d9b32db361d5973822",
+          "a7afa032ebaf4663af469a95cf38a303",
+          "ff4ea11fba4243d0a151e4e7f5dffb07",
+          "f79aa7f1e1d04350bc883a2822fc274c",
+          "6c3ab6f86809411d86c3d2c4ed2b1098",
+          "7e154a0335cd46648510c5b861c54c32",
+          "cf1e80ee019e40eda562ab9afdc2d170",
+          "e35f2caea6f64c6fb40408056102495d",
+          "07826afb8ffa4987bbe7fb2b32734076",
+          "c92e526466ab4792b8ae72456632a6e4",
+          "1ed5e2df8dfd43c1838d4d75b5f3f22a",
+          "83aeffb35e04455eaa5ad7fea2f2103b",
+          "919160bc1f0d4e2bb854855ba1345cb1",
+          "acbdb81ca8434e94a84abf17244624b3",
+          "599d0a3401f0498ebb8985f26f05bfc1",
+          "a810c7c4e1cb4726829db7ba98d5181f",
+          "36bfe05f335e46b3ad31b474c9e1eace",
+          "c83341e431d34f408545d1dcfc0169c0",
+          "effde7b6ae494ae489631fbb2d16f6e5",
+          "57858318f07d4d6faf408098ae928204",
+          "2fe4b8ecd5534d92a0b3972583daab80",
+          "d3509f9ff67941629f929369f37be63d",
+          "acdaf81f234c4b14aa60c76f60e0fcef",
+          "8253e7d4117f4491a13a606c5d62b8e2",
+          "6226026283c54074955c13bedf190fdb",
+          "ca33abea5d91410fa79cb145c98d3c93",
+          "53fe093cf1df45708cfd6ad2e83eec94",
+          "9bf5eebc54fd47e08c424d6c00d33fd5",
+          "12f3fa1127154a628e20f60e9cf5a555",
+          "579b1e943449416eaff0d68d5826d620",
+          "78fc13c5cac945819840e87ddda017d1",
+          "2a66a9f644c94d7c9fdb7e2893ca4b24",
+          "8f62be1e54ef4401a6e6530b17c11589",
+          "a19fefcd2be74b47ba284d1a939f4c3a",
+          "c8c09b034ddc46e08f8191ec01507830",
+          "0ebfebb7f9be42c48e81d79d1d790389",
+          "7cfa123e5d904159af19f06888fe41dd",
+          "b1baa36392a6432d8fd5ebfdfdb84049",
+          "c2b98f56dcb448698897434353f3f26c",
+          "0566a667afe7483c91b95e862c4127bd",
+          "cd8344dceb84492690933ad57b344a47",
+          "eac196a59b0a41d197eda6d71b6ef251",
+          "432b86ab209f453fa986888e899c38de",
+          "954bc1007c4b45a4a2e3479d9bb2c116"
+        ]
+      },
+      {
+        "id": "fa5e68e791b2e76cf9f07cd8162ad884afdbf80c13e87ccc346f5d5757f1fe6d",
+        "record_schema_version": 2,
+        "quantity": 95000,
+        "subtotal": "1010.57",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "club-flyers",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "27",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "39594f5480674b1d8cd8e7578264dfbf",
+          "206b3c1125dc46d9b32db361d5973822",
+          "a7afa032ebaf4663af469a95cf38a303",
+          "ff4ea11fba4243d0a151e4e7f5dffb07",
+          "f79aa7f1e1d04350bc883a2822fc274c",
+          "6c3ab6f86809411d86c3d2c4ed2b1098",
+          "7e154a0335cd46648510c5b861c54c32",
+          "cf1e80ee019e40eda562ab9afdc2d170",
+          "e35f2caea6f64c6fb40408056102495d",
+          "07826afb8ffa4987bbe7fb2b32734076",
+          "c92e526466ab4792b8ae72456632a6e4",
+          "1ed5e2df8dfd43c1838d4d75b5f3f22a",
+          "83aeffb35e04455eaa5ad7fea2f2103b",
+          "919160bc1f0d4e2bb854855ba1345cb1",
+          "acbdb81ca8434e94a84abf17244624b3",
+          "599d0a3401f0498ebb8985f26f05bfc1",
+          "a810c7c4e1cb4726829db7ba98d5181f",
+          "36bfe05f335e46b3ad31b474c9e1eace",
+          "c83341e431d34f408545d1dcfc0169c0",
+          "effde7b6ae494ae489631fbb2d16f6e5",
+          "57858318f07d4d6faf408098ae928204",
+          "2fe4b8ecd5534d92a0b3972583daab80",
+          "d3509f9ff67941629f929369f37be63d",
+          "acdaf81f234c4b14aa60c76f60e0fcef",
+          "8253e7d4117f4491a13a606c5d62b8e2",
+          "6226026283c54074955c13bedf190fdb",
+          "ca33abea5d91410fa79cb145c98d3c93",
+          "53fe093cf1df45708cfd6ad2e83eec94",
+          "9bf5eebc54fd47e08c424d6c00d33fd5",
+          "12f3fa1127154a628e20f60e9cf5a555",
+          "579b1e943449416eaff0d68d5826d620",
+          "78fc13c5cac945819840e87ddda017d1",
+          "2a66a9f644c94d7c9fdb7e2893ca4b24",
+          "8f62be1e54ef4401a6e6530b17c11589",
+          "a19fefcd2be74b47ba284d1a939f4c3a",
+          "c8c09b034ddc46e08f8191ec01507830",
+          "0ebfebb7f9be42c48e81d79d1d790389",
+          "7cfa123e5d904159af19f06888fe41dd",
+          "b1baa36392a6432d8fd5ebfdfdb84049",
+          "c2b98f56dcb448698897434353f3f26c",
+          "0566a667afe7483c91b95e862c4127bd",
+          "cd8344dceb84492690933ad57b344a47",
+          "eac196a59b0a41d197eda6d71b6ef251",
+          "0cf319e42ea848eabf2884fddb3edbbd"
+        ]
+      },
+      {
+        "id": "4f43b9f7d6383804c73bdb1fe3931a6603c98274e0381f4e5ae58434b537cbd9",
+        "record_schema_version": 2,
+        "quantity": 90000,
+        "subtotal": "958.54",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "club-flyers",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "27",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "39594f5480674b1d8cd8e7578264dfbf",
+          "206b3c1125dc46d9b32db361d5973822",
+          "a7afa032ebaf4663af469a95cf38a303",
+          "ff4ea11fba4243d0a151e4e7f5dffb07",
+          "f79aa7f1e1d04350bc883a2822fc274c",
+          "6c3ab6f86809411d86c3d2c4ed2b1098",
+          "7e154a0335cd46648510c5b861c54c32",
+          "cf1e80ee019e40eda562ab9afdc2d170",
+          "e35f2caea6f64c6fb40408056102495d",
+          "07826afb8ffa4987bbe7fb2b32734076",
+          "c92e526466ab4792b8ae72456632a6e4",
+          "1ed5e2df8dfd43c1838d4d75b5f3f22a",
+          "83aeffb35e04455eaa5ad7fea2f2103b",
+          "919160bc1f0d4e2bb854855ba1345cb1",
+          "acbdb81ca8434e94a84abf17244624b3",
+          "599d0a3401f0498ebb8985f26f05bfc1",
+          "a810c7c4e1cb4726829db7ba98d5181f",
+          "36bfe05f335e46b3ad31b474c9e1eace",
+          "c83341e431d34f408545d1dcfc0169c0",
+          "effde7b6ae494ae489631fbb2d16f6e5",
+          "57858318f07d4d6faf408098ae928204",
+          "2fe4b8ecd5534d92a0b3972583daab80",
+          "d3509f9ff67941629f929369f37be63d",
+          "acdaf81f234c4b14aa60c76f60e0fcef",
+          "8253e7d4117f4491a13a606c5d62b8e2",
+          "6226026283c54074955c13bedf190fdb",
+          "ca33abea5d91410fa79cb145c98d3c93",
+          "53fe093cf1df45708cfd6ad2e83eec94",
+          "9bf5eebc54fd47e08c424d6c00d33fd5",
+          "12f3fa1127154a628e20f60e9cf5a555",
+          "579b1e943449416eaff0d68d5826d620",
+          "78fc13c5cac945819840e87ddda017d1",
+          "2a66a9f644c94d7c9fdb7e2893ca4b24",
+          "8f62be1e54ef4401a6e6530b17c11589",
+          "a19fefcd2be74b47ba284d1a939f4c3a",
+          "c8c09b034ddc46e08f8191ec01507830",
+          "0ebfebb7f9be42c48e81d79d1d790389",
+          "7cfa123e5d904159af19f06888fe41dd",
+          "b1baa36392a6432d8fd5ebfdfdb84049",
+          "c2b98f56dcb448698897434353f3f26c",
+          "0566a667afe7483c91b95e862c4127bd",
+          "cd8344dceb84492690933ad57b344a47",
+          "c0a194fae315442294edd85e5a799b0e"
+        ]
+      },
+      {
+        "id": "7601e1845cd1f217c99d2a9a0bac6bc8d4906d095c7f97d64739bb0d4d2a8b60",
+        "record_schema_version": 2,
+        "quantity": 85000,
+        "subtotal": "906.40",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "club-flyers",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "27",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "39594f5480674b1d8cd8e7578264dfbf",
+          "206b3c1125dc46d9b32db361d5973822",
+          "a7afa032ebaf4663af469a95cf38a303",
+          "ff4ea11fba4243d0a151e4e7f5dffb07",
+          "f79aa7f1e1d04350bc883a2822fc274c",
+          "6c3ab6f86809411d86c3d2c4ed2b1098",
+          "7e154a0335cd46648510c5b861c54c32",
+          "cf1e80ee019e40eda562ab9afdc2d170",
+          "e35f2caea6f64c6fb40408056102495d",
+          "07826afb8ffa4987bbe7fb2b32734076",
+          "c92e526466ab4792b8ae72456632a6e4",
+          "1ed5e2df8dfd43c1838d4d75b5f3f22a",
+          "83aeffb35e04455eaa5ad7fea2f2103b",
+          "919160bc1f0d4e2bb854855ba1345cb1",
+          "acbdb81ca8434e94a84abf17244624b3",
+          "599d0a3401f0498ebb8985f26f05bfc1",
+          "a810c7c4e1cb4726829db7ba98d5181f",
+          "36bfe05f335e46b3ad31b474c9e1eace",
+          "c83341e431d34f408545d1dcfc0169c0",
+          "effde7b6ae494ae489631fbb2d16f6e5",
+          "57858318f07d4d6faf408098ae928204",
+          "2fe4b8ecd5534d92a0b3972583daab80",
+          "d3509f9ff67941629f929369f37be63d",
+          "acdaf81f234c4b14aa60c76f60e0fcef",
+          "8253e7d4117f4491a13a606c5d62b8e2",
+          "6226026283c54074955c13bedf190fdb",
+          "ca33abea5d91410fa79cb145c98d3c93",
+          "53fe093cf1df45708cfd6ad2e83eec94",
+          "9bf5eebc54fd47e08c424d6c00d33fd5",
+          "12f3fa1127154a628e20f60e9cf5a555",
+          "579b1e943449416eaff0d68d5826d620",
+          "78fc13c5cac945819840e87ddda017d1",
+          "2a66a9f644c94d7c9fdb7e2893ca4b24",
+          "8f62be1e54ef4401a6e6530b17c11589",
+          "a19fefcd2be74b47ba284d1a939f4c3a",
+          "c8c09b034ddc46e08f8191ec01507830",
+          "0ebfebb7f9be42c48e81d79d1d790389",
+          "7cfa123e5d904159af19f06888fe41dd",
+          "b1baa36392a6432d8fd5ebfdfdb84049",
+          "c2b98f56dcb448698897434353f3f26c",
+          "0566a667afe7483c91b95e862c4127bd",
+          "bec6c99e09ec41f2847dd75d3dc8f17e"
+        ]
+      }
+    ],
+    "4ccfd37ce02c411b97f478c643b3a481": [
+      {
+        "id": "75d381ba2fcd970200f055c47b49dd44e504d622de4e36b32a9ef26a18c94afe",
+        "record_schema_version": 2,
+        "quantity": 35000,
+        "subtotal": "401.17",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "roll-labels",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "36",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "5b9fed8b31ed4171b5c7b83f7485393d",
+          "5ba39cbdfe4a413592bbb312ae16e8d9",
+          "d352ad91d0fd4537b5e627de3eaeb47a",
+          "0646a6a46ec5452394ecf58f3fdcce6b",
+          "70937af23a074ee3a581fd49280ffcdc",
+          "6f401220aa524bb1b996bfeac733f280",
+          "e310828075794cdbaf7dd2cba61402f7",
+          "50a49fc8a82b48de8c5af12cbdab2f2d",
+          "ae001eb6dfbf44eba344900892704fe9",
+          "17b16f632f0b425c8a35568bc6606219",
+          "fd9f161fe80446289b03cf77b4fc3394",
+          "7dd9b412faf74279b253c6b4b2252a93",
+          "a97dc9a36d93412aa59c4221d4d7095b",
+          "be5435aa36cc4bcf9012644a350ac000",
+          "59e1b851b020462aac9ea7ae689de3fa",
+          "e044f4ffcd3c440c85bd11e2a26c09c1",
+          "f97f5cd1324a446db41eb3ae479166e6",
+          "47b64b263b0f432eb5d3a569618b8ca9",
+          "e59169cb5b8c4f8dbc2e806bce6e59a5",
+          "6c4aa9161d694daab270a70e02a65374",
+          "88894191091144a88d987f648c57d3c6",
+          "f87ce1dd84c348a5a572e00aa4945e69",
+          "071b4815c4ac4df58ecae0e67a3917a8",
+          "21b2e98db24a4fcc8ee4bdf63ea9d291",
+          "43b450c4b23142ad879ad14cf43e7cd0",
+          "22b4f330fc504d96a9877a6c25d79eb4",
+          "694e5a16097942ef9f1a837606aee354",
+          "295826896a0144d6af8324c9a6ae93e5",
+          "bcd5a3ff1c884941844bf989e977ce90",
+          "521b2e5178d74e0fa44f35901f071823",
+          "a21ae0094643497fa4cafbddff41b5e9",
+          "f6214ceb69cd498d8efac688473aaf82",
+          "1c556e23803b41a98a05ca631d2834ef",
+          "3b7e5c25f1f94b198ac5944cc694bbf0",
+          "d4cf04094cde46cbbbb1bf3018ee2caa",
+          "e78726ce61c14ee593982ae1c8c71d69",
+          "ed2291347e94471bac9854c8cb4f4e17",
+          "c76bf0ca3c304999b373535c69b53013",
+          "3130a76c3b4b45b6a9e52973c03363a3",
+          "fbc6db8754244256889873e9731a1b0b",
+          "557346dbd1494a59b79ae20400c805d4",
+          "84d3d84847d74405864e71d59aaa1dd7",
+          "a27d97bfa0b74df5a66efb38b2d3c660",
+          "e6f47194ae8246dfad811a5cf926d10e",
+          "a8fc6cbed07c477cadde184890d081df",
+          "22daea5b0bca4733a34b49fc0c546024"
+        ]
+      },
+      {
+        "id": "14b18ddc5bbc1c50cfa83e1e649953fa06f192442ea98d7baa81b2af9fef11c6",
+        "record_schema_version": 2,
+        "quantity": 30000,
+        "subtotal": "357.82",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "roll-labels",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "36",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "5b9fed8b31ed4171b5c7b83f7485393d",
+          "5ba39cbdfe4a413592bbb312ae16e8d9",
+          "d352ad91d0fd4537b5e627de3eaeb47a",
+          "0646a6a46ec5452394ecf58f3fdcce6b",
+          "70937af23a074ee3a581fd49280ffcdc",
+          "6f401220aa524bb1b996bfeac733f280",
+          "e310828075794cdbaf7dd2cba61402f7",
+          "50a49fc8a82b48de8c5af12cbdab2f2d",
+          "ae001eb6dfbf44eba344900892704fe9",
+          "17b16f632f0b425c8a35568bc6606219",
+          "fd9f161fe80446289b03cf77b4fc3394",
+          "7dd9b412faf74279b253c6b4b2252a93",
+          "a97dc9a36d93412aa59c4221d4d7095b",
+          "be5435aa36cc4bcf9012644a350ac000",
+          "59e1b851b020462aac9ea7ae689de3fa",
+          "e044f4ffcd3c440c85bd11e2a26c09c1",
+          "f97f5cd1324a446db41eb3ae479166e6",
+          "47b64b263b0f432eb5d3a569618b8ca9",
+          "e59169cb5b8c4f8dbc2e806bce6e59a5",
+          "6c4aa9161d694daab270a70e02a65374",
+          "88894191091144a88d987f648c57d3c6",
+          "f87ce1dd84c348a5a572e00aa4945e69",
+          "071b4815c4ac4df58ecae0e67a3917a8",
+          "21b2e98db24a4fcc8ee4bdf63ea9d291",
+          "43b450c4b23142ad879ad14cf43e7cd0",
+          "22b4f330fc504d96a9877a6c25d79eb4",
+          "694e5a16097942ef9f1a837606aee354",
+          "295826896a0144d6af8324c9a6ae93e5",
+          "bcd5a3ff1c884941844bf989e977ce90",
+          "521b2e5178d74e0fa44f35901f071823",
+          "a21ae0094643497fa4cafbddff41b5e9",
+          "f6214ceb69cd498d8efac688473aaf82",
+          "1c556e23803b41a98a05ca631d2834ef",
+          "3b7e5c25f1f94b198ac5944cc694bbf0",
+          "d4cf04094cde46cbbbb1bf3018ee2caa",
+          "e78726ce61c14ee593982ae1c8c71d69",
+          "ed2291347e94471bac9854c8cb4f4e17",
+          "c76bf0ca3c304999b373535c69b53013",
+          "3130a76c3b4b45b6a9e52973c03363a3",
+          "fbc6db8754244256889873e9731a1b0b",
+          "557346dbd1494a59b79ae20400c805d4",
+          "84d3d84847d74405864e71d59aaa1dd7",
+          "a27d97bfa0b74df5a66efb38b2d3c660",
+          "e6f47194ae8246dfad811a5cf926d10e",
+          "dd00cffe614349bd9278e188b726ab67"
+        ]
+      },
+      {
+        "id": "8ddadcd33ad288f1527a95b50763c485bb0fe60f18c0d16d78dc84ebba4ec812",
+        "record_schema_version": 2,
+        "quantity": 25000,
+        "subtotal": "313.56",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "roll-labels",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "36",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "5b9fed8b31ed4171b5c7b83f7485393d",
+          "5ba39cbdfe4a413592bbb312ae16e8d9",
+          "d352ad91d0fd4537b5e627de3eaeb47a",
+          "0646a6a46ec5452394ecf58f3fdcce6b",
+          "70937af23a074ee3a581fd49280ffcdc",
+          "6f401220aa524bb1b996bfeac733f280",
+          "e310828075794cdbaf7dd2cba61402f7",
+          "50a49fc8a82b48de8c5af12cbdab2f2d",
+          "ae001eb6dfbf44eba344900892704fe9",
+          "17b16f632f0b425c8a35568bc6606219",
+          "fd9f161fe80446289b03cf77b4fc3394",
+          "7dd9b412faf74279b253c6b4b2252a93",
+          "a97dc9a36d93412aa59c4221d4d7095b",
+          "be5435aa36cc4bcf9012644a350ac000",
+          "59e1b851b020462aac9ea7ae689de3fa",
+          "e044f4ffcd3c440c85bd11e2a26c09c1",
+          "f97f5cd1324a446db41eb3ae479166e6",
+          "47b64b263b0f432eb5d3a569618b8ca9",
+          "e59169cb5b8c4f8dbc2e806bce6e59a5",
+          "6c4aa9161d694daab270a70e02a65374",
+          "88894191091144a88d987f648c57d3c6",
+          "f87ce1dd84c348a5a572e00aa4945e69",
+          "071b4815c4ac4df58ecae0e67a3917a8",
+          "21b2e98db24a4fcc8ee4bdf63ea9d291",
+          "43b450c4b23142ad879ad14cf43e7cd0",
+          "22b4f330fc504d96a9877a6c25d79eb4",
+          "694e5a16097942ef9f1a837606aee354",
+          "295826896a0144d6af8324c9a6ae93e5",
+          "bcd5a3ff1c884941844bf989e977ce90",
+          "521b2e5178d74e0fa44f35901f071823",
+          "a21ae0094643497fa4cafbddff41b5e9",
+          "f6214ceb69cd498d8efac688473aaf82",
+          "1c556e23803b41a98a05ca631d2834ef",
+          "3b7e5c25f1f94b198ac5944cc694bbf0",
+          "d4cf04094cde46cbbbb1bf3018ee2caa",
+          "e78726ce61c14ee593982ae1c8c71d69",
+          "ed2291347e94471bac9854c8cb4f4e17",
+          "c76bf0ca3c304999b373535c69b53013",
+          "3130a76c3b4b45b6a9e52973c03363a3",
+          "fbc6db8754244256889873e9731a1b0b",
+          "557346dbd1494a59b79ae20400c805d4",
+          "84d3d84847d74405864e71d59aaa1dd7",
+          "a27d97bfa0b74df5a66efb38b2d3c660",
+          "37f40f41d414462a9b561515eeb0bf5c"
+        ]
+      },
+      {
+        "id": "f7d005578ae33ac35b707679721930380bea11a9356934e31e26f47debee97d9",
+        "record_schema_version": 2,
+        "quantity": 20000,
+        "subtotal": "268.38",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "roll-labels",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "36",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "5b9fed8b31ed4171b5c7b83f7485393d",
+          "5ba39cbdfe4a413592bbb312ae16e8d9",
+          "d352ad91d0fd4537b5e627de3eaeb47a",
+          "0646a6a46ec5452394ecf58f3fdcce6b",
+          "70937af23a074ee3a581fd49280ffcdc",
+          "6f401220aa524bb1b996bfeac733f280",
+          "e310828075794cdbaf7dd2cba61402f7",
+          "50a49fc8a82b48de8c5af12cbdab2f2d",
+          "ae001eb6dfbf44eba344900892704fe9",
+          "17b16f632f0b425c8a35568bc6606219",
+          "fd9f161fe80446289b03cf77b4fc3394",
+          "7dd9b412faf74279b253c6b4b2252a93",
+          "a97dc9a36d93412aa59c4221d4d7095b",
+          "be5435aa36cc4bcf9012644a350ac000",
+          "59e1b851b020462aac9ea7ae689de3fa",
+          "e044f4ffcd3c440c85bd11e2a26c09c1",
+          "f97f5cd1324a446db41eb3ae479166e6",
+          "47b64b263b0f432eb5d3a569618b8ca9",
+          "e59169cb5b8c4f8dbc2e806bce6e59a5",
+          "6c4aa9161d694daab270a70e02a65374",
+          "88894191091144a88d987f648c57d3c6",
+          "f87ce1dd84c348a5a572e00aa4945e69",
+          "071b4815c4ac4df58ecae0e67a3917a8",
+          "21b2e98db24a4fcc8ee4bdf63ea9d291",
+          "43b450c4b23142ad879ad14cf43e7cd0",
+          "22b4f330fc504d96a9877a6c25d79eb4",
+          "694e5a16097942ef9f1a837606aee354",
+          "295826896a0144d6af8324c9a6ae93e5",
+          "bcd5a3ff1c884941844bf989e977ce90",
+          "521b2e5178d74e0fa44f35901f071823",
+          "a21ae0094643497fa4cafbddff41b5e9",
+          "f6214ceb69cd498d8efac688473aaf82",
+          "1c556e23803b41a98a05ca631d2834ef",
+          "3b7e5c25f1f94b198ac5944cc694bbf0",
+          "d4cf04094cde46cbbbb1bf3018ee2caa",
+          "e78726ce61c14ee593982ae1c8c71d69",
+          "ed2291347e94471bac9854c8cb4f4e17",
+          "c76bf0ca3c304999b373535c69b53013",
+          "3130a76c3b4b45b6a9e52973c03363a3",
+          "fbc6db8754244256889873e9731a1b0b",
+          "557346dbd1494a59b79ae20400c805d4",
+          "84d3d84847d74405864e71d59aaa1dd7",
+          "ff236296ee674edb93967d0a1d30e7e3"
+        ]
+      },
+      {
+        "id": "72187b90b33d891c55692288596b75852412cadf2c06afabebe1f61a5a9e83c3",
+        "record_schema_version": 2,
+        "quantity": 15000,
+        "subtotal": "222.28",
+        "provenance": "direct_quote",
+        "verification_status": "not_selected",
+        "pricing_context": {
+          "product_slug": "roll-labels",
+          "schema_version": 2,
+          "service_context": {
+            "groups": {
+              "fileDeliveryForIop": {
+                "status": "selected",
+                "values": [
+                  "5"
+                ]
+              },
+              "proofType": {
+                "status": "selected",
+                "values": [
+                  "31"
+                ]
+              }
+            },
+            "status": "observed",
+            "version": 2
+          },
+          "source_product_type": "36",
+          "store_type": "broker"
+        },
+        "evidence_ids": [
+          "5b9fed8b31ed4171b5c7b83f7485393d",
+          "5ba39cbdfe4a413592bbb312ae16e8d9",
+          "d352ad91d0fd4537b5e627de3eaeb47a",
+          "0646a6a46ec5452394ecf58f3fdcce6b",
+          "70937af23a074ee3a581fd49280ffcdc",
+          "6f401220aa524bb1b996bfeac733f280",
+          "e310828075794cdbaf7dd2cba61402f7",
+          "50a49fc8a82b48de8c5af12cbdab2f2d",
+          "ae001eb6dfbf44eba344900892704fe9",
+          "17b16f632f0b425c8a35568bc6606219",
+          "fd9f161fe80446289b03cf77b4fc3394",
+          "7dd9b412faf74279b253c6b4b2252a93",
+          "a97dc9a36d93412aa59c4221d4d7095b",
+          "be5435aa36cc4bcf9012644a350ac000",
+          "59e1b851b020462aac9ea7ae689de3fa",
+          "e044f4ffcd3c440c85bd11e2a26c09c1",
+          "f97f5cd1324a446db41eb3ae479166e6",
+          "47b64b263b0f432eb5d3a569618b8ca9",
+          "e59169cb5b8c4f8dbc2e806bce6e59a5",
+          "6c4aa9161d694daab270a70e02a65374",
+          "88894191091144a88d987f648c57d3c6",
+          "f87ce1dd84c348a5a572e00aa4945e69",
+          "071b4815c4ac4df58ecae0e67a3917a8",
+          "21b2e98db24a4fcc8ee4bdf63ea9d291",
+          "43b450c4b23142ad879ad14cf43e7cd0",
+          "22b4f330fc504d96a9877a6c25d79eb4",
+          "694e5a16097942ef9f1a837606aee354",
+          "295826896a0144d6af8324c9a6ae93e5",
+          "bcd5a3ff1c884941844bf989e977ce90",
+          "521b2e5178d74e0fa44f35901f071823",
+          "a21ae0094643497fa4cafbddff41b5e9",
+          "f6214ceb69cd498d8efac688473aaf82",
+          "1c556e23803b41a98a05ca631d2834ef",
+          "3b7e5c25f1f94b198ac5944cc694bbf0",
+          "d4cf04094cde46cbbbb1bf3018ee2caa",
+          "e78726ce61c14ee593982ae1c8c71d69",
+          "ed2291347e94471bac9854c8cb4f4e17",
+          "c76bf0ca3c304999b373535c69b53013",
+          "3130a76c3b4b45b6a9e52973c03363a3",
+          "fbc6db8754244256889873e9731a1b0b",
+          "557346dbd1494a59b79ae20400c805d4",
+          "df7d8b8dde0845fba71932a00fe7d432"
+        ]
+      }
+    ]
+  },
+  "limits": "This is a live startup/resume observation, not whole-product completion, new configuration coverage, sustained throughput, or independent cart verification."
+}

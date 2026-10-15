@@ -1,0 +1,53 @@
+services:
+  atlas:
+    build: .
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${ATLAS_PORT:-18877}:18877"
+    environment:
+      ATLAS_API_TOKEN: ${ATLAS_API_TOKEN:?Set ATLAS_API_TOKEN in .env}
+      ATLAS_SECRET_KEY: ${ATLAS_SECRET_KEY:?Set ATLAS_SECRET_KEY in .env}
+      ATLAS_DATA_DIR: /data
+      DATABASE_URL: postgresql+psycopg://atlas:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/atlas
+      ATLAS_PRODUCT_CONCURRENCY: ${ATLAS_PRODUCT_CONCURRENCY:-100}
+      ATLAS_SOURCE_RPS: ${ATLAS_SOURCE_RPS:-2}
+      ATLAS_SOURCE_CONCURRENCY: ${ATLAS_SOURCE_CONCURRENCY:-2}
+      ATLAS_CACHE_SECONDS: ${ATLAS_CACHE_SECONDS:-86400}
+      ATLAS_BROWSER_HEADLESS: "true"
+      ATLAS_BROWSER_PRODUCT_CONCURRENCY: ${ATLAS_BROWSER_PRODUCT_CONCURRENCY:-1}
+      ATLAS_BROWSER_PERSIST_SESSION: ${ATLAS_BROWSER_PERSIST_SESSION:-true}
+      ATLAS_BROWSER_PROFILE_DIR: ${ATLAS_BROWSER_PROFILE_DIR:-}
+      ATLAS_BROWSER_STORAGE_STATE: ${ATLAS_BROWSER_STORAGE_STATE:-}
+      ATLAS_BROWSER_AUTH_WAIT_SECONDS: ${ATLAS_BROWSER_AUTH_WAIT_SECONDS:-0}
+      ATLAS_BROWSER_INACTIVITY_SECONDS: ${ATLAS_BROWSER_INACTIVITY_SECONDS:-30}
+    volumes:
+      - atlas-data:/data
+    shm_size: "1gb"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stop_grace_period: 45s
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18877/api/v1/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+  postgres:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: atlas
+      POSTGRES_USER: atlas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atlas -d atlas"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  atlas-data:
+  postgres-data:

@@ -1,0 +1,33 @@
+{
+  "run_id": "af206ed87dbd47b688aca5c0076186af",
+  "started_at": "2026-09-25T19:08:31.658708+00:00",
+  "elapsed_seconds": 454.86,
+  "observed_peak_rss_mib": 773.0,
+  "peak_rss_sampling_seconds": 5,
+  "max_observed_running_products": 100,
+  "row_count": 3000000,
+  "rows_per_second": 6595.4,
+  "status": "completed",
+  "fixture": true,
+  "supplier_requests": 0,
+  "products": 100,
+  "export_files": 402,
+  "export_bytes": 9848972931,
+  "machine": "macOS-15.5-arm64-arm-64bit",
+  "python": "3.11.3",
+  "database": "SQLite WAL",
+  "concurrency_cap": 100,
+  "includes_csv_parquet_exports": true,
+  "independent_verification": {
+    "rows": 3000000,
+    "products": 100,
+    "unique_configuration_rows": 3000000,
+    "synthetic_rows": 3000000,
+    "min_rows_per_product": 30000,
+    "max_rows_per_product": 30000,
+    "elapsed_seconds": 4.81,
+    "method": "DuckDB scan of the combined exported Parquet artifact",
+    "csv_rows": 3000000,
+    "csv_parse_seconds": 18.9
+  }
+}

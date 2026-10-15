@@ -1,0 +1,2704 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-26T06:38:05.679605+00:00",
+  "snapshot_semantics": "One read transaction; rerun to include later durable probe results.",
+  "requests_made_by_report": 0,
+  "source_contract": {
+    "order_form_sha256": "fd26a9c72ba1a162d5d12aa0f0f845dfed7d1a136f276440f1b5b06a465a1d8b",
+    "common_sha256": "577bddf60b70e3c2c8362de3f358cd9477dc21232aa1d3c41839d5e1db1ed88d"
+  },
+  "jobs": [
+    {
+      "id": "hermes-dependency-probes-20260926",
+      "run_id": "36c1c4b084664d36b7b32dbca7cf8f08",
+      "status": "completed_with_errors",
+      "error": null,
+      "budget": 398,
+      "durable_used": 391,
+      "attempt_ledger_count": 391,
+      "prior_public_contract_gets": 2,
+      "total_recorded_attempts_including_prior_gets": 393,
+      "remaining_job_budget": 7,
+      "attempt_status_counts": {
+        "0": 45,
+        "200": 336,
+        "400": 7,
+        "404": 3
+      },
+      "attempt_phase_counts": {
+        "bootstrap": 58,
+        "browser_dependency:baseline": 259,
+        "browser_dependency:reset_after_manual_proof_36": 1,
+        "probe": 72,
+        "transport_diagnostic": 1
+      },
+      "results_count": 47,
+      "planned_http_requests": 24,
+      "planned_browser_experiments": 8,
+      "updated_at": "2026-09-26T06:16:31.851686+00:00"
+    }
+  ],
+  "http_results": [
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 0,
+      "id": "broad-product-type-1",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "1"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 1,
+      "id": "exact-lookup-1",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "1",
+        "turnaround": "1",
+        "size": "101",
+        "orientation": "1",
+        "paper": "1",
+        "color": "2"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 2,
+      "id": "broad-product-type-27",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "27"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 3,
+      "id": "exact-lookup-27",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "27",
+        "turnaround": "1",
+        "size": "272",
+        "orientation": "1",
+        "paper": "1",
+        "color": "2"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 4,
+      "id": "broad-product-type-36",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "36"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 5,
+      "id": "exact-lookup-36",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "36",
+        "turnaround": "1",
+        "shape": "5",
+        "size": "742",
+        "orientation": "1",
+        "paper": "13",
+        "finish": "1",
+        "color": "1"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 6,
+      "id": "base-all-quantities-bc",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/prices",
+      "params": {},
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 7,
+      "id": "option-catalog-bc",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options",
+      "params": {
+        "requestValues": "true",
+        "eddm": "false"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 8,
+      "id": "option-unfiltered-quantities-bc",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+      "params": {},
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 9,
+      "id": "option-two-quantities-bc",
+      "status": "failed",
+      "code": "network_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+      "params": {
+        "quantities": "1000,2500"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 10,
+      "id": "generic-spec-quote-bc",
+      "status": "failed",
+      "code": "network_error",
+      "method": "POST",
+      "path": "/service/rest/v1/product/prices",
+      "params": {},
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 11,
+      "id": "broad-product-type-1",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "1"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "c960b8eb14bc41359791d8a555c2299b",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "e94b6b049e270b34861308e1f07c840f6ae8ca2f6d0d6abcc28f578d6b7c6d0e",
+        "full_json_sha256": "e94b6b049e270b34861308e1f07c840f6ae8ca2f6d0d6abcc28f578d6b7c6d0e",
+        "item_count": 25,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 12,
+      "id": "exact-lookup-1",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "1",
+        "turnaround": "1",
+        "size": "101",
+        "orientation": "1",
+        "paper": "1",
+        "color": "2"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "d14246dae8da4d488830a8c3e1f9a102",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "9e0fe66dde4add2abb75b7f0b50319c38bad250ed579ccd8a589deafe11c8700",
+        "full_json_sha256": "9e0fe66dde4add2abb75b7f0b50319c38bad250ed579ccd8a589deafe11c8700",
+        "item_count": 1,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 13,
+      "id": "broad-product-type-27",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "27"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "fdf5d440b7e945ccb290da64d684b2cb",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "a455f4db13317ac0b3e96c20ed94a04c74aaa78c63f2ae96840dfa02d64dcbf0",
+        "full_json_sha256": "a455f4db13317ac0b3e96c20ed94a04c74aaa78c63f2ae96840dfa02d64dcbf0",
+        "item_count": 25,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 14,
+      "id": "exact-lookup-27",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "27",
+        "turnaround": "1",
+        "size": "272",
+        "orientation": "1",
+        "paper": "1",
+        "color": "2"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "5fa9fc6d669547d9a4f717bffc14430a",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "3b9cafe51d2a8d68f68fd00636cb4996df77ebb3ef4b67564ee4d55a53f49e99",
+        "full_json_sha256": "3b9cafe51d2a8d68f68fd00636cb4996df77ebb3ef4b67564ee4d55a53f49e99",
+        "item_count": 1,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 15,
+      "id": "broad-product-type-36",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "36"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "a52119c16de843aba31050f4e3193361",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "1eab76a25e0245ba317a73a5fd09fb547eb945917c8c514aec011eabc2139d15",
+        "full_json_sha256": "1eab76a25e0245ba317a73a5fd09fb547eb945917c8c514aec011eabc2139d15",
+        "item_count": 25,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 16,
+      "id": "exact-lookup-36",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "36",
+        "turnaround": "1",
+        "shape": "5",
+        "size": "742",
+        "orientation": "1",
+        "paper": "13",
+        "finish": "1",
+        "color": "1"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "ae1ca926f8db4cb98b8178279b8c3c61",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "4fbf32c6758780da4ce0c1571aa3b85505167fc298f5d336e1bbfab73eac9d24",
+        "full_json_sha256": "4fbf32c6758780da4ce0c1571aa3b85505167fc298f5d336e1bbfab73eac9d24",
+        "item_count": 1,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 17,
+      "id": "base-all-quantities-bc",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/prices",
+      "params": {},
+      "cached": false,
+      "response": {
+        "evidence_id": "92a463951edc40e8948f49e99a952f79",
+        "http_status": 200,
+        "path": "/service/rest/v1/products/100125944/prices",
+        "available": true,
+        "raw_body_sha256": "7de9f0c3e4508e4437a72c4317b2c7765396ff68fb69222c1055e47c251d86cd",
+        "full_json_sha256": "a14936f9f6e01ea82750007835625d738a274b0f9b2ace46317fb75da9f62b9c",
+        "item_count": 26,
+        "quantity_count": 26,
+        "quantities": [
+          50,
+          100,
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          15000,
+          20000,
+          25000,
+          30000,
+          35000,
+          40000,
+          45000,
+          50000,
+          55000,
+          60000,
+          65000,
+          70000,
+          75000,
+          80000,
+          85000,
+          90000,
+          95000,
+          100000
+        ],
+        "priced_quantity_table": true
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 18,
+      "id": "option-catalog-bc",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options",
+      "params": {
+        "requestValues": "true",
+        "eddm": "false"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "b40fcb9f7cce4b7fb96cbacda4fa1236",
+        "http_status": 200,
+        "path": "/service/rest/v1/products/100125944/options",
+        "available": true,
+        "raw_body_sha256": "24f0b8814b151657c6ff397a0ac1e5fc03f41527c2eeac5fadb811ced7a677ad",
+        "full_json_sha256": "62faf9fa150497dbab0760f8d16a6847ba73a038c6efa6e0e3b862b8898f9a7e",
+        "item_count": 14,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 19,
+      "id": "option-unfiltered-quantities-bc",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+      "params": {},
+      "cached": false,
+      "response": {
+        "evidence_id": "e729a40b4c554f249c6e75fd88d6ca44",
+        "http_status": 200,
+        "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+        "available": true,
+        "raw_body_sha256": "68c03d15d2e74a0ebcb12be2537d9a117bb2c864153db4de54c4f16a425fa731",
+        "full_json_sha256": "7855da3de0f89a07388bab70e6e52d14322f7709fad73b0ab0c0496f9d05ecef",
+        "item_count": 4,
+        "quantity_count": 4,
+        "quantities": [
+          100,
+          250,
+          500,
+          1000
+        ],
+        "priced_quantity_table": true
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 20,
+      "id": "option-two-quantities-bc",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+      "params": {
+        "quantities": "1000,2500"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "6388c26c926f4bd6bca661d74280096d",
+        "http_status": 200,
+        "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+        "available": true,
+        "raw_body_sha256": "93363d95e7bb11b38c76a07cb7823913f8501388ee4b6038a8e3e50b70aa6553",
+        "full_json_sha256": "29d64c6322037933abe449c3514b9a91f43c63b6d7e1b40bb401056ff8585625",
+        "item_count": 1,
+        "quantity_count": 1,
+        "quantities": [
+          1000
+        ],
+        "priced_quantity_table": true
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 21,
+      "id": "generic-spec-quote-bc",
+      "status": "failed",
+      "code": "http_error",
+      "method": "POST",
+      "path": "/service/rest/v1/product/prices",
+      "params": {},
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 23,
+      "id": "generic-spec-quote-bc",
+      "status": "failed",
+      "code": "http_error",
+      "method": "POST",
+      "path": "/service/rest/v1/product/prices",
+      "params": {},
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 24,
+      "id": "listing-1-0-1000",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "1",
+        "offset": 0,
+        "limit": 1000,
+        "requestValues": "true"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "62b4431494504d68b077600dc95b3daf",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "b0518a6ddbf64dc7cfc85f53d7af38fe6e68feda3c9b1c333580890f9122eabd",
+        "full_json_sha256": "b0518a6ddbf64dc7cfc85f53d7af38fe6e68feda3c9b1c333580890f9122eabd",
+        "item_count": 180,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 25,
+      "id": "listing-1-25-25",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "1",
+        "offset": 25,
+        "limit": 25,
+        "requestValues": "true"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "11193fd2b4a54b69abe1e1943a1242d0",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "defe2e275cf654197f4a176d8e625018341f8311e7e459e488c52af441cf4bcc",
+        "full_json_sha256": "defe2e275cf654197f4a176d8e625018341f8311e7e459e488c52af441cf4bcc",
+        "item_count": 25,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 26,
+      "id": "listing-27-0-1000",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "27",
+        "offset": 0,
+        "limit": 1000,
+        "requestValues": "true"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "39a2564531fc4c3e813f71be18e19a82",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "03b24d375dada6e3971fd3fe8882986d642dff840fe2dea39a9d006d4311011e",
+        "full_json_sha256": "03b24d375dada6e3971fd3fe8882986d642dff840fe2dea39a9d006d4311011e",
+        "item_count": 304,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 27,
+      "id": "listing-27-25-25",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "27",
+        "offset": 25,
+        "limit": 25,
+        "requestValues": "true"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "bad3c7802cc44fb0b33283ec5fe6d08b",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "36ed0c5d6a313f1a651fe39aaa875c91eec41ffb165decb88e097eaf6d2d0136",
+        "full_json_sha256": "36ed0c5d6a313f1a651fe39aaa875c91eec41ffb165decb88e097eaf6d2d0136",
+        "item_count": 25,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 28,
+      "id": "listing-36-0-1000",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "36",
+        "offset": 0,
+        "limit": 1000,
+        "requestValues": "true"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "3df35f6457d14c519d30a09d8086c723",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "de45b2ffc30a12173a7f621536bb53598d29fdce9c3a2254601d447d8b571577",
+        "full_json_sha256": "de45b2ffc30a12173a7f621536bb53598d29fdce9c3a2254601d447d8b571577",
+        "item_count": 459,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 29,
+      "id": "listing-36-25-25",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "36",
+        "offset": 25,
+        "limit": 25,
+        "requestValues": "true"
+      },
+      "cached": false,
+      "response": {
+        "evidence_id": "190cff5b3cd74841994be955819b9d1e",
+        "http_status": 200,
+        "path": "/service/rest/v1/products",
+        "available": true,
+        "raw_body_sha256": "4d1fe9f4562ffa05a0c7fae45610bccee29ed2e315ed258b68164a6b8796c697",
+        "full_json_sha256": "4d1fe9f4562ffa05a0c7fae45610bccee29ed2e315ed258b68164a6b8796c697",
+        "item_count": 25,
+        "quantity_count": 0,
+        "quantities": [],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 30,
+      "id": "base-detail-bc",
+      "status": "failed",
+      "code": "http_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944",
+      "params": {
+        "requestValues": "true"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 31,
+      "id": "proof-all-qty-bc",
+      "status": "observed",
+      "code": null,
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/101871186/prices",
+      "params": {},
+      "cached": false,
+      "response": {
+        "evidence_id": "12f80470d6604fa793682b3d97a84c5f",
+        "http_status": 200,
+        "path": "/service/rest/v1/products/100125944/options/101871186/prices",
+        "available": true,
+        "raw_body_sha256": "4a9f2fa134b11100c64fac1e0c22621f53020472e4dc0f9e245ef436c1fbeca1",
+        "full_json_sha256": "4db11ae9dbc61720811b8f4b23cd694308a873520127e057110c22686d7d6e68",
+        "item_count": 27,
+        "quantity_count": 27,
+        "quantities": [
+          25,
+          50,
+          100,
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          15000,
+          20000,
+          25000,
+          30000,
+          35000,
+          40000,
+          45000,
+          50000,
+          55000,
+          60000,
+          65000,
+          70000,
+          75000,
+          80000,
+          85000,
+          90000,
+          95000,
+          100000
+        ],
+        "priced_quantity_table": true
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 32,
+      "id": "proof-range-qty-bc",
+      "status": "failed",
+      "code": "http_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/101871186/prices",
+      "params": {
+        "quantities": "50-100000"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 33,
+      "id": "generic-spec-quote-bc",
+      "status": "failed",
+      "code": "http_error",
+      "method": "POST",
+      "path": "/service/rest/v1/product/prices",
+      "params": {},
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 34,
+      "id": "base-detail-bc",
+      "status": "failed",
+      "code": "http_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944",
+      "params": {
+        "requestValues": "true"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 35,
+      "id": "proof-range-qty-bc",
+      "status": "failed",
+      "code": "http_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/101871186/prices",
+      "params": {
+        "quantities": "50-100000"
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 36,
+      "id": "generic-base-quote-bc-v2",
+      "status": "observed",
+      "code": null,
+      "method": "POST",
+      "path": "/service/rest/v1/product/prices",
+      "params": {},
+      "cached": false,
+      "response": {
+        "evidence_id": "5ab43499d22b437eba4804245bd69e64",
+        "http_status": 200,
+        "path": "/service/rest/v1/product/prices",
+        "available": true,
+        "raw_body_sha256": "97d46d5b5e79d7ab871d2827f8a9fea628e91af87a07b652a16b9910efca8d2c",
+        "full_json_sha256": "977b03498c6af05b7b7d71c3617aa3a4d2592eda4bcdbb4795ec2b91506e00da",
+        "item_count": 1,
+        "quantity_count": 1,
+        "quantities": [
+          1000
+        ],
+        "priced_quantity_table": false
+      }
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 37,
+      "id": "listing-end-1",
+      "status": "failed",
+      "code": "http_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "1",
+        "limit": 1000,
+        "offset": 1000
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 38,
+      "id": "listing-end-27",
+      "status": "failed",
+      "code": "http_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "27",
+        "limit": 1000,
+        "offset": 1000
+      },
+      "cached": null,
+      "response": {}
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "result_index": 39,
+      "id": "listing-end-36",
+      "status": "failed",
+      "code": "http_error",
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "params": {
+        "productType": "36",
+        "limit": 1000,
+        "offset": 1000
+      },
+      "cached": null,
+      "response": {}
+    }
+  ],
+  "browser_experiments": [
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-business-cards",
+      "product_url": "https://www.printograph.com/products/business-cards/order",
+      "status": "unresolved",
+      "reason": "browser_probe_failed",
+      "source_bundle_match": false,
+      "capture_count": 0,
+      "phases": [],
+      "evidence_ids": [],
+      "request_errors": [],
+      "baseline_status": "not_captured"
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-business-cards-v2",
+      "product_url": "https://www.printograph.com/products/business-cards/order",
+      "status": "finished",
+      "reason": null,
+      "source_bundle_match": true,
+      "capture_count": 1,
+      "phases": [
+        {
+          "name": "baseline",
+          "status": "observed",
+          "reason": null,
+          "evidence_ids": [
+            "832cbab5e210494bb545c56d235ceb7d"
+          ],
+          "formula": {
+            "status": "unresolved",
+            "comparison": "unresolved",
+            "context_hash": null,
+            "reasons": [
+              "base_price_not_positive",
+              "comparison_not_established",
+              "unselected_required_value:color",
+              "unselected_required_value:paper",
+              "unselected_required_value:productId",
+              "unselected_required_value:quantity"
+            ],
+            "subtotal": null,
+            "subtotal_before_coupon": "0.00",
+            "displayed_total": "$0.00",
+            "controller_total": "0.00",
+            "components": [
+              {
+                "field": "productPrice",
+                "selected_value": null,
+                "amount": "0.00"
+              }
+            ]
+          },
+          "selections": {
+            "size": "101",
+            "orientation": "1",
+            "paper": "",
+            "color": "",
+            "roundedCorners": "",
+            "coating": "",
+            "spotCoating": "",
+            "raisedPrint": "",
+            "raisedFoilColor": "",
+            "paperFinish": "1",
+            "proofType": "31",
+            "manualProofType": "1",
+            "designServices": "42",
+            "fileDelivery": "5",
+            "quantity": "0",
+            "productId": "",
+            "productionTime": "1"
+          }
+        },
+        {
+          "name": "manual_proof_1",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        },
+        {
+          "name": "manual_proof_36",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        },
+        {
+          "name": "delivery",
+          "status": "unsupported",
+          "reason": "choice_unavailable",
+          "evidence_ids": []
+        },
+        {
+          "name": "rush",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": [
+        "832cbab5e210494bb545c56d235ceb7d"
+      ],
+      "request_errors": [],
+      "baseline_status": "unresolved"
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-club-flyers-v2",
+      "product_url": "https://www.printograph.com/products/club-flyers/order",
+      "status": "unresolved",
+      "reason": "browser_probe_failed",
+      "source_bundle_match": true,
+      "capture_count": 1,
+      "phases": [
+        {
+          "name": "baseline",
+          "status": "observed",
+          "reason": null,
+          "evidence_ids": [
+            "df36c0e17ee94b82b2c3963740270761"
+          ],
+          "formula": {
+            "status": "unresolved",
+            "comparison": "unresolved",
+            "context_hash": null,
+            "reasons": [
+              "base_price_not_positive",
+              "comparison_not_established",
+              "unselected_required_value:color",
+              "unselected_required_value:paper",
+              "unselected_required_value:productId",
+              "unselected_required_value:quantity",
+              "unselected_required_value:size"
+            ],
+            "subtotal": null,
+            "subtotal_before_coupon": "0.00",
+            "displayed_total": "$0.00",
+            "controller_total": "0.00",
+            "components": [
+              {
+                "field": "productPrice",
+                "selected_value": null,
+                "amount": "0.00"
+              }
+            ]
+          },
+          "selections": {
+            "size": "",
+            "orientation": "1",
+            "paper": "",
+            "color": "",
+            "roundedCorners": "",
+            "coating": "",
+            "spotCoating": "",
+            "raisedPrint": "",
+            "raisedFoilColor": "",
+            "paperFinish": "1",
+            "proofType": "31",
+            "manualProofType": "1",
+            "designServices": "42",
+            "fileDelivery": "5",
+            "quantity": "0",
+            "productId": "",
+            "productionTime": "1"
+          }
+        },
+        {
+          "name": "manual_proof_1",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        },
+        {
+          "name": "manual_proof_36",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": [
+        "df36c0e17ee94b82b2c3963740270761"
+      ],
+      "request_errors": [],
+      "baseline_status": "unresolved"
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-roll-labels-v2",
+      "product_url": "https://www.printograph.com/products/roll-labels/order",
+      "status": "finished",
+      "reason": null,
+      "source_bundle_match": true,
+      "capture_count": 1,
+      "phases": [
+        {
+          "name": "baseline",
+          "status": "observed",
+          "reason": null,
+          "evidence_ids": [
+            "66639be1741c45319e661473b5ec1fef"
+          ],
+          "formula": {
+            "status": "unresolved",
+            "comparison": "unresolved",
+            "context_hash": null,
+            "reasons": [
+              "base_price_not_positive",
+              "comparison_not_established",
+              "unselected_required_value:color",
+              "unselected_required_value:finish",
+              "unselected_required_value:paper",
+              "unselected_required_value:productId",
+              "unselected_required_value:quantity",
+              "unselected_required_value:shape",
+              "unselected_required_value:size"
+            ],
+            "subtotal": null,
+            "subtotal_before_coupon": "0.00",
+            "displayed_total": "$0.00",
+            "controller_total": "0.00",
+            "components": [
+              {
+                "field": "productPrice",
+                "selected_value": null,
+                "amount": "0.00"
+              }
+            ]
+          },
+          "selections": {
+            "shape": "",
+            "size": "",
+            "orientation": "1",
+            "paper": "",
+            "finish": "",
+            "color": "",
+            "windPosition": "54",
+            "proofType": "31",
+            "manualProofType": "1",
+            "designServices": "42",
+            "fileDelivery": "5",
+            "quantity": "0",
+            "productId": "",
+            "productionTime": "1"
+          }
+        },
+        {
+          "name": "manual_proof_1",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        },
+        {
+          "name": "manual_proof_36",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        },
+        {
+          "name": "delivery",
+          "status": "unsupported",
+          "reason": "choice_unavailable",
+          "evidence_ids": []
+        },
+        {
+          "name": "rush",
+          "status": "unsupported",
+          "reason": "control_unavailable",
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": [
+        "66639be1741c45319e661473b5ec1fef"
+      ],
+      "request_errors": [],
+      "baseline_status": "unresolved"
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-business-cards-v3",
+      "product_url": "https://www.printograph.com/products/business-cards/order",
+      "status": "unresolved",
+      "reason": "browser_probe_failed",
+      "source_bundle_match": true,
+      "capture_count": 2,
+      "phases": [],
+      "evidence_ids": [
+        "317769337b7a48c4b6f02faf3e8dffb5",
+        "a9ca59a6bf214eccb3d59acc93216ab8"
+      ],
+      "request_errors": [],
+      "baseline_status": "not_captured"
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-roll-labels-v3",
+      "product_url": "https://www.printograph.com/products/roll-labels/order",
+      "status": "unresolved",
+      "reason": "browser_probe_failed",
+      "source_bundle_match": true,
+      "capture_count": 2,
+      "phases": [],
+      "evidence_ids": [
+        "39bde513519145bc88939ea444114713",
+        "6000f1b0809b420babc112b7621ee527"
+      ],
+      "request_errors": [],
+      "baseline_status": "not_captured"
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-club-flyers-v3",
+      "product_url": "https://www.printograph.com/products/club-flyers/order",
+      "status": "unresolved",
+      "reason": "browser_probe_failed",
+      "source_bundle_match": true,
+      "capture_count": 2,
+      "phases": [],
+      "evidence_ids": [
+        "1b9da4f45fe04233b247875d62a4e5ad",
+        "41c1f51f5d43475db87c0fe1dd2186b2"
+      ],
+      "request_errors": [],
+      "baseline_status": "not_captured"
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "id": "browser-controlled-roll-labels-v4-initialized",
+      "product_url": "https://www.printograph.com/products/roll-labels/order",
+      "status": "unresolved",
+      "reason": "browser_action_timeout",
+      "source_bundle_match": true,
+      "capture_count": 18,
+      "phases": [],
+      "evidence_ids": [
+        "878d4bfcccc64b98bdf185923603b17a",
+        "65ff4ca1e2094948a8a8357f9969d48e",
+        "19daa11e9c21423c8f9ea5ef399ce78e",
+        "509c10cc9f3d4795b6e8850b77346229",
+        "c74f60a9e2ef4037924524289bf93455",
+        "cc4780b8963d4ef3885f973f82cea936",
+        "f94c405114ee49589c3a30762aea25ac",
+        "a6969b1e49b74056ae3d0390ed9d8bb5",
+        "8bb1b38aaef54a36a6cc853dd9bba6f5",
+        "ea04827c63894239aef0fd7c2b8d482c",
+        "50bc1f42acda4d69b0089e528594c2db",
+        "9384ee0883e44c8f8d66d729aac9c03a",
+        "0ba9a4a7afb84e2ebff1f9edbcd02fc4",
+        "522c8dbee9444cb89bb848178a05a02d",
+        "43013e828f27487a887cd2b3baa43daa",
+        "6e5f8e2c626a48c5aad2c4b4cdcfe92b",
+        "eb368a5cec254d86a13fae0466e0208b",
+        "ffa2174a72fd4da48ac90eb1da9895fe"
+      ],
+      "request_errors": [],
+      "baseline_status": "not_captured"
+    }
+  ],
+  "products": [
+    {
+      "title": "Business Cards",
+      "product_url": "https://www.printograph.com/products/business-cards/order",
+      "latest_experiment_id": "browser-controlled-business-cards-v3",
+      "status": "unresolved",
+      "baseline_status": "not_captured",
+      "phases": []
+    },
+    {
+      "title": "Club Flyers",
+      "product_url": "https://www.printograph.com/products/club-flyers/order",
+      "latest_experiment_id": "browser-controlled-club-flyers-v3",
+      "status": "unresolved",
+      "baseline_status": "not_captured",
+      "phases": []
+    },
+    {
+      "title": "Roll Labels",
+      "product_url": "https://www.printograph.com/products/roll-labels/order",
+      "latest_experiment_id": "browser-controlled-roll-labels-v4-initialized",
+      "status": "unresolved",
+      "baseline_status": "not_captured",
+      "phases": []
+    }
+  ],
+  "formula_issues": [
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-business-cards",
+      "product_url": "https://www.printograph.com/products/business-cards/order",
+      "phase": "baseline",
+      "comparison": "unresolved",
+      "reasons": [
+        "settled_baseline_not_captured"
+      ],
+      "evidence_ids": []
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-business-cards-v2",
+      "product_url": "https://www.printograph.com/products/business-cards/order",
+      "phase": "baseline",
+      "evidence_ids": [
+        "832cbab5e210494bb545c56d235ceb7d"
+      ],
+      "status": "unresolved",
+      "comparison": "unresolved",
+      "context_hash": null,
+      "reasons": [
+        "base_price_not_positive",
+        "comparison_not_established",
+        "unselected_required_value:color",
+        "unselected_required_value:paper",
+        "unselected_required_value:productId",
+        "unselected_required_value:quantity"
+      ],
+      "subtotal": null,
+      "subtotal_before_coupon": "0.00",
+      "displayed_total": "$0.00",
+      "controller_total": "0.00",
+      "components": [
+        {
+          "field": "productPrice",
+          "selected_value": null,
+          "amount": "0.00"
+        }
+      ]
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-club-flyers-v2",
+      "product_url": "https://www.printograph.com/products/club-flyers/order",
+      "phase": "baseline",
+      "evidence_ids": [
+        "df36c0e17ee94b82b2c3963740270761"
+      ],
+      "status": "unresolved",
+      "comparison": "unresolved",
+      "context_hash": null,
+      "reasons": [
+        "base_price_not_positive",
+        "comparison_not_established",
+        "unselected_required_value:color",
+        "unselected_required_value:paper",
+        "unselected_required_value:productId",
+        "unselected_required_value:quantity",
+        "unselected_required_value:size"
+      ],
+      "subtotal": null,
+      "subtotal_before_coupon": "0.00",
+      "displayed_total": "$0.00",
+      "controller_total": "0.00",
+      "components": [
+        {
+          "field": "productPrice",
+          "selected_value": null,
+          "amount": "0.00"
+        }
+      ]
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-roll-labels-v2",
+      "product_url": "https://www.printograph.com/products/roll-labels/order",
+      "phase": "baseline",
+      "evidence_ids": [
+        "66639be1741c45319e661473b5ec1fef"
+      ],
+      "status": "unresolved",
+      "comparison": "unresolved",
+      "context_hash": null,
+      "reasons": [
+        "base_price_not_positive",
+        "comparison_not_established",
+        "unselected_required_value:color",
+        "unselected_required_value:finish",
+        "unselected_required_value:paper",
+        "unselected_required_value:productId",
+        "unselected_required_value:quantity",
+        "unselected_required_value:shape",
+        "unselected_required_value:size"
+      ],
+      "subtotal": null,
+      "subtotal_before_coupon": "0.00",
+      "displayed_total": "$0.00",
+      "controller_total": "0.00",
+      "components": [
+        {
+          "field": "productPrice",
+          "selected_value": null,
+          "amount": "0.00"
+        }
+      ]
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-business-cards-v3",
+      "product_url": "https://www.printograph.com/products/business-cards/order",
+      "phase": "baseline",
+      "comparison": "unresolved",
+      "reasons": [
+        "settled_baseline_not_captured"
+      ],
+      "evidence_ids": [
+        "317769337b7a48c4b6f02faf3e8dffb5",
+        "a9ca59a6bf214eccb3d59acc93216ab8"
+      ]
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-roll-labels-v3",
+      "product_url": "https://www.printograph.com/products/roll-labels/order",
+      "phase": "baseline",
+      "comparison": "unresolved",
+      "reasons": [
+        "settled_baseline_not_captured"
+      ],
+      "evidence_ids": [
+        "39bde513519145bc88939ea444114713",
+        "6000f1b0809b420babc112b7621ee527"
+      ]
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-club-flyers-v3",
+      "product_url": "https://www.printograph.com/products/club-flyers/order",
+      "phase": "baseline",
+      "comparison": "unresolved",
+      "reasons": [
+        "settled_baseline_not_captured"
+      ],
+      "evidence_ids": [
+        "1b9da4f45fe04233b247875d62a4e5ad",
+        "41c1f51f5d43475db87c0fe1dd2186b2"
+      ]
+    },
+    {
+      "job_id": "hermes-dependency-probes-20260926",
+      "experiment_id": "browser-controlled-roll-labels-v4-initialized",
+      "product_url": "https://www.printograph.com/products/roll-labels/order",
+      "phase": "baseline",
+      "comparison": "unresolved",
+      "reasons": [
+        "settled_baseline_not_captured"
+      ],
+      "evidence_ids": [
+        "878d4bfcccc64b98bdf185923603b17a",
+        "65ff4ca1e2094948a8a8357f9969d48e",
+        "19daa11e9c21423c8f9ea5ef399ce78e",
+        "509c10cc9f3d4795b6e8850b77346229",
+        "c74f60a9e2ef4037924524289bf93455",
+        "cc4780b8963d4ef3885f973f82cea936",
+        "f94c405114ee49589c3a30762aea25ac",
+        "a6969b1e49b74056ae3d0390ed9d8bb5",
+        "8bb1b38aaef54a36a6cc853dd9bba6f5",
+        "ea04827c63894239aef0fd7c2b8d482c",
+        "50bc1f42acda4d69b0089e528594c2db",
+        "9384ee0883e44c8f8d66d729aac9c03a",
+        "0ba9a4a7afb84e2ebff1f9edbcd02fc4",
+        "522c8dbee9444cb89bb848178a05a02d",
+        "43013e828f27487a887cd2b3baa43daa",
+        "6e5f8e2c626a48c5aad2c4b4cdcfe92b",
+        "eb368a5cec254d86a13fae0466e0208b",
+        "ffa2174a72fd4da48ac90eb1da9895fe"
+      ]
+    }
+  ],
+  "one_dimension_comparisons": [],
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/product/search",
+      "observation_count": 4,
+      "distinct_evidence_count": 4,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        0
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-business-cards-v3",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "a9ca59a6bf214eccb3d59acc93216ab8",
+          "http_status": 200,
+          "path": "/service/rest/v1/product/search",
+          "available": true,
+          "raw_body_sha256": "4747fe013207ab44cf8da59f7c3f7355ee365766d6e92c215889c57e685c69b1",
+          "full_json_sha256": "93861ac723e56b08175eb8b9ea8dc89a6ee2599627032019e2ea08c049a98d72",
+          "item_count": 229,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-roll-labels-v3",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "39bde513519145bc88939ea444114713",
+          "http_status": 200,
+          "path": "/service/rest/v1/product/search",
+          "available": true,
+          "raw_body_sha256": "4747fe013207ab44cf8da59f7c3f7355ee365766d6e92c215889c57e685c69b1",
+          "full_json_sha256": "93861ac723e56b08175eb8b9ea8dc89a6ee2599627032019e2ea08c049a98d72",
+          "item_count": 229,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-club-flyers-v3",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "1b9da4f45fe04233b247875d62a4e5ad",
+          "http_status": 200,
+          "path": "/service/rest/v1/product/search",
+          "available": true,
+          "raw_body_sha256": "4747fe013207ab44cf8da59f7c3f7355ee365766d6e92c215889c57e685c69b1",
+          "full_json_sha256": "93861ac723e56b08175eb8b9ea8dc89a6ee2599627032019e2ea08c049a98d72",
+          "item_count": 229,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "65ff4ca1e2094948a8a8357f9969d48e",
+          "http_status": 200,
+          "path": "/service/rest/v1/product/search",
+          "available": true,
+          "raw_body_sha256": "4747fe013207ab44cf8da59f7c3f7355ee365766d6e92c215889c57e685c69b1",
+          "full_json_sha256": "93861ac723e56b08175eb8b9ea8dc89a6ee2599627032019e2ea08c049a98d72",
+          "item_count": 229,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products",
+      "observation_count": 13,
+      "distinct_evidence_count": 13,
+      "distinct_raw_bodies": 12,
+      "distinct_full_json_bodies": 12,
+      "observed_quantity_counts": [
+        0
+      ],
+      "observations": [
+        {
+          "id": "broad-product-type-1",
+          "params": {
+            "productType": "1"
+          },
+          "evidence_id": "c960b8eb14bc41359791d8a555c2299b",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "e94b6b049e270b34861308e1f07c840f6ae8ca2f6d0d6abcc28f578d6b7c6d0e",
+          "full_json_sha256": "e94b6b049e270b34861308e1f07c840f6ae8ca2f6d0d6abcc28f578d6b7c6d0e",
+          "item_count": 25,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "exact-lookup-1",
+          "params": {
+            "productType": "1",
+            "turnaround": "1",
+            "size": "101",
+            "orientation": "1",
+            "paper": "1",
+            "color": "2"
+          },
+          "evidence_id": "d14246dae8da4d488830a8c3e1f9a102",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "9e0fe66dde4add2abb75b7f0b50319c38bad250ed579ccd8a589deafe11c8700",
+          "full_json_sha256": "9e0fe66dde4add2abb75b7f0b50319c38bad250ed579ccd8a589deafe11c8700",
+          "item_count": 1,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "broad-product-type-27",
+          "params": {
+            "productType": "27"
+          },
+          "evidence_id": "fdf5d440b7e945ccb290da64d684b2cb",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "a455f4db13317ac0b3e96c20ed94a04c74aaa78c63f2ae96840dfa02d64dcbf0",
+          "full_json_sha256": "a455f4db13317ac0b3e96c20ed94a04c74aaa78c63f2ae96840dfa02d64dcbf0",
+          "item_count": 25,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "exact-lookup-27",
+          "params": {
+            "productType": "27",
+            "turnaround": "1",
+            "size": "272",
+            "orientation": "1",
+            "paper": "1",
+            "color": "2"
+          },
+          "evidence_id": "5fa9fc6d669547d9a4f717bffc14430a",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "3b9cafe51d2a8d68f68fd00636cb4996df77ebb3ef4b67564ee4d55a53f49e99",
+          "full_json_sha256": "3b9cafe51d2a8d68f68fd00636cb4996df77ebb3ef4b67564ee4d55a53f49e99",
+          "item_count": 1,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "broad-product-type-36",
+          "params": {
+            "productType": "36"
+          },
+          "evidence_id": "a52119c16de843aba31050f4e3193361",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "1eab76a25e0245ba317a73a5fd09fb547eb945917c8c514aec011eabc2139d15",
+          "full_json_sha256": "1eab76a25e0245ba317a73a5fd09fb547eb945917c8c514aec011eabc2139d15",
+          "item_count": 25,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "exact-lookup-36",
+          "params": {
+            "productType": "36",
+            "turnaround": "1",
+            "shape": "5",
+            "size": "742",
+            "orientation": "1",
+            "paper": "13",
+            "finish": "1",
+            "color": "1"
+          },
+          "evidence_id": "ae1ca926f8db4cb98b8178279b8c3c61",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "4fbf32c6758780da4ce0c1571aa3b85505167fc298f5d336e1bbfab73eac9d24",
+          "full_json_sha256": "4fbf32c6758780da4ce0c1571aa3b85505167fc298f5d336e1bbfab73eac9d24",
+          "item_count": 1,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "listing-1-0-1000",
+          "params": {
+            "productType": "1",
+            "offset": 0,
+            "limit": 1000,
+            "requestValues": "true"
+          },
+          "evidence_id": "62b4431494504d68b077600dc95b3daf",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "b0518a6ddbf64dc7cfc85f53d7af38fe6e68feda3c9b1c333580890f9122eabd",
+          "full_json_sha256": "b0518a6ddbf64dc7cfc85f53d7af38fe6e68feda3c9b1c333580890f9122eabd",
+          "item_count": 180,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "listing-1-25-25",
+          "params": {
+            "productType": "1",
+            "offset": 25,
+            "limit": 25,
+            "requestValues": "true"
+          },
+          "evidence_id": "11193fd2b4a54b69abe1e1943a1242d0",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "defe2e275cf654197f4a176d8e625018341f8311e7e459e488c52af441cf4bcc",
+          "full_json_sha256": "defe2e275cf654197f4a176d8e625018341f8311e7e459e488c52af441cf4bcc",
+          "item_count": 25,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "listing-27-0-1000",
+          "params": {
+            "productType": "27",
+            "offset": 0,
+            "limit": 1000,
+            "requestValues": "true"
+          },
+          "evidence_id": "39a2564531fc4c3e813f71be18e19a82",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "03b24d375dada6e3971fd3fe8882986d642dff840fe2dea39a9d006d4311011e",
+          "full_json_sha256": "03b24d375dada6e3971fd3fe8882986d642dff840fe2dea39a9d006d4311011e",
+          "item_count": 304,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "listing-27-25-25",
+          "params": {
+            "productType": "27",
+            "offset": 25,
+            "limit": 25,
+            "requestValues": "true"
+          },
+          "evidence_id": "bad3c7802cc44fb0b33283ec5fe6d08b",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "36ed0c5d6a313f1a651fe39aaa875c91eec41ffb165decb88e097eaf6d2d0136",
+          "full_json_sha256": "36ed0c5d6a313f1a651fe39aaa875c91eec41ffb165decb88e097eaf6d2d0136",
+          "item_count": 25,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "listing-36-0-1000",
+          "params": {
+            "productType": "36",
+            "offset": 0,
+            "limit": 1000,
+            "requestValues": "true"
+          },
+          "evidence_id": "3df35f6457d14c519d30a09d8086c723",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "de45b2ffc30a12173a7f621536bb53598d29fdce9c3a2254601d447d8b571577",
+          "full_json_sha256": "de45b2ffc30a12173a7f621536bb53598d29fdce9c3a2254601d447d8b571577",
+          "item_count": 459,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "listing-36-25-25",
+          "params": {
+            "productType": "36",
+            "offset": 25,
+            "limit": 25,
+            "requestValues": "true"
+          },
+          "evidence_id": "190cff5b3cd74841994be955819b9d1e",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "4d1fe9f4562ffa05a0c7fae45610bccee29ed2e315ed258b68164a6b8796c697",
+          "full_json_sha256": "4d1fe9f4562ffa05a0c7fae45610bccee29ed2e315ed258b68164a6b8796c697",
+          "item_count": 25,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "productType": "36",
+            "turnaround": "1",
+            "shape": "5",
+            "size": "742",
+            "orientation": "1",
+            "paper": "13",
+            "finish": "1",
+            "color": "1"
+          },
+          "evidence_id": "19daa11e9c21423c8f9ea5ef399ce78e",
+          "http_status": 200,
+          "path": "/service/rest/v1/products",
+          "available": true,
+          "raw_body_sha256": "4fbf32c6758780da4ce0c1571aa3b85505167fc298f5d336e1bbfab73eac9d24",
+          "full_json_sha256": "4fbf32c6758780da4ce0c1571aa3b85505167fc298f5d336e1bbfab73eac9d24",
+          "item_count": 1,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        0
+      ],
+      "observations": [
+        {
+          "id": "option-catalog-bc",
+          "params": {
+            "requestValues": "true",
+            "eddm": "false"
+          },
+          "evidence_id": "b40fcb9f7cce4b7fb96cbacda4fa1236",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100125944/options",
+          "available": true,
+          "raw_body_sha256": "24f0b8814b151657c6ff397a0ac1e5fc03f41527c2eeac5fadb811ced7a677ad",
+          "full_json_sha256": "62faf9fa150497dbab0760f8d16a6847ba73a038c6efa6e0e3b862b8898f9a7e",
+          "item_count": 14,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/101871186/prices",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        27
+      ],
+      "observations": [
+        {
+          "id": "proof-all-qty-bc",
+          "params": {},
+          "evidence_id": "12f80470d6604fa793682b3d97a84c5f",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100125944/options/101871186/prices",
+          "available": true,
+          "raw_body_sha256": "4a9f2fa134b11100c64fac1e0c22621f53020472e4dc0f9e245ef436c1fbeca1",
+          "full_json_sha256": "4db11ae9dbc61720811b8f4b23cd694308a873520127e057110c22686d7d6e68",
+          "item_count": 27,
+          "quantity_count": 27,
+          "quantities": [
+            25,
+            50,
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000,
+            55000,
+            60000,
+            65000,
+            70000,
+            75000,
+            80000,
+            85000,
+            90000,
+            95000,
+            100000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+      "observation_count": 2,
+      "distinct_evidence_count": 2,
+      "distinct_raw_bodies": 2,
+      "distinct_full_json_bodies": 2,
+      "observed_quantity_counts": [
+        1,
+        4
+      ],
+      "observations": [
+        {
+          "id": "option-unfiltered-quantities-bc",
+          "params": {},
+          "evidence_id": "e729a40b4c554f249c6e75fd88d6ca44",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+          "available": true,
+          "raw_body_sha256": "68c03d15d2e74a0ebcb12be2537d9a117bb2c864153db4de54c4f16a425fa731",
+          "full_json_sha256": "7855da3de0f89a07388bab70e6e52d14322f7709fad73b0ab0c0496f9d05ecef",
+          "item_count": 4,
+          "quantity_count": 4,
+          "quantities": [
+            100,
+            250,
+            500,
+            1000
+          ],
+          "priced_quantity_table": true
+        },
+        {
+          "id": "option-two-quantities-bc",
+          "params": {
+            "quantities": "1000,2500"
+          },
+          "evidence_id": "6388c26c926f4bd6bca661d74280096d",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100125944/options/103225753/prices",
+          "available": true,
+          "raw_body_sha256": "93363d95e7bb11b38c76a07cb7823913f8501388ee4b6038a8e3e50b70aa6553",
+          "full_json_sha256": "29d64c6322037933abe449c3514b9a91f43c63b6d7e1b40bb401056ff8585625",
+          "item_count": 1,
+          "quantity_count": 1,
+          "quantities": [
+            1000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100125944/prices",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        26
+      ],
+      "observations": [
+        {
+          "id": "base-all-quantities-bc",
+          "params": {},
+          "evidence_id": "92a463951edc40e8948f49e99a952f79",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100125944/prices",
+          "available": true,
+          "raw_body_sha256": "7de9f0c3e4508e4437a72c4317b2c7765396ff68fb69222c1055e47c251d86cd",
+          "full_json_sha256": "a14936f9f6e01ea82750007835625d738a274b0f9b2ace46317fb75da9f62b9c",
+          "item_count": 26,
+          "quantity_count": 26,
+          "quantities": [
+            50,
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000,
+            55000,
+            60000,
+            65000,
+            70000,
+            75000,
+            80000,
+            85000,
+            90000,
+            95000,
+            100000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100134417/options",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        0
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "eddm": "false"
+          },
+          "evidence_id": "c74f60a9e2ef4037924524289bf93455",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options",
+          "available": true,
+          "raw_body_sha256": "c4ff5cdd8f0eb21daf127b9bd59d71cab2d7055ccdbb95b769cba38c2889c9ce",
+          "full_json_sha256": "da2c846280f3adf53f04df5db6c42cb07a9584f9e4cc7d65258bece5a83d86e3",
+          "item_count": 11,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100134417/options/101210753/prices",
+      "observation_count": 2,
+      "distinct_evidence_count": 2,
+      "distinct_raw_bodies": 2,
+      "distinct_full_json_bodies": 2,
+      "observed_quantity_counts": [
+        1,
+        15
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "quantities": "100"
+          },
+          "evidence_id": "6e5f8e2c626a48c5aad2c4b4cdcfe92b",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101210753/prices",
+          "available": true,
+          "raw_body_sha256": "1f2dcf10c2724aea720a3269420b60c77fb0d4a42a0d1d932d6f54748971190e",
+          "full_json_sha256": "d74d087d38230c552ec6afb4ed7b12482298196d8fea24b48cc2d979db0257b2",
+          "item_count": 1,
+          "quantity_count": 1,
+          "quantities": [
+            100
+          ],
+          "priced_quantity_table": true
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "ffa2174a72fd4da48ac90eb1da9895fe",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101210753/prices",
+          "available": true,
+          "raw_body_sha256": "a1efd7942c452c0aee08ef9a0e5b4e813cb5bdd339cd0408bd632bfa1533e898",
+          "full_json_sha256": "8b761c0d941afa98725132dc493221cbba26a2015fdecfb09119d9176de7a3dc",
+          "item_count": 15,
+          "quantity_count": 15,
+          "quantities": [
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100134417/options/101210754/prices",
+      "observation_count": 2,
+      "distinct_evidence_count": 2,
+      "distinct_raw_bodies": 2,
+      "distinct_full_json_bodies": 2,
+      "observed_quantity_counts": [
+        1,
+        15
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "quantities": "100"
+          },
+          "evidence_id": "f94c405114ee49589c3a30762aea25ac",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101210754/prices",
+          "available": true,
+          "raw_body_sha256": "67a1425d394b56005acd12ce9fc6892486101ac278cce790a14c40e330ddf181",
+          "full_json_sha256": "e7b3ac2ae4959e49b61127932fb87d715d89c8e716a970a5e01e8b23e54929de",
+          "item_count": 1,
+          "quantity_count": 1,
+          "quantities": [
+            100
+          ],
+          "priced_quantity_table": true
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "9384ee0883e44c8f8d66d729aac9c03a",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101210754/prices",
+          "available": true,
+          "raw_body_sha256": "1e201683630efd73ebf7d3e55cb75ed1993e11d6b852ffcf14b952c4c5250da8",
+          "full_json_sha256": "eee1611109f383291c3dd0b9df099e5eef3c9977bf711db4be4777a4536cb51b",
+          "item_count": 15,
+          "quantity_count": 15,
+          "quantities": [
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100134417/options/101210755/prices",
+      "observation_count": 2,
+      "distinct_evidence_count": 2,
+      "distinct_raw_bodies": 2,
+      "distinct_full_json_bodies": 2,
+      "observed_quantity_counts": [
+        1,
+        15
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "quantities": "100"
+          },
+          "evidence_id": "a6969b1e49b74056ae3d0390ed9d8bb5",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101210755/prices",
+          "available": true,
+          "raw_body_sha256": "9fb8cda4ccc02ca9a3b606bd4bb5552caaf7231e0b54828070274110ac1ae821",
+          "full_json_sha256": "fbb5a86af1ecef0c4174cf8f2eb1b78eaadac2bd304bc28b1ef351f3e80acff9",
+          "item_count": 1,
+          "quantity_count": 1,
+          "quantities": [
+            100
+          ],
+          "priced_quantity_table": true
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "43013e828f27487a887cd2b3baa43daa",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101210755/prices",
+          "available": true,
+          "raw_body_sha256": "469c61da7602d41baf3f70be6feff63184be5dfcd14cd6a4b7d9ecc92eaebd84",
+          "full_json_sha256": "6102768654e599b9842cb9345eb6712715ae7d9ea7f965fc5a7dda9552da2e0f",
+          "item_count": 15,
+          "quantity_count": 15,
+          "quantities": [
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100134417/options/101877578/prices",
+      "observation_count": 2,
+      "distinct_evidence_count": 2,
+      "distinct_raw_bodies": 2,
+      "distinct_full_json_bodies": 2,
+      "observed_quantity_counts": [
+        1,
+        27
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "quantities": "100"
+          },
+          "evidence_id": "50bc1f42acda4d69b0089e528594c2db",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101877578/prices",
+          "available": true,
+          "raw_body_sha256": "d1a391960ec49af6ad671a9e898c91d0a20b36dbe2d2b7c0d61cd1df43bf8f04",
+          "full_json_sha256": "81ba2d797ea4c9d8b2fd8fe89bb4b23c552d6b94cdd7ea51a29bbb5b609402c5",
+          "item_count": 1,
+          "quantity_count": 1,
+          "quantities": [
+            100
+          ],
+          "priced_quantity_table": true
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "eb368a5cec254d86a13fae0466e0208b",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101877578/prices",
+          "available": true,
+          "raw_body_sha256": "45e28b771cc8054fb4443b8be82d0a7c33af051f1199f2f4063c770c9c9a5f46",
+          "full_json_sha256": "96bc284641933265c779231c05ea278955232fe7ca85029bedabcfd9da3b70ea",
+          "item_count": 27,
+          "quantity_count": 27,
+          "quantities": [
+            25,
+            50,
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000,
+            55000,
+            60000,
+            65000,
+            70000,
+            75000,
+            80000,
+            85000,
+            90000,
+            95000,
+            100000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100134417/options/101945666/prices",
+      "observation_count": 2,
+      "distinct_evidence_count": 2,
+      "distinct_raw_bodies": 2,
+      "distinct_full_json_bodies": 2,
+      "observed_quantity_counts": [
+        1,
+        27
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "quantities": "100"
+          },
+          "evidence_id": "ea04827c63894239aef0fd7c2b8d482c",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101945666/prices",
+          "available": true,
+          "raw_body_sha256": "53b32f2b4f2e6c89672ed6b5fa02b574710b1e390d66cca171c0cbf515036276",
+          "full_json_sha256": "01d7a94c834997bf53771db0727cc84d0e10ce93807627156fb3d0d78bba7c05",
+          "item_count": 1,
+          "quantity_count": 1,
+          "quantities": [
+            100
+          ],
+          "priced_quantity_table": true
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "0ba9a4a7afb84e2ebff1f9edbcd02fc4",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/options/101945666/prices",
+          "available": true,
+          "raw_body_sha256": "4a8a6428e0e6c14bbd5c3fd51e75fbc1b105133a3285eeadd5e986b65739ba15",
+          "full_json_sha256": "70e6879ec67652f009843583a211a5f3338d1526163526b4357283069bbc5a90",
+          "item_count": 27,
+          "quantity_count": 27,
+          "quantities": [
+            25,
+            50,
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000,
+            55000,
+            60000,
+            65000,
+            70000,
+            75000,
+            80000,
+            85000,
+            90000,
+            95000,
+            100000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/100134417/prices",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        15
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "cc4780b8963d4ef3885f973f82cea936",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/100134417/prices",
+          "available": true,
+          "raw_body_sha256": "7e5ebdc3baeac67c3269f7816e7e6eb4b845db49eacd9aaa7ec83e4e488c4336",
+          "full_json_sha256": "f9ca9e830f9bdcb2ab03640519407fada9c1aeb8c1dc59768b897c0ce952248f",
+          "item_count": 15,
+          "quantity_count": 15,
+          "quantities": [
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000
+          ],
+          "priced_quantity_table": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/options/quantities",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        0
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "optionIds": "32,33,34,35,54",
+            "includeTurnaround": "true",
+            "productType": "36",
+            "shape": "5",
+            "size": "742",
+            "orientation": "1",
+            "paper": "13",
+            "finish": "1",
+            "color": "1"
+          },
+          "evidence_id": "522c8dbee9444cb89bb848178a05a02d",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/options/quantities",
+          "available": true,
+          "raw_body_sha256": "47f007289225045b18f60457a58c6310a0cf92f19e777aa0bf536fee46070e89",
+          "full_json_sha256": "47f007289225045b18f60457a58c6310a0cf92f19e777aa0bf536fee46070e89",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/products/quantities",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        15
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "productType": "36",
+            "includeTurnaround": "true",
+            "shape": "5",
+            "size": "742",
+            "orientation": "1",
+            "paper": "13",
+            "finish": "1",
+            "color": "1"
+          },
+          "evidence_id": "509c10cc9f3d4795b6e8850b77346229",
+          "http_status": 200,
+          "path": "/service/rest/v1/products/quantities",
+          "available": true,
+          "raw_body_sha256": "24d316b2fd20d63ab3b528a32f7ba71f06a4f2a59cc42db28f2956fd35672a25",
+          "full_json_sha256": "24d316b2fd20d63ab3b528a32f7ba71f06a4f2a59cc42db28f2956fd35672a25",
+          "item_count": 15,
+          "quantity_count": 15,
+          "quantities": [
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+            15000,
+            20000,
+            25000,
+            30000,
+            35000,
+            40000,
+            45000,
+            50000
+          ],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/service/rest/v1/settings/product/specifications",
+      "observation_count": 7,
+      "distinct_evidence_count": 7,
+      "distinct_raw_bodies": 3,
+      "distinct_full_json_bodies": 3,
+      "observed_quantity_counts": [
+        0
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-business-cards-v2",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "productType": "1"
+          },
+          "evidence_id": "832cbab5e210494bb545c56d235ceb7d",
+          "http_status": 200,
+          "path": "/service/rest/v1/settings/product/specifications",
+          "available": true,
+          "raw_body_sha256": "cf334cadfc5354907246dc0e6b0ba39f16f62f3f70789fb73f9daa0994f9c1a7",
+          "full_json_sha256": "a95a47a6b3c6bb539e34f317e83ebe4ad6f2e844e44cd73c7e72af574bc6de39",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-club-flyers-v2",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "productType": "27"
+          },
+          "evidence_id": "df36c0e17ee94b82b2c3963740270761",
+          "http_status": 200,
+          "path": "/service/rest/v1/settings/product/specifications",
+          "available": true,
+          "raw_body_sha256": "d2a9328864d025a229743335e1e784e46405c2cc5ed82123f66cd486c96578a4",
+          "full_json_sha256": "30506d33fdfd7bd609369dab9281aa8390aa71c8a0ae72fa2c30cc23a5df651b",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-roll-labels-v2",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "productType": "36"
+          },
+          "evidence_id": "66639be1741c45319e661473b5ec1fef",
+          "http_status": 200,
+          "path": "/service/rest/v1/settings/product/specifications",
+          "available": true,
+          "raw_body_sha256": "7ea65f1714bcea9ffad13b636793083c02864a3c64fc3b88d5be475bf3d32582",
+          "full_json_sha256": "d9c1fed918047b8600268a54fba206747df1575d6a2505251fffd9ed98221f87",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-business-cards-v3",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "productType": "1"
+          },
+          "evidence_id": "317769337b7a48c4b6f02faf3e8dffb5",
+          "http_status": 200,
+          "path": "/service/rest/v1/settings/product/specifications",
+          "available": true,
+          "raw_body_sha256": "cf334cadfc5354907246dc0e6b0ba39f16f62f3f70789fb73f9daa0994f9c1a7",
+          "full_json_sha256": "a95a47a6b3c6bb539e34f317e83ebe4ad6f2e844e44cd73c7e72af574bc6de39",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-roll-labels-v3",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "productType": "36"
+          },
+          "evidence_id": "6000f1b0809b420babc112b7621ee527",
+          "http_status": 200,
+          "path": "/service/rest/v1/settings/product/specifications",
+          "available": true,
+          "raw_body_sha256": "7ea65f1714bcea9ffad13b636793083c02864a3c64fc3b88d5be475bf3d32582",
+          "full_json_sha256": "d9c1fed918047b8600268a54fba206747df1575d6a2505251fffd9ed98221f87",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-club-flyers-v3",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "productType": "27"
+          },
+          "evidence_id": "41c1f51f5d43475db87c0fe1dd2186b2",
+          "http_status": 200,
+          "path": "/service/rest/v1/settings/product/specifications",
+          "available": true,
+          "raw_body_sha256": "d2a9328864d025a229743335e1e784e46405c2cc5ed82123f66cd486c96578a4",
+          "full_json_sha256": "30506d33fdfd7bd609369dab9281aa8390aa71c8a0ae72fa2c30cc23a5df651b",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        },
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {
+            "requestValues": "true",
+            "productType": "36"
+          },
+          "evidence_id": "878d4bfcccc64b98bdf185923603b17a",
+          "http_status": 200,
+          "path": "/service/rest/v1/settings/product/specifications",
+          "available": true,
+          "raw_body_sha256": "7ea65f1714bcea9ffad13b636793083c02864a3c64fc3b88d5be475bf3d32582",
+          "full_json_sha256": "d9c1fed918047b8600268a54fba206747df1575d6a2505251fffd9ed98221f87",
+          "item_count": null,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/service/rest/v1/product/prices",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        1
+      ],
+      "observations": [
+        {
+          "id": "generic-base-quote-bc-v2",
+          "params": {},
+          "evidence_id": "5ab43499d22b437eba4804245bd69e64",
+          "http_status": 200,
+          "path": "/service/rest/v1/product/prices",
+          "available": true,
+          "raw_body_sha256": "97d46d5b5e79d7ab871d2827f8a9fea628e91af87a07b652a16b9910efca8d2c",
+          "full_json_sha256": "977b03498c6af05b7b7d71c3617aa3a4d2592eda4bcdbb4795ec2b91506e00da",
+          "item_count": 1,
+          "quantity_count": 1,
+          "quantities": [
+            1000
+          ],
+          "priced_quantity_table": false
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/service/rest/v1/rules/turnarounds",
+      "observation_count": 1,
+      "distinct_evidence_count": 1,
+      "distinct_raw_bodies": 1,
+      "distinct_full_json_bodies": 1,
+      "observed_quantity_counts": [
+        0
+      ],
+      "observations": [
+        {
+          "id": "browser-controlled-roll-labels-v4-initialized",
+          "phase": "baseline",
+          "params": {},
+          "evidence_id": "8bb1b38aaef54a36a6cc853dd9bba6f5",
+          "http_status": 200,
+          "path": "/service/rest/v1/rules/turnarounds",
+          "available": true,
+          "raw_body_sha256": "c4181022789a30be7a3dc6f020e6c8b859c46279b3e368f38b6d1655613263aa",
+          "full_json_sha256": "a873afd1ae1a7438c370363ac72acebcc9955fdef13554ffb9e486f98c4affc5",
+          "item_count": 2,
+          "quantity_count": 0,
+          "quantities": [],
+          "priced_quantity_table": false
+        }
+      ]
+    }
+  ],
+  "global_dependency_proof": false,
+  "cache_certificates_created": 0,
+  "formula_summary": {
+    "phase_captures": 3,
+    "matched": 0,
+    "mismatch": 0,
+    "unresolved": 3,
+    "missing_baseline_observations": 5,
+    "pass_rate_denominator": 0,
+    "pass_rate": null,
+    "definition": "Matched / (matched + mismatch) complete source-pinned controller and displayed-total captures; unresolved and missing captures excluded, separately reported."
+  }
+}

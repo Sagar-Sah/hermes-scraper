@@ -1,0 +1,1654 @@
+{
+  "schema_version": 1,
+  "bundle_sha256": {
+    "orderForm.js": "fd26a9c72ba1a162d5d12aa0f0f845dfed7d1a136f276440f1b5b06a465a1d8b",
+    "chunk-common.js": "577bddf60b70e3c2c8362de3f358cd9477dc21232aa1d3c41839d5e1db1ed88d"
+  },
+  "display_options": {
+    "shape": {},
+    "size": {},
+    "orientation": {},
+    "material": {},
+    "page": {
+      "68": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            2,
+            3,
+            11
+          ]
+        }
+      },
+      "72": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            2,
+            3,
+            11
+          ]
+        }
+      },
+      "76": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            2,
+            3,
+            11
+          ]
+        }
+      },
+      "80": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            2,
+            3,
+            11
+          ]
+        }
+      },
+      "84": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            2,
+            3,
+            11
+          ]
+        }
+      },
+      "88": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            1,
+            4,
+            8,
+            2,
+            3,
+            11
+          ]
+        }
+      },
+      "92": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            1,
+            4,
+            8,
+            2,
+            3,
+            11
+          ]
+        }
+      },
+      "96": {
+        "group": {
+          "paper": [
+            3
+          ],
+          "coverPaper": [
+            1,
+            4,
+            8,
+            2,
+            3,
+            11
+          ]
+        }
+      }
+    },
+    "pocket": {
+      "3": {
+        "size": [
+          469,
+          741
+        ]
+      }
+    },
+    "paper": {
+      "3": {
+        "size": [
+          380
+        ]
+      },
+      "4": {
+        "size": [
+          380
+        ]
+      },
+      "6": {
+        "size": [
+          380
+        ]
+      },
+      "8": {
+        "size": [
+          110,
+          111,
+          117,
+          118,
+          188,
+          121,
+          733,
+          188
+        ]
+      },
+      "31": {
+        "size": [
+          381,
+          396
+        ]
+      },
+      "32": {
+        "size": [
+          381,
+          396
+        ]
+      },
+      "36": {
+        "size": [
+          381,
+          396
+        ]
+      },
+      "56": {
+        "size": [
+          381,
+          396
+        ]
+      },
+      "66": {
+        "size": [
+          381,
+          396
+        ]
+      }
+    },
+    "finish": {
+      "4": {
+        "paper": [
+          13,
+          14,
+          15,
+          72,
+          73,
+          79,
+          80,
+          81
+        ]
+      },
+      "3": {
+        "paper": [
+          12,
+          13,
+          14,
+          72,
+          73,
+          81
+        ]
+      },
+      "2": {
+        "paper": [
+          12,
+          13,
+          15,
+          72,
+          73,
+          81,
+          79,
+          80
+        ]
+      },
+      "1": {
+        "paper": [
+          14,
+          15,
+          79,
+          80
+        ]
+      }
+    },
+    "folding": {
+      "1": {
+        "size": [
+          384,
+          110,
+          386,
+          388,
+          114,
+          122,
+          390,
+          392,
+          394,
+          126,
+          170
+        ]
+      },
+      "2": {
+        "size": [
+          125,
+          170
+        ]
+      },
+      "3": {
+        "size": []
+      },
+      "4": {
+        "size": [
+          125,
+          721,
+          127,
+          172,
+          170
+        ]
+      },
+      "5": {
+        "size": [
+          125,
+          721,
+          127,
+          172,
+          170
+        ]
+      },
+      "6": {
+        "size": [
+          125,
+          721,
+          127,
+          172,
+          170
+        ]
+      },
+      "7": {
+        "size": [
+          125,
+          721,
+          127,
+          170
+        ]
+      },
+      "9": {
+        "size": [
+          125,
+          721,
+          127,
+          170
+        ]
+      },
+      "11": {
+        "size": [
+          125,
+          721,
+          127,
+          132,
+          172,
+          460,
+          170
+        ],
+        "paper": [
+          4,
+          7
+        ]
+      },
+      "12": {
+        "size": [
+          125,
+          721,
+          127,
+          132,
+          172,
+          460,
+          170
+        ],
+        "paper": [
+          4,
+          7
+        ]
+      },
+      "13": {
+        "size": [
+          125,
+          385,
+          111,
+          387,
+          389,
+          115,
+          123,
+          391,
+          393,
+          395,
+          132,
+          460,
+          131,
+          170,
+          146
+        ]
+      },
+      "14": {
+        "size": [
+          125,
+          721,
+          127,
+          172,
+          170
+        ]
+      }
+    },
+    "preScoredFolding": {},
+    "color": {
+      "2": {
+        "paper": [
+          4,
+          7,
+          31,
+          32,
+          36,
+          56,
+          66,
+          9,
+          74,
+          75,
+          76,
+          77
+        ]
+      },
+      "3": {
+        "material": [
+          2,
+          3
+        ],
+        "paper": [
+          9
+        ],
+        "size": [
+          175,
+          176,
+          401,
+          402
+        ]
+      }
+    },
+    "coverPaper": {},
+    "panel": {
+      "1": {
+        "size": [
+          458,
+          459
+        ]
+      },
+      "2": {
+        "size": [
+          456,
+          457
+        ]
+      }
+    },
+    "tray": {
+      "1": {
+        "size": [
+          457,
+          459
+        ]
+      },
+      "2": {
+        "size": [
+          456,
+          458
+        ]
+      }
+    },
+    "quantity": {},
+    "roundedCorners": {},
+    "coating": {
+      "6": {
+        "color": [
+          1
+        ]
+      },
+      "40": {
+        "color": [
+          1
+        ]
+      }
+    },
+    "spotCoating": {
+      "3": {
+        "coating": [
+          40
+        ]
+      },
+      "4": {
+        "color": [
+          1
+        ],
+        "coating": [
+          40
+        ]
+      },
+      "39": {
+        "color": [
+          1
+        ]
+      }
+    },
+    "raisedPrint": {
+      "136": {
+        "color": [
+          1
+        ]
+      },
+      "137": {
+        "color": [
+          1
+        ]
+      },
+      "139": {
+        "color": [
+          1
+        ]
+      },
+      "140": {
+        "color": [
+          1
+        ]
+      }
+    },
+    "raisedFoilColor": {},
+    "grommets": {},
+    "windPosition": {},
+    "holePosition": {},
+    "cardSlit": {
+      "28": {
+        "pocket": [
+          1
+        ]
+      },
+      "29": {
+        "pocket": [
+          1,
+          3
+        ]
+      }
+    },
+    "binding": {},
+    "stitching": {},
+    "holeDrilling": {},
+    "performationNumbering": {},
+    "numberingColor": {},
+    "numberingPosition": {},
+    "startingNumber": {},
+    "designServices": {},
+    "frontInstructions": {},
+    "backInstructions": {},
+    "generalInstructions": {},
+    "proofType": {
+      "31": {
+        "fileDelivery": [
+          6,
+          7
+        ]
+      },
+      "1": {
+        "fileDelivery": [
+          22,
+          28
+        ]
+      },
+      "36": {
+        "fileDelivery": [
+          22,
+          28
+        ]
+      },
+      "37": {
+        "fileDelivery": [
+          22,
+          28
+        ]
+      },
+      "38": {
+        "fileDelivery": [
+          22,
+          28
+        ]
+      }
+    },
+    "fileDelivery": {
+      "6": {
+        "proofType": [
+          31
+        ]
+      },
+      "7": {
+        "proofType": [
+          31
+        ]
+      },
+      "22": {
+        "proofType": [
+          1,
+          38,
+          37,
+          36
+        ]
+      },
+      "28": {
+        "proofType": [
+          1,
+          38,
+          37,
+          36
+        ]
+      }
+    },
+    "productionTime": {
+      "3": {
+        "paper": [
+          31,
+          32,
+          36,
+          56,
+          66
+        ]
+      }
+    },
+    "thickness": {
+      "2": {
+        "material": [
+          2,
+          3
+        ]
+      }
+    },
+    "accessories": {
+      "4": {
+        "shape": [
+          5,
+          4,
+          1,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      }
+    },
+    "giftBox": {
+      "131": {
+        "size": [
+          10488,
+          926,
+          927,
+          928
+        ]
+      }
+    }
+  },
+  "display_fields": {
+    "shape": {},
+    "size": {},
+    "orientation": {
+      "size": [
+        "",
+        380
+      ]
+    },
+    "material": {},
+    "page": {},
+    "pocket": {},
+    "paper": {},
+    "finish": {},
+    "paperFinish": {
+      "paper": [
+        1,
+        2,
+        3,
+        4,
+        8,
+        9,
+        10,
+        5,
+        2,
+        56,
+        7,
+        6,
+        13,
+        12,
+        15,
+        14,
+        16,
+        17,
+        34,
+        21,
+        71,
+        74,
+        75,
+        76,
+        77
+      ]
+    },
+    "folding": {},
+    "preScoredFolding": {},
+    "color": {},
+    "coverPaper": {},
+    "panel": {},
+    "tray": {},
+    "quantity": {},
+    "roundedCorners": {
+      "paper": [
+        3,
+        4,
+        8,
+        5,
+        6,
+        56,
+        32,
+        36,
+        66,
+        13,
+        12,
+        15,
+        14,
+        16,
+        17,
+        34,
+        21
+      ],
+      "size": [
+        727,
+        728,
+        729,
+        730
+      ]
+    },
+    "coating": {
+      "paper": [
+        8,
+        2,
+        31,
+        56,
+        32,
+        36,
+        66,
+        13,
+        12,
+        15,
+        14,
+        16,
+        17,
+        34,
+        21,
+        71,
+        74,
+        75,
+        76,
+        77
+      ]
+    },
+    "spotCoating": {
+      "paper": [
+        3,
+        4,
+        8,
+        5,
+        2,
+        31,
+        56,
+        32,
+        36,
+        66,
+        7,
+        6,
+        13,
+        12,
+        15,
+        14,
+        16,
+        17,
+        34,
+        21,
+        9,
+        74,
+        75,
+        76,
+        77
+      ]
+    },
+    "raisedPrint": {
+      "paper": [
+        74,
+        75,
+        76,
+        77
+      ]
+    },
+    "raisedFoilColor": {
+      "raisedPrint": [
+        "",
+        135,
+        136,
+        137
+      ]
+    },
+    "grommets": {},
+    "windPosition": {},
+    "holePosition": {},
+    "cardSlit": {},
+    "binding": {},
+    "stitching": {
+      "binding": [
+        10
+      ]
+    },
+    "holeDrilling": {},
+    "performationNumbering": {},
+    "numberingColor": {
+      "performationNumbering": [
+        "",
+        15
+      ]
+    },
+    "numberingPosition": {
+      "performationNumbering": [
+        "",
+        15
+      ]
+    },
+    "startingNumber": {
+      "performationNumbering": [
+        "",
+        15
+      ]
+    },
+    "designService": {},
+    "designServices": {
+      "proofType": [
+        100
+      ]
+    },
+    "frontInstructions": {
+      "proofType": [
+        100
+      ],
+      "color": [
+        5
+      ]
+    },
+    "backInstructions": {
+      "proofType": [
+        100
+      ],
+      "color": [
+        1
+      ]
+    },
+    "generalInstructions": {
+      "proofType": [
+        100
+      ]
+    },
+    "proofType": {
+      "fileDelivery": [
+        9,
+        14,
+        15,
+        29
+      ]
+    },
+    "fileDelivery": {},
+    "productionTime": {},
+    "type": {
+      "material": [
+        2,
+        3
+      ]
+    },
+    "materialHoleDrilling": {
+      "shape": [
+        5,
+        4,
+        1,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "material": [
+        3
+      ]
+    },
+    "accessories": {
+      "material": [
+        3
+      ]
+    },
+    "giftBox": {
+      "size": [
+        10488,
+        926,
+        927,
+        928
+      ]
+    }
+  },
+  "validation_rules": [
+    {
+      "criteria": {
+        "size": [
+          469,
+          741
+        ]
+      },
+      "result": {
+        "pocket": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          741
+        ],
+        "paper": [
+          74
+        ]
+      },
+      "result": {
+        "paper": [
+          4
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          10
+        ],
+        "color": [
+          1,
+          2
+        ],
+        "coating": [
+          40
+        ]
+      },
+      "result": {
+        "coating": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          31,
+          32,
+          36,
+          56,
+          66,
+          71,
+          74,
+          75,
+          76,
+          77
+        ]
+      },
+      "result": {
+        "coating": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          74,
+          75,
+          76,
+          77
+        ]
+      },
+      "result": {
+        "spotCoating": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          4,
+          7,
+          31,
+          32,
+          36,
+          56,
+          66,
+          9,
+          74,
+          75,
+          76,
+          77
+        ],
+        "color": [
+          2
+        ]
+      },
+      "result": {
+        "color": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          457,
+          459
+        ]
+      },
+      "result": {
+        "tray": [
+          2
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          456,
+          458
+        ]
+      },
+      "result": {
+        "tray": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          457,
+          456
+        ]
+      },
+      "result": {
+        "panel": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          459,
+          458
+        ]
+      },
+      "result": {
+        "panel": [
+          2
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          159,
+          734,
+          736,
+          738,
+          384,
+          110,
+          386,
+          388,
+          114,
+          122,
+          390,
+          392,
+          394,
+          126
+        ]
+      },
+      "result": {
+        "folding": [
+          13
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          160,
+          735,
+          737,
+          739,
+          385,
+          111,
+          387,
+          389,
+          115,
+          123,
+          391,
+          393,
+          395,
+          289,
+          291
+        ]
+      },
+      "result": {
+        "folding": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          289,
+          291
+        ]
+      },
+      "result": {
+        "holePosition": [
+          12
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          170
+        ]
+      },
+      "result": {
+        "folding": [
+          3
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "productionTime": [
+          3
+        ],
+        "paper": [
+          31,
+          32,
+          36,
+          56,
+          66
+        ]
+      },
+      "result": {
+        "productionTime": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          13,
+          72,
+          73,
+          81
+        ]
+      },
+      "result": {
+        "finish": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          14
+        ]
+      },
+      "result": {
+        "finish": [
+          2
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          15,
+          79,
+          80
+        ]
+      },
+      "result": {
+        "finish": [
+          3
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          32,
+          36,
+          56,
+          66
+        ],
+        "size": [
+          727,
+          728,
+          729,
+          730
+        ]
+      },
+      "result": {
+        "roundedCorners": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "binding": [
+          10
+        ]
+      },
+      "result": {
+        "stitching": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "binding": [
+          9
+        ],
+        "stitching": [
+          ""
+        ]
+      },
+      "result": {
+        "stitching": [
+          116
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          110,
+          111,
+          117,
+          118
+        ],
+        "paper": [
+          8
+        ]
+      },
+      "result": {
+        "paper": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          380
+        ],
+        "paper": [
+          3,
+          4,
+          6
+        ]
+      },
+      "result": {
+        "paper": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "performationNumbering": [
+          17,
+          19
+        ],
+        "numberingColor": [
+          21
+        ],
+        "color": [
+          1
+        ]
+      },
+      "result": {
+        "numberingColor": [
+          20
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "performationNumbering": [
+          15
+        ]
+      },
+      "result": {
+        "numberingColor": [
+          ""
+        ],
+        "numberingPosition": [
+          ""
+        ],
+        "startingNumber": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "pocket": [
+          1
+        ],
+        "cardSlit": [
+          28
+        ]
+      },
+      "result": {
+        "cardSlit": [
+          30
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "color": [
+          4,
+          7,
+          31,
+          32,
+          36,
+          56,
+          66
+        ],
+        "paper": [
+          8
+        ]
+      },
+      "result": {
+        "paper": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "productionTime": [
+          3
+        ],
+        "paper": [
+          5,
+          6
+        ]
+      },
+      "result": {
+        "productionTime": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          1
+        ],
+        "color": [
+          3
+        ],
+        "coating": [
+          ""
+        ],
+        "spotCoating": [
+          ""
+        ]
+      },
+      "result": {
+        "coating": [
+          40
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          1,
+          9
+        ],
+        "color": [
+          1,
+          2
+        ],
+        "coating": [
+          "",
+          40
+        ],
+        "spotCoating": [
+          ""
+        ]
+      },
+      "result": {
+        "coating": [
+          5
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          1,
+          2,
+          7,
+          31,
+          32,
+          36,
+          66,
+          71,
+          74,
+          75,
+          76,
+          77
+        ]
+      },
+      "result": {
+        "raisedPrint": [
+          ""
+        ],
+        "raisedFoilColor": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "color": [
+          1
+        ],
+        "raisedPrint": [
+          136,
+          137,
+          139,
+          140
+        ]
+      },
+      "result": {
+        "raisedPrint": [
+          ""
+        ],
+        "raisedFoilColor": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "raisedPrint": [
+          "",
+          135,
+          136,
+          137
+        ],
+        "raisedFoilColor": [
+          141,
+          142,
+          143
+        ]
+      },
+      "result": {
+        "raisedFoilColor": [
+          ""
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "raisedPrint": [
+          138,
+          139,
+          140
+        ],
+        "raisedFoilColor": [
+          ""
+        ]
+      },
+      "result": {
+        "raisedFoilColor": [
+          141
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          4,
+          7
+        ],
+        "folding": [
+          11,
+          12
+        ]
+      },
+      "result": {
+        "folding": [
+          7
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "material": [
+          2,
+          3
+        ]
+      },
+      "result": {
+        "type": [
+          1
+        ],
+        "thickness": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          9
+        ],
+        "color": [
+          3
+        ]
+      },
+      "result": {
+        "color": [
+          1
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "paper": [
+          9
+        ],
+        "color": [
+          1
+        ]
+      },
+      "result": {
+        "coating": [
+          5
+        ]
+      }
+    },
+    {
+      "criteria": {
+        "size": [
+          469,
+          741
+        ],
+        "pocket": [
+          3
+        ]
+      },
+      "result": {
+        "pocket": [
+          1
+        ]
+      }
+    }
+  ],
+  "option_fields_by_store": {
+    "100": {
+      "1": [
+        "roundedCorners",
+        "coating",
+        "raisedPrint",
+        "raisedFoilColor",
+        "paperFinish"
+      ],
+      "27": [
+        "roundedCorners",
+        "coating",
+        "raisedPrint",
+        "raisedFoilColor",
+        "paperFinish"
+      ],
+      "36": [
+        "windPosition"
+      ]
+    },
+    "other": {
+      "1": [
+        "roundedCorners",
+        "coating",
+        "spotCoating",
+        "raisedPrint",
+        "raisedFoilColor",
+        "paperFinish"
+      ],
+      "27": [
+        "roundedCorners",
+        "coating",
+        "spotCoating",
+        "raisedPrint",
+        "raisedFoilColor",
+        "paperFinish"
+      ],
+      "36": [
+        "windPosition"
+      ]
+    }
+  },
+  "paper_finish_choices": [
+    {
+      "id": 1,
+      "label": "Velvet"
+    }
+  ],
+  "price_bearing_option_types": [
+    "2",
+    "68",
+    "69",
+    "26",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "3",
+    "4",
+    "39",
+    "1",
+    "38",
+    "37",
+    "36",
+    "41",
+    "42",
+    "43",
+    "44",
+    "45",
+    "53",
+    "9",
+    "10",
+    "26",
+    "78",
+    "79",
+    "80",
+    "81",
+    "82",
+    "83",
+    "84",
+    "131",
+    "135",
+    "136",
+    "137",
+    "138",
+    "139",
+    "140",
+    "141",
+    "142",
+    "143",
+    "144",
+    "145",
+    "146",
+    "147"
+  ],
+  "source_offsets": {
+    "option_visibility": 123052,
+    "field_visibility": 126797,
+    "shared_corrections": 1342258,
+    "price_bearing_option_types": 56443,
+    "paper_finish_schema": 130409,
+    "store_variant_selection": 1240747,
+    "specChange": 1420856,
+    "displayOptions": 1446199,
+    "displaySpecs": 1600416,
+    "rushCondition": 1535009,
+    "getTurnaround": 227516,
+    "turnaroundParam_common": 388971,
+    "processTurnaround_common": 756731
+  },
+  "scope": "classic product types1,27,36; no uploaded artwork/admin/edit/mailing/custom dimensions"
+}

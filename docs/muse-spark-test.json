@@ -1,0 +1,139 @@
+{
+  "tested_at": "2026-09-26T00:44:17.625179+00:00",
+  "provider": "OpenRouter",
+  "model": "meta/muse-spark-1.3-contributor",
+  "run_id": "36c1c4b084664d36b7b32dbca7cf8f08",
+  "products": [
+    "Business Cards",
+    "Club Flyers",
+    "Roll Labels"
+  ],
+  "scope": "This test validates instruction interpretation; it does not certify product coverage.",
+  "initial_instruction_test": {
+    "input": "Include every available size, shape, stock, color specification, coating, envelope option, quantity, and production option. Apply no attribute filters.",
+    "result": {
+      "filters": {},
+      "needs_clarification": true,
+      "explanation": "No attribute filters were applied as requested. The additional request to include every available size, shape, stock, color specification, coating, envelope option, quantity, and production option is an enumeration request that cannot be represented as attribute filters."
+    },
+    "passed": false
+  },
+  "instruction_test": {
+    "input": "Include every available size, shape, stock, color specification, coating, envelope option, quantity, and production option. Apply no attribute filters.",
+    "result": {
+      "filters": {},
+      "needs_clarification": false,
+      "explanation": "The input requests every available option with no attribute restrictions, so filters is empty."
+    },
+    "passed": true
+  },
+  "prompt_correction": "Explicitly define an empty filter object as unrestricted extraction, including all available values.",
+  "run_application": {
+    "provider_id": "b70b7914dde641d282f455d88e2b87e0",
+    "existing_run_preserved": true,
+    "filters": {},
+    "applied_to_existing_run": true,
+    "product_completion_claimed": false
+  },
+  "crawler_fixes": [
+    "Durable completed supported finite-branch journal; historical rows do not retroactively imply completed branches",
+    "Quantity-dependent finishing restoration with actual absent inactive controls preserved",
+    "Explicit inactive None finishing table binding with unchanged two-quote gate",
+    "Shared source-profile pacing validation; Printograph ceiling6rps and4inflight, adaptive starting rate retained",
+    "Selected proof/file-delivery context retained as diagnostics only",
+    "Discover late Orientation before fixing Size in the traversal prefix; temporary selections publish no rows",
+    "Restrict inactive finishing absence witnesses to their observed size/paper/color/orientation context",
+    "Restore offered Regular production before an unfixed finishing sibling when permitted by filters",
+    "Retain exact same-origin square dimension specifications that arrive before form metadata; price metadata remain mandatory",
+    "Guarded Matte Aqueous baseline candidate with exact selection context and both displayed subtotal checks; Gloss remains unsupported"
+  ],
+  "traversal_review": {
+    "tested_at": "2026-09-26T01:08:20.336696+00:00",
+    "input": "Review this crawler traversal issue using only these observations. Public print-product form initially has only Shape. After selecting Rectangle it has Size choices, but Orientation becomes visible only after the first size is selected. Horizontal and Vertical use disjoint size IDs. A DFS selects all currently visible controls; it prioritizes Orientation when present, but it locks Size into its prefix before Orientation first appears. Saved data covers one Rectangle size although later snapshots advertise 22 size choices. Explain the likely missed-domain mechanism and a safe bounded correction plus a regression test, in at most 180 words. Do not invent prices, claim live verification, or suggest narrowing the requested catalog.",
+    "model_response": "The form is conditionally dependent: Orientation is hidden until Size selected, and Size IDs differ by orientation. DFS that enumerates currently visible controls will pick a Size to reveal Orientation, then fix that Size in the path prefix while branching on Orientation. That locks exploration to sizes compatible with the first-picked Size's orientation family, missing the other family's IDs. Later snapshots showing 22 sizes reflect UI after both orientations explored, but saved records only contain the first branch, hence one Rectangle size.\n\nCorrection: make traversal orientation-aware with bounded backtracking: when new control appears, re-expand predecessor choices that gate it, limited to e.g. Rectangle x Sizes x Orientations, with visited-state dedup on (shape,size-id,orientation). Do not unboundedly crawl.\n\nRegression: seed Rectangle, select first size, assert Orientation appears, then assert crawler revisits Size list under both Horizontal and Vertical and saves >1 distinct size-id, and that count matches snapshot's advertised size options.\n",
+    "status": "advisory; implementation and browser regression verified separately"
+  },
+  "deployment_history": [
+    {
+      "resumed_at": "2026-09-26T01:02:11.448947+00:00",
+      "saved_rows": 2243,
+      "completed_products": 0,
+      "source_ceiling_rps": 6,
+      "source_max_concurrency": 4
+    },
+    {
+      "resumed_at": "2026-09-26T01:27:55.762182+00:00",
+      "saved_rows": 2311,
+      "completed_products": 0,
+      "source_ceiling_rps": 6,
+      "source_max_concurrency": 4
+    }
+  ],
+  "final_regressions": {
+    "table_parser_tests_passed": 161,
+    "late_orientation_chromium_tests_passed": 3,
+    "quantity_dependent_finishing_chromium_tests_passed": 2,
+    "production_dependent_finishing_chromium_tests_passed": 3,
+    "square_specification_chromium_tests_passed": 2,
+    "matte_baseline_and_mismatch_chromium_tests_passed": 2,
+    "compile_check": "passed",
+    "scope": "Focused regressions; not a claim that a full supplier catalog has completed."
+  },
+  "pre_final_deployment_probe": {
+    "start": "2026-09-26T01:19:29+00:00",
+    "end": "2026-09-26T01:22:42+00:00",
+    "elapsed_seconds": 192.44,
+    "new_unique_rows": 16,
+    "requests": 682,
+    "requests_per_second": 3.54,
+    "new_rows_per_minute": 4.99,
+    "completed_products": 0,
+    "interpretation": "Rows replayed for journal adoption are excluded from new-row throughput."
+  },
+  "post_deployment_probe": {
+    "ended_at": "2026-09-26T01:32:32+00:00",
+    "seconds_since_deployment": 277,
+    "saved_unique_rows": 2311,
+    "new_unique_rows": 0,
+    "completed_products": 0,
+    "additional_requests": 646,
+    "table_expansions": 64,
+    "new_scope_journal_markers": 10,
+    "journaled_existing_rows": 998,
+    "product_errors": 0,
+    "captured_supplier_http_errors": 0,
+    "observed": "All three workers active; late-orientation warmups, quantity expansion, and journal commits observed.",
+    "not_yet_validated_live": [
+      "new size transition",
+      "square metadata fast path"
+    ],
+    "replay_is_new_progress": false
+  },
+  "extended_live_probe": {
+    "observed_at": "2026-09-26T01:37:33+00:00",
+    "saved_unique_rows": 2341,
+    "completed_products": 0,
+    "new_unique_rows_since_deployment": 30,
+    "new_roll_size_id": "743",
+    "roll_rows": 1054,
+    "business_card_rows": 662,
+    "club_flyer_rows": 625,
+    "evidence": "Thirty persisted rows for previously unseen Roll size743; two fresh quantity-table expansions.",
+    "product_errors": 0,
+    "captured_supplier_http_errors": 0,
+    "not_yet_validated_live": [
+      "Business Cards/Club Flyers new-size advancement",
+      "square Roll metadata fast path",
+      "complete catalog coverage"
+    ],
+    "table_rows_verification": "pending"
+  },
+  "export_check": {
+    "snapshot_at": "2026-09-26T01:38:10.232656+00:00",
+    "row_count": 2391,
+    "csv_and_parquet_counts_match": true,
+    "unique_configuration_ids": true,
+    "products_complete": 0,
+    "artifact_kind": "partial_progress_snapshot"
+  }
+}

@@ -1,0 +1,335 @@
+{
+  "source_url": "https://www.b2sign.com/event-tent-canopy-graphic",
+  "source_collection_id": "b87ded1201ad4207a8cbf71f4852e178",
+  "source_evidence_sha256": "96e0486b1784cd37d4cdf2cf1d7f3c64d7a8588d8abf61c82356fbfc3bc97156",
+  "source_bundle_sha256": "c41d0a9ae2290bab7005b6bece2d124153cad0b682851ae106ab00b657c1b4d3",
+  "projection": "public option/rule data; decorative media omitted",
+  "item": {
+    "id": 35,
+    "url": "/event-tent-canopy-graphic",
+    "title": "10ft Event Tent",
+    "attrs": {
+      "attrs": [
+        {
+          "action": [
+            {
+              "change": [
+                {
+                  "key": "tent_carrybag",
+                  "value": "s"
+                }
+              ],
+              "match": [
+                {
+                  "key": "tent_hardware",
+                  "logic": "and",
+                  "op": "=",
+                  "value": "0"
+                },
+                {
+                  "key": "tent_carrybag",
+                  "logic": "and",
+                  "op": "=",
+                  "value": "w"
+                }
+              ],
+              "type": "change"
+            }
+          ],
+          "component": "button",
+          "key": "tent_hardware",
+          "label": "",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "1",
+              "label": "Canopy Graphic + Frame"
+            },
+            {
+              "component": "select",
+              "key": "0",
+              "label": "Canopy Graphic Only"
+            }
+          ]
+        },
+        {
+          "action": [],
+          "component": "select",
+          "component_props": {},
+          "key": "tent_sewing_thread",
+          "label": "Reinforced Strip",
+          "options": [
+            {
+              "default": true,
+              "key": "white",
+              "label": "White"
+            },
+            {
+              "key": "black",
+              "label": "Black"
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "component_props": {},
+          "key": "tent_carrybag",
+          "label": "Carry Bag",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "s",
+              "label": "Standard Bag"
+            },
+            {
+              "component": "select",
+              "key": "w",
+              "label": "Carry Bag with Wheels"
+            }
+          ],
+          "visible": [
+            {
+              "key": "tent_hardware",
+              "logic": "and",
+              "op": "=",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "action": [],
+          "component": "select",
+          "component_props": {},
+          "key": "mesh_sidewall",
+          "label": "Mesh Sidewall",
+          "options": [
+            {
+              "component": "select",
+              "default": true,
+              "key": "0",
+              "label": "No"
+            },
+            {
+              "component": "select",
+              "key": "1",
+              "label": "Yes"
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "component_props": {},
+          "key": "tent_sandbag",
+          "label": "Sandbag",
+          "options": [
+            {
+              "default": true,
+              "key": "0",
+              "label": "No"
+            },
+            {
+              "key": "1",
+              "label": "4 Sandbags"
+            }
+          ]
+        },
+        {
+          "action": [
+            {
+              "change": [
+                {
+                  "key": "tent_full_wall_velcro",
+                  "value": "cfw"
+                }
+              ],
+              "match": [
+                {
+                  "key": "tent_full_wall",
+                  "logic": "and",
+                  "op": "!=",
+                  "value": "0"
+                }
+              ],
+              "type": "change"
+            },
+            {
+              "change": [
+                {
+                  "key": "tent_full_wall_velcro",
+                  "value": "nfw"
+                }
+              ],
+              "match": [
+                {
+                  "key": "tent_full_wall",
+                  "logic": "and",
+                  "op": "=",
+                  "value": "0"
+                }
+              ],
+              "type": "change"
+            }
+          ],
+          "component": "select",
+          "component_props": {},
+          "key": "tent_full_wall",
+          "label": "Full Wall",
+          "options": [
+            {
+              "default": true,
+              "key": "0",
+              "label": "No Full Wall"
+            },
+            {
+              "component": "select",
+              "key": "A",
+              "label": "1 Full Wall"
+            },
+            {
+              "component": "select",
+              "key": "AB",
+              "label": "2 Full Walls"
+            },
+            {
+              "component": "select",
+              "key": "ABC",
+              "label": "3 Full Walls"
+            },
+            {
+              "component": "select",
+              "key": "ABCD",
+              "label": "4 Full Walls"
+            }
+          ]
+        },
+        {
+          "component": "select",
+          "component_props": {},
+          "key": "tent_half_wall",
+          "label": "Half Wall",
+          "options": [
+            {
+              "default": true,
+              "key": "0",
+              "label": "No Half Wall"
+            },
+            {
+              "key": "1x1",
+              "label": "1 Half Wall (Single Sided)"
+            },
+            {
+              "key": "2x1",
+              "label": "2 Half Walls (Single Sided)"
+            },
+            {
+              "key": "3x1",
+              "label": "3 Half Walls (Single Sided)"
+            },
+            {
+              "key": "4x1",
+              "label": "4 Half Walls (Single Sided)"
+            },
+            {
+              "key": "1x2",
+              "label": "1 Half Wall (Double Sided)"
+            },
+            {
+              "key": "2x2",
+              "label": "2 Half Walls (Double Sided)"
+            },
+            {
+              "key": "3x2",
+              "label": "3 Half Walls (Double Sided)"
+            },
+            {
+              "key": "4x2",
+              "label": "4 Half Walls (Double Sided)"
+            }
+          ]
+        }
+      ],
+      "designproof": true,
+      "turnaround": [
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 200
+            }
+          ],
+          "options": [
+            {
+              "key": "v5",
+              "label": "5 Business Days"
+            }
+          ]
+        },
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 100
+            }
+          ],
+          "options": [
+            {
+              "key": "v3",
+              "label": "3 Business Days"
+            }
+          ]
+        },
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 10
+            }
+          ],
+          "options": [
+            {
+              "key": "v1",
+              "label": "Next Day"
+            }
+          ]
+        },
+        {
+          "match": [
+            {
+              "key": "_qty",
+              "op": ">",
+              "value": 0
+            }
+          ],
+          "options": [
+            {
+              "key": "v1",
+              "label": "Next Day"
+            },
+            {
+              "key": "v-2",
+              "label": "Free Same Day",
+              "visible": [
+                {
+                  "key": "_business_day",
+                  "value": false
+                },
+                {
+                  "key": "_time",
+                  "logic": "or",
+                  "op": "<",
+                  "value": "06:00:00"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "fields": []
+  }
+}
