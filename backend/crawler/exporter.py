@@ -13,11 +13,16 @@ import uuid
 from collections import Counter, OrderedDict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping
 
 from .commerce import configuration, decimal_value
 from .presentation import present_row
-from .customer_csv import customer_columns, customer_row, format_schemas
+from .customer_csv import (
+    customer_attribute_columns,
+    customer_columns,
+    customer_row,
+    format_schemas,
+)
 
 BASE_COLUMNS = (
     "product_url",
@@ -125,7 +130,14 @@ def _sync_directory(path: Path) -> None:
 
 
 def _write_dataset(
-    spool: Path, target: Path, columns: list[str], csv_columns: list[str], batch_size: int
+    spool: Path,
+    target: Path,
+    columns: list[str],
+    csv_columns: list[str],
+    batch_size: int,
+    *,
+    projected: bool = False,
+    projection_sink: Callable[[Mapping[str, Any], Mapping[str, Any]], None] | None = None,
 ) -> tuple[Path, Path, int]:
     import pyarrow as pa
     import pyarrow.parquet as pq
@@ -145,8 +157,17 @@ def _write_dataset(
         with spool.open("r", encoding="utf-8") as source:
             for line in source:
                 source_row = json.loads(line)
-                row = _normalize(source_row)
-                writer.writerow(customer_row(source_row))
+                if projected:
+                    projection = source_row
+                else:
+                    projection = {
+                        "audit": _normalize(source_row),
+                        "customer": customer_row(source_row),
+                    }
+                    if projection_sink is not None:
+                        projection_sink(source_row, projection)
+                row = projection["audit"]
+                writer.writerow(projection["customer"])
                 batch.append(row)
                 total += 1
                 if len(batch) >= batch_size:
@@ -176,6 +197,9 @@ def export_rows(
 
     Memory is bounded by a batch plus product/attribute metadata. Dynamic columns
     are discovered using temporary on-disk spools, never by materializing rows.
+    Audit/customer projections are computed once and shared by the combined and
+    per-product writers. Single-product exports avoid a second scratch copy;
+    multi-product scratch projections are removed before publication.
     Prices are decimal strings. Customer CSVs contain readable labels, while
     audit Parquet retains typed configuration, IDs, evidence and full records.
     """
@@ -205,9 +229,13 @@ def export_rows(
             for incoming in rows:
                 row = dict(incoming)
                 identity = _product_key(row)
-                config = configuration(row)
-                attributes.update(f"attr:{key}" for key in config)
-                csv_attributes.update(customer_row(row))
+                attributes.update(f"attr:{key}" for key in configuration(row))
+                csv_attributes.update(customer_attribute_columns(row))
+                # Keep invalid amounts as an immediate input error, as before,
+                # without recomputing full service/presentation projections.
+                for key in ("subtotal", "unit_price"):
+                    if row.get(key) is not None:
+                        decimal_value(row[key])
                 status = str(row.get("verification_status") or "provisional")
                 statuses[status] += 1
                 if identity not in products:
@@ -222,21 +250,8 @@ def export_rows(
                 product = products[identity]
                 product["row_count"] += 1
                 product["statuses"][status] += 1
-                encoded = _json(row) + "\n"
-                combined.write(encoded)
-                if identity not in handles:
-                    if len(handles) >= 32:
-                        _, evicted = handles.popitem(last=False)
-                        evicted.close()
-                    handles[identity] = (spool_dir / _spool_name(identity)).open(
-                        "a", encoding="utf-8"
-                    )
-                handles.move_to_end(identity)
-                handles[identity].write(encoded)
+                combined.write(_json(row) + "\n")
                 count += 1
-        for handle in handles.values():
-            handle.close()
-        handles.clear()
         columns = list(BASE_COLUMNS) + sorted(attributes)
         csv_columns = customer_columns(csv_attributes)
         items: list[dict[str, Any]] = []
@@ -255,9 +270,29 @@ def export_rows(
                     }
                 )
 
+        def spool_projection(source_row, projection):
+            identity = _product_key(source_row)
+            if identity not in handles:
+                if len(handles) >= 32:
+                    _, evicted = handles.popitem(last=False)
+                    evicted.close()
+                handles[identity] = (spool_dir / _spool_name(identity)).open(
+                    "a", encoding="utf-8"
+                )
+            handles.move_to_end(identity)
+            handles[identity].write(_json(projection) + "\n")
+
         csv_path, parquet_path, combined_count = _write_dataset(
-            combined_spool, staging / "combined", columns, csv_columns, batch_size
+            combined_spool,
+            staging / "combined",
+            columns,
+            csv_columns,
+            batch_size,
+            projection_sink=spool_projection if len(products) > 1 else None,
         )
+        for handle in handles.values():
+            handle.close()
+        handles.clear()
         if combined_count != count:
             raise RuntimeError("Combined row count changed during export")
         record_files((csv_path, parquet_path))
@@ -275,6 +310,7 @@ def export_rows(
                 columns,
                 csv_columns,
                 batch_size,
+                projected=True,
             )
             if product_count != product["row_count"]:
                 raise RuntimeError("Product row count changed during export")

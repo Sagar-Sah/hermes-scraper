@@ -1,0 +1,96 @@
+{
+  "benchmark": "eight-row local Chromium traversal with in-memory journal",
+  "measured_at_utc": "2026-10-15T06:30:47.397984+00:00",
+  "adapter_ref": "working-tree",
+  "reviewed_source_fixture": true,
+  "readiness_contract": "Each choice triggers an exact immediate local JSON quote; reviewed-source eligibility is patched for this fixture only.",
+  "python": "3.11.3",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "scope": "Real local browser; no supplier requests, persisted product rows/exports or source rate-limit timing. Chromium uses temporary runtime files.",
+  "runs": [
+    {
+      "elapsed_seconds": 18.9318,
+      "rows": 8,
+      "request_counts": {
+        "/product": 1,
+        "/service/rest/v1/products/prices": 12
+      },
+      "metrics": {
+        "transport_checks": 173,
+        "limiter_acquisitions": 13,
+        "limiter_releases": 13,
+        "page_evaluations": 119,
+        "snapshot_evaluations": 119,
+        "observations": 20
+      },
+      "adapter_sleep_counts": {
+        "0.35": 51
+      },
+      "requested_adapter_sleep_seconds": 17.85,
+      "completed_journal_branches": 15,
+      "exact_rows": [
+        [
+          "large",
+          "gloss",
+          100,
+          "31.00"
+        ],
+        [
+          "large",
+          "gloss",
+          250,
+          "46.00"
+        ],
+        [
+          "large",
+          "matte",
+          100,
+          "32.00"
+        ],
+        [
+          "large",
+          "matte",
+          250,
+          "47.00"
+        ],
+        [
+          "small",
+          "gloss",
+          100,
+          "21.00"
+        ],
+        [
+          "small",
+          "gloss",
+          250,
+          "36.00"
+        ],
+        [
+          "small",
+          "matte",
+          100,
+          "22.00"
+        ],
+        [
+          "small",
+          "matte",
+          250,
+          "37.00"
+        ]
+      ],
+      "coverage": {
+        "status": "visible_domain_exhausted",
+        "rows": 8,
+        "invalid_branches": 0,
+        "reasons": [],
+        "count_is_exact": true,
+        "verification_complete": false,
+        "shipping_status": "not_requested",
+        "resumed_completed_branches": 0,
+        "source_revalidated_on_resume": true,
+        "restore_failures": 0,
+        "skipped_branch_occurrences": 0
+      }
+    }
+  ]
+}

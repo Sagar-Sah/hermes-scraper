@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-14",
+  "scope": "synthetic export only; zero supplier requests",
+  "hardware": {
+    "cpu": "Apple M1 Max",
+    "ram_gib": 32,
+    "os": "macOS 27.0.1 arm64",
+    "python": "3.11.3",
+    "pyarrow": "25.0.1"
+  },
+  "timed_region": "export_rows call including input generation, scratch IO, CSV/Parquet generation and atomic fsync publication; independent content comparison excluded",
+  "baseline_commit": "a01ac7d",
+  "warm_cache": "same process per three-run case; no source response cache or network",
+  "measurements": [
+    {
+      "case": "ten_products",
+      "baseline": {
+        "workload": "synthetic_export_only_zero_supplier_requests",
+        "implementation": "a01ac7d:backend/crawler/exporter.py",
+        "rows": 30000,
+        "products": 10,
+        "seconds": [
+          4.703766833990812,
+          4.694908666017,
+          4.763406665995717
+        ],
+        "median_seconds": 4.703766833990812,
+        "rows_per_second": 6377.867156001678,
+        "content_sha256": [
+          "557a5093c6c697c5dffa81f1ac5f6168642be43fcd7d440da1aea7b68e5ba243",
+          "557a5093c6c697c5dffa81f1ac5f6168642be43fcd7d440da1aea7b68e5ba243",
+          "557a5093c6c697c5dffa81f1ac5f6168642be43fcd7d440da1aea7b68e5ba243"
+        ]
+      },
+      "optimized": {
+        "workload": "synthetic_export_only_zero_supplier_requests",
+        "implementation": "working_tree:backend/crawler/exporter.py",
+        "rows": 30000,
+        "products": 10,
+        "seconds": [
+          3.869911250018049,
+          3.8697750830324367,
+          3.9767231660080142
+        ],
+        "median_seconds": 3.869911250018049,
+        "rows_per_second": 7752.115762308524,
+        "content_sha256": [
+          "557a5093c6c697c5dffa81f1ac5f6168642be43fcd7d440da1aea7b68e5ba243",
+          "557a5093c6c697c5dffa81f1ac5f6168642be43fcd7d440da1aea7b68e5ba243",
+          "557a5093c6c697c5dffa81f1ac5f6168642be43fcd7d440da1aea7b68e5ba243"
+        ]
+      },
+      "elapsed_reduction_percent": 17.72740047289495,
+      "content_identical": true
+    },
+    {
+      "case": "single_product",
+      "baseline": {
+        "workload": "synthetic_export_only_zero_supplier_requests",
+        "implementation": "a01ac7d:backend/crawler/exporter.py",
+        "rows": 30000,
+        "products": 1,
+        "seconds": [
+          2.7142829170334153,
+          2.7167337500141002,
+          2.785024999990128
+        ],
+        "median_seconds": 2.7167337500141002,
+        "rows_per_second": 11042.672105738848,
+        "content_sha256": [
+          "28fa0b92015751771aec1a0773ece6e0067668d6af4362bfcaa2acd23d0f4ad7",
+          "28fa0b92015751771aec1a0773ece6e0067668d6af4362bfcaa2acd23d0f4ad7",
+          "28fa0b92015751771aec1a0773ece6e0067668d6af4362bfcaa2acd23d0f4ad7"
+        ]
+      },
+      "optimized": {
+        "workload": "synthetic_export_only_zero_supplier_requests",
+        "implementation": "working_tree:backend/crawler/exporter.py",
+        "rows": 30000,
+        "products": 1,
+        "seconds": [
+          2.582303332979791,
+          2.663955707976129,
+          2.5815283749834634
+        ],
+        "median_seconds": 2.582303332979791,
+        "rows_per_second": 11617.535251128756,
+        "content_sha256": [
+          "28fa0b92015751771aec1a0773ece6e0067668d6af4362bfcaa2acd23d0f4ad7",
+          "28fa0b92015751771aec1a0773ece6e0067668d6af4362bfcaa2acd23d0f4ad7",
+          "28fa0b92015751771aec1a0773ece6e0067668d6af4362bfcaa2acd23d0f4ad7"
+        ]
+      },
+      "elapsed_reduction_percent": 4.948236721158694,
+      "content_identical": true
+    }
+  ]
+}

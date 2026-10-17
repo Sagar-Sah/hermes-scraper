@@ -5,7 +5,7 @@ from copy import deepcopy
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from crawler.customer_csv import LABEL_UNAVAILABLE, audit_record, customer_row
+from crawler.customer_csv import LABEL_UNAVAILABLE, audit_record, customer_attribute_columns, customer_row
 from crawler.catalog_export import combine_catalog
 from crawler.exporter import export_rows
 
@@ -47,6 +47,15 @@ def test_customer_projection_uses_labels_and_preserves_numeric_user_attributes()
     assert row["service_status:fileDeliveryForIop"] == "absent"
     assert "attr:sku" not in row and "attr:dimensions.sourceId" not in row
     assert original == before
+
+
+def test_column_discovery_matches_nested_customer_attributes_without_pricing_projection():
+    original = record()
+    expected = {key for key in customer_row(original) if key.startswith("attr:")}
+    # Discovery is structural. Invalid amounts remain an output validation
+    # failure, but cannot require a complete service/price projection per pass.
+    original["subtotal"] = "not a price"
+    assert set(customer_attribute_columns(original)) == expected
 
 
 def test_standard_csvs_omit_identifiers_while_parquet_preserves_audit(tmp_path):

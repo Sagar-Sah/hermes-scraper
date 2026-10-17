@@ -20,6 +20,8 @@ from urllib.parse import parse_qsl, urlparse
 from ..config import settings
 from ..commerce import unit_price
 from ..service_context import canonical_service_context
+from ..browser_stability import SettledSnapshot, supports_stable_reuse
+from ..browser_capacity import browser_workload
 from ..pacing import retry_after_seconds, source_pacing
 from ..transport import RunInterrupted
 from .printograph import AdapterError
@@ -48,19 +50,15 @@ class InactivityDeadline:
 
 
 @asynccontextmanager
-async def browser_slot(check):
+async def browser_slot(check, *, source_origin=None, per_source_limit=None):
     """Bound active pages and keep queued paused/cancelled jobs responsive."""
-    while True:
-        await check()
-        try:
-            await asyncio.wait_for(_BROWSER_LOCK.acquire(), timeout=1)
-            break
-        except TimeoutError:
-            continue
-    try:
+    async with browser_workload.slot(
+        _BROWSER_LOCK,
+        check,
+        source_origin=source_origin,
+        per_source_limit=per_source_limit,
+    ):
         yield
-    finally:
-        _BROWSER_LOCK.release()
 
 
 ALIASES = {
@@ -167,13 +165,41 @@ def filter_choices(control: dict, requested=None) -> list[dict]:
 
 
 SNAPSHOT_JS = r"""({priceSelector}) => {
- const visible = e => !!e && (e.getClientRects().length > 0) && getComputedStyle(e).visibility !== 'hidden';
- const path = e => { if(e.id) return '#'+CSS.escape(e.id); const parts=[];
-   for(let n=e;n&&n.nodeType===1;n=n.parentElement){if(n.id){parts.unshift('#'+CSS.escape(n.id));break;}
-     let ix=1;for(let s=n.previousElementSibling;s;s=s.previousElementSibling)if(s.tagName===n.tagName)ix++;
-     parts.unshift(n.tagName.toLowerCase()+':nth-of-type('+ix+')');}return parts.join(' > ');};
+ // These caches live for one synchronous observation only. They avoid repeated
+ // layout/style/ancestor scans without retaining stale controls between reads.
+ const visibility = new WeakMap(), paths = new WeakMap(), siblingIndexes = new WeakMap(), labels = new WeakMap();
+ const visible = e => {
+   if(!e)return false;
+   if(!visibility.has(e))visibility.set(e,e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden');
+   return visibility.get(e);
+ };
+ const path = e => {
+   if(paths.has(e))return paths.get(e);
+   const pending=[];let prefix='';
+   for(let n=e;n&&n.nodeType===1;n=n.parentElement){
+     if(paths.has(n)){prefix=paths.get(n);break;}
+     if(n.id){prefix='#'+CSS.escape(n.id);paths.set(n,prefix);break;}
+     pending.push(n);
+   }
+   for(const n of pending.reverse()){
+     let ix=1;const parent=n.parentElement;
+     if(parent){
+       if(!siblingIndexes.has(parent)){
+         const indexes=new WeakMap(),counts=new Map();
+         for(const child of parent.children){const count=(counts.get(child.tagName)||0)+1;counts.set(child.tagName,count);indexes.set(child,count);}
+         siblingIndexes.set(parent,indexes);
+       }
+       ix=siblingIndexes.get(parent).get(n);
+     }
+     prefix=(prefix?prefix+' > ':'')+n.tagName.toLowerCase()+':nth-of-type('+ix+')';paths.set(n,prefix);
+   }
+   return prefix;
+ };
  const clean = s => (s||'').replace(/\s+/g,' ').trim();
- const label = e => clean(e.getAttribute('aria-label') || Array.from(e.labels||[]).map(x=>x.innerText).join(' ') || e.name || e.id);
+ const label = e => {
+   if(!labels.has(e))labels.set(e,clean(e.getAttribute('aria-label') || Array.from(e.labels||[]).map(x=>x.innerText).join(' ') || e.name || e.id));
+   return labels.get(e);
+ };
  const excluded = /country|shipping|delivery.?address|address.?type|zip.?code|postal|billing|stateprovince|language|currency/i;
  const root=document.querySelector('#order-form') || document.querySelector('form.variations_form') || document.querySelector('main') || document.body;
  if(!root||!document.body)return {title:document.title||'',controls:[],unsupported:[],price:null,basis:null,images:[],busy:true,document_ready:false,challenge:false,login:false};
@@ -262,11 +288,12 @@ SNAPSHOT_JS = r"""({priceSelector}) => {
    return null;
  }).filter(Boolean)));
  const busy=Array.from(document.querySelectorAll('#ajaxLoader,[aria-busy=true]')).some(visible);
- const bodyText=clean(document.body?.innerText||'').slice(0,1000);
+ const fullBodyText=clean(document.body?.innerText||'');
+ const bodyText=fullBodyText.slice(0,1000);
  // Some catalog pages show public descriptions but replace their entire price
  // and purchase controls with a sign-in notice. They have no password field on
  // the product URL, so waiting for controls can only end in a false timeout.
- const productText=clean(document.querySelector('article')?.innerText||document.querySelector('main')?.innerText||document.body?.innerText||'').slice(0,4000);
+ const productText=clean(document.querySelector('article')?.innerText||document.querySelector('main')?.innerText||fullBodyText).slice(0,4000);
  const priceLoginNotice=!price && /(?:please\s+)?(?:log|sign)\s+in\s+to\s+(?:see|view|access)\s+(?:the\s+)?(?:price|pricing|prices)|(?:price|pricing|prices)\s+(?:are\s+)?(?:available|visible)\s+(?:only\s+)?(?:after|when)\s+(?:you\s+)?(?:log|sign)\s+in/i.test(productText);
  return {title:clean(h1?.textContent||document.title),controls,unsupported,coverage_gaps:Array.from(coverageGaps),service_context:serviceContext,service_context_observed:serviceContextObserved,price,basis,images,busy,
    product_type:document.querySelector('#order-form')?.getAttribute('data-printproducttype')||null,
@@ -502,7 +529,11 @@ class BrowserAdapter:
             )
         except ValueError as exc:
             raise AdapterError("invalid_source_pacing", str(exc)) from exc
-        async with browser_slot(transport.check):
+        async with browser_slot(
+            transport.check,
+            source_origin=source_origin,
+            per_source_limit=concurrency_limit,
+        ):
             await transport.check()
             async with browser_page(
                 transport, source_origin, headless=headless
@@ -536,6 +567,7 @@ class BrowserAdapter:
                 route_tasks = set()
                 closing = False
                 source_progress = {"sequence": 0, "events": deque(maxlen=512)}
+                settled_snapshot = SettledSnapshot()
 
                 def navigated(frame):
                     if frame == page.main_frame:
@@ -1144,7 +1176,7 @@ class BrowserAdapter:
                             partial.add("unbounded_numeric_control:" + c["key"])
                     return state
 
-                async def settle(require_price=False, auth_grace=0):
+                async def settle(require_price=False, auth_grace=0, allow_reuse=True):
                     deadline = InactivityDeadline(inactivity_seconds)
                     sequence = source_progress["sequence"]
 
@@ -1200,9 +1232,38 @@ class BrowserAdapter:
                             control["kind"] == "number" or filter_choices(control)
                             for control in state["controls"]
                         )
-                        if stable >= 2 and actionable and discrete_domains_ready:
+                        stability_token = (
+                            navigation["generation"],
+                            selection_epoch,
+                            request_count,
+                            source_progress["sequence"],
+                        )
+                        # DFS checkpoint/restore calls often follow a completed
+                        # settle with no intervening action. Re-read the DOM, but
+                        # do not spend another 700 ms proving the same state.
+                        # Source activity, actions, navigation and any transient
+                        # DOM/busy state invalidate this short certification.
+                        reusable = settled_snapshot.matches(
+                            signature,
+                            stability_token,
+                            idle=(
+                                not active_requests
+                                and not state["busy"]
+                                and supports_stable_reuse(page.url, state)
+                            ),
+                        )
+                        if (
+                            (
+                                stable >= 2
+                                or (reusable and allow_reuse and not require_price)
+                            )
+                            and actionable
+                            and discrete_domains_ready
+                        ):
                             if require_price:
                                 observed_amount(state)
+                            if stable >= 2:
+                                settled_snapshot.remember(signature, stability_token)
                             # Only stable effective controls establish recovery
                             # witnesses; transient dependency updates do not.
                             remember_finishing_domain(state)
@@ -1798,7 +1859,7 @@ class BrowserAdapter:
                         return None
 
                     try:
-                        anchor = await settle()
+                        anchor = await settle(allow_reuse=False)
                         try:
                             observed_amount(anchor)
                         except AdapterError as exc:

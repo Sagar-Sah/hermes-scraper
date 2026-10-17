@@ -282,7 +282,7 @@ async def test_dashboard_failure_history_scope_and_export_transparency():
         await page.goto("http://dashboard.fixture/")
         await page.get_by_role("button", name="Harvest runs").click()
         await page.get_by_label("Filter run status").select_option("needs_attention")
-        await page.get_by_role("button", name="Mixed fixture harvest").click()
+        await page.locator("button.table-title").filter(has_text="Mixed fixture harvest").click()
         await playwright.expect(
             page.get_by_text("1 product needs attention · 2 active")
         ).to_be_visible()

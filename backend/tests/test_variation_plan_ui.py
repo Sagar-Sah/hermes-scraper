@@ -113,7 +113,7 @@ async def test_variation_plan_inventory_counts_scope_and_last_known_failure():
         await page.route("**/*", intercept)
         await page.goto("http://variation.fixture/")
         await page.get_by_role("button", name="Harvest runs").click()
-        await page.get_by_role("button", name="Inventory fixture").click()
+        await page.locator("button.table-title").filter(has_text="Inventory fixture").click()
         panel = page.get_by_role("region", name="Product variation plan")
         await playwright.expect(panel.get_by_role("heading", name="Business Cards", exact=True)).to_be_visible()
         await playwright.expect(panel.get_by_role("link", name="Printograph", exact=True)).to_have_attribute("href", cards["product_url"])

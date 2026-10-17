@@ -20,4 +20,10 @@ if [[ -z "${ATLAS_BROWSER_HEADLESS+x}" ]]; then
     export ATLAS_BROWSER_HEADLESS=true
   fi
 fi
-exec .venv/bin/python -m uvicorn crawler.app:app --host 127.0.0.1 --port "${ATLAS_PORT:-18877}" --no-access-log
+# Uvicorn's dotenv loader preserves explicitly exported shell settings.
+# In particular, browser worker settings in .env must affect local launches too.
+env_file_args=()
+if [[ -f "$project_dir/.env" ]]; then
+  env_file_args=(--env-file "$project_dir/.env")
+fi
+exec .venv/bin/python -m uvicorn crawler.app:app "${env_file_args[@]}" --host 127.0.0.1 --port "${ATLAS_PORT:-18877}" --no-access-log

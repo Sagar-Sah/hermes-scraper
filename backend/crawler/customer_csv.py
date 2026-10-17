@@ -62,6 +62,15 @@ def _attributes(config):
     return result
 
 
+def customer_attribute_columns(incoming):
+    """Discover dynamic CSV columns without computing prices or service labels.
+
+    Export's first pass only needs column names. The full customer projection is
+    computed when the output is written and reused for each product's dataset.
+    """
+    return _attributes(configuration(present_row(incoming))).keys()
+
+
 def customer_row(incoming):
     """Allowlisted fields only: no raw records, IDs or nested JSON payloads.
 

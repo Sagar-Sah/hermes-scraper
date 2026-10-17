@@ -29,6 +29,7 @@ def adapter_semantics():
         for name in (
             "adapters/browser.py",
             "adapters/browser_tables.py",
+            "browser_stability.py",
             "commerce.py",
             "browser_progress.py",
             "service_context.py",

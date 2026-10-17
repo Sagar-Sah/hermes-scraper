@@ -14,7 +14,7 @@ class Settings:
         default_factory=lambda: int(os.getenv("ATLAS_PRODUCT_CONCURRENCY", "100"))
     )
     browser_product_concurrency: int = field(
-        default_factory=lambda: int(os.getenv("ATLAS_BROWSER_PRODUCT_CONCURRENCY", "1"))
+        default_factory=lambda: int(os.getenv("ATLAS_BROWSER_PRODUCT_CONCURRENCY", "4"))
     )
     requests_per_second: float = field(
         default_factory=lambda: float(os.getenv("ATLAS_SOURCE_RPS", "2"))
@@ -45,6 +45,18 @@ class Settings:
         self.browser_product_concurrency = max(
             1, min(self.browser_product_concurrency, 256)
         )
+
+    def execution_capacity(self):
+        """Startup limits for extraction workers, separate from source pacing."""
+        return {
+            "product_task_limit": self.product_concurrency,
+            "browser_page_limit": self.browser_product_concurrency,
+            "effective_browser_page_limit": min(self.product_concurrency, self.browser_product_concurrency),
+            "maximum_configured_limit": 256,
+            "browser_setting": "ATLAS_BROWSER_PRODUCT_CONCURRENCY",
+            "restart_required": True,
+            "scope": "per_instance",
+        }
 
 
 settings = Settings()

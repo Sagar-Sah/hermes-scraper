@@ -111,6 +111,21 @@ def test_nonnumeric_price_prevents_publication_instead_of_looking_valid(tmp_path
     assert not (tmp_path / "manifest.json").exists()
 
 
+@pytest.mark.parametrize("field", ["subtotal", "unit_price"])
+@pytest.mark.parametrize("amount", ["invalid", "NaN", "Infinity"])
+def test_invalid_amount_still_fails_before_consuming_more_input(tmp_path, field, amount):
+    previous = export_rows(fixture_rows(2), tmp_path)
+
+    def invalid_source():
+        yield {**next(fixture_rows(1)), field: amount}
+        raise AssertionError("Invalid amounts must fail in the input pass")
+
+    with pytest.raises(ValueError):
+        export_rows(invalid_source(), tmp_path)
+    assert json.loads((tmp_path / "manifest.json").read_text()) == previous
+    assert not list(tmp_path.glob(".building-*"))
+
+
 def test_duckdb_analytics_keeps_currencies_separate(tmp_path):
     pytest.importorskip("duckdb")
     row = next(fixture_rows(1))
@@ -162,3 +177,80 @@ def test_exported_configuration_and_record_share_copy_only_label_projection(tmp_
     assert csv_rows[1]["attr:roundedCorners"] == direct["configuration"]["roundedCorners"]["label"]
     assert not any(key.endswith("_json") for key in csv_rows[0])
     assert original == before
+
+
+@pytest.mark.parametrize("products", [1, 40])
+def test_export_projects_each_source_row_once_for_all_output_datasets(tmp_path, monkeypatch, products):
+    from collections import Counter
+    from crawler import exporter
+
+    calls = Counter()
+    normalize, readable = exporter._normalize, exporter.customer_row
+
+    def counted_normalize(row):
+        calls["audit"] += 1
+        return normalize(row)
+
+    def counted_readable(row):
+        calls["customer"] += 1
+        return readable(row)
+
+    monkeypatch.setattr(exporter, "_normalize", counted_normalize)
+    monkeypatch.setattr(exporter, "customer_row", counted_readable)
+    rows = [{**row, "product_url": f"https://fixture.test/product/{index % products}"}
+            for index, row in enumerate(fixture_rows(81))]
+    manifest = exporter.export_rows(iter(rows), tmp_path, batch_size=7)
+
+    assert calls == {"audit": len(rows), "customer": len(rows)}
+    combined = next(item for item in manifest["items"] if item["name"] == "combined.parquet")
+    audit_rows = pq.read_table(combined["path"]).to_pylist()
+    columns = manifest["schemas"]["audit_parquet"]["columns"]
+    assert audit_rows == [{key: projected.get(key) for key in columns}
+                          for projected in map(normalize, rows)]
+    csv_path = next(item["path"] for item in manifest["items"] if item["name"] == "combined.csv")
+    with open(csv_path, newline="", encoding="utf-8") as handle:
+        customer_rows = list(csv.DictReader(handle))
+    for actual, source in zip(customer_rows, rows):
+        expected = readable(source)
+        assert actual == {key: expected.get(key, "") for key in manifest["columns"]}
+    if products > 1:
+        for item in manifest["items"]:
+            if item["format"] == "parquet" and item["product_key"]:
+                assert pq.read_table(item["path"]).to_pylist() == [
+                    row for row in audit_rows if row["product_url"] == item["product_key"]]
+
+
+def test_export_preserves_json_conversion_before_projection(tmp_path):
+    from datetime import date
+    from decimal import Decimal
+    from crawler import exporter
+
+    row = {**next(fixture_rows(1)), "subtotal": Decimal("19.9900"),
+           "configuration": {"width": Decimal("2.50"), "delivery": date(2026, 10, 14)}}
+    # Scratch JSON has always converted supported non-JSON values with str.
+    expected_source = json.loads(exporter._json(row))
+    manifest = exporter.export_rows([row], tmp_path)
+    parquet = next(item["path"] for item in manifest["items"] if item["format"] == "parquet")
+    assert pq.read_table(parquet).to_pylist() == [exporter._normalize(expected_source)]
+
+
+def test_projection_failure_closes_partition_spools_and_preserves_previous_publication(tmp_path, monkeypatch):
+    from crawler import exporter
+
+    previous = exporter.export_rows(fixture_rows(2), tmp_path)
+    normalize = exporter._normalize
+    calls = 0
+
+    def failed_projection(row):
+        nonlocal calls
+        calls += 1
+        if calls == 3:
+            raise RuntimeError("synthetic projection failure after partition writes")
+        return normalize(row)
+
+    monkeypatch.setattr(exporter, "_normalize", failed_projection)
+    with pytest.raises(RuntimeError, match="projection failure"):
+        exporter.export_rows(fixture_rows(10), tmp_path, batch_size=1)
+    assert json.loads((tmp_path / "manifest.json").read_text()) == previous
+    assert not list(tmp_path.glob(".building-*"))
+    assert all(Path(item["path"]).exists() for item in previous["items"])

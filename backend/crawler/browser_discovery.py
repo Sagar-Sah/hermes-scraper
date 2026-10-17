@@ -7,7 +7,7 @@ import time
 from types import SimpleNamespace
 from urllib.parse import urldefrag, urljoin, urlparse
 
-from .adapters.browser import _BROWSER_LOCK
+from .adapters.browser import browser_slot
 from .adapters.printograph import AdapterError
 from .browser_session import browser_page
 from .transport import validate_url
@@ -71,7 +71,7 @@ async def resolve_titles(
     async def check():
         return None
 
-    async with _BROWSER_LOCK:
+    async with browser_slot(check, source_origin=base, per_source_limit=min(2, concurrency)):
         async with browser_page(
             SimpleNamespace(browser_pool=browser_pool), base, headless=headless
         ) as page:
