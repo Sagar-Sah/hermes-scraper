@@ -1,0 +1,41 @@
+{
+  "current_quote_or_stock_proof": false,
+  "private_capture_records_and_price_values_omitted": true,
+  "public_response_projections": [
+    {
+      "available_false_count": 150,
+      "available_true_count": 0,
+      "items_count": 150,
+      "ref": {
+        "path": "/service/rest/v1/product/prices"
+      }
+    },
+    {
+      "available_false_count": 150,
+      "available_true_count": 0,
+      "items_count": 150,
+      "ref": {
+        "path": "/service/rest/v1/product/prices"
+      }
+    },
+    {
+      "available_false_count": 150,
+      "available_true_count": 0,
+      "items_count": 150,
+      "ref": {
+        "path": "/service/rest/v1/product/prices"
+      }
+    },
+    {
+      "available_false_count": 150,
+      "available_true_count": 0,
+      "items_count": 150,
+      "ref": {
+        "path": "/service/rest/v1/product/prices"
+      }
+    }
+  ],
+  "runtime_API_DB_writes": 0,
+  "schema": "publication-archived-availability-aggregates/v1",
+  "source_requests": 0
+}

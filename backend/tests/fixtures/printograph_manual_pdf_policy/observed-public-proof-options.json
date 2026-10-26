@@ -1,0 +1,64 @@
+{
+  "not_inferred": "These public catalog rows do not prove the exact currently rendered radio label or current selected native option.",
+  "private_capture_paths_omitted": true,
+  "records": [
+    {
+      "product_id": "17898",
+      "saved_public_product_options": [
+        {
+          "object_sha256": "e440d6c08a2f09897440ac356e4b0ade0568e7cf88b3ef92e78eceae93ef4af7",
+          "path": "/service/rest/v1/products/100210152/options",
+          "proof_rows": [
+            {
+              "id": 103124301,
+              "name": "MANUAL_SOFT_PROOF",
+              "type": {
+                "id": 1,
+                "label": "Manually Processed, PDF Proof 24 Hrs."
+              }
+            },
+            {
+              "id": 103124302,
+              "name": "INSTANT_PROOF",
+              "type": {
+                "id": 31,
+                "label": "Instant Processing Proof"
+              }
+            }
+          ],
+          "total_items": 2
+        }
+      ]
+    },
+    {
+      "product_id": "17875",
+      "saved_public_product_options": [
+        {
+          "object_sha256": "884068429f684669c25af979b38469f4399e49f55e15c6a520f0e5fa5b4b7a35",
+          "path": "/service/rest/v1/products/100211272/options",
+          "proof_rows": [
+            {
+              "id": 103142055,
+              "name": "MANUAL_SOFT_PROOF",
+              "type": {
+                "id": 1,
+                "label": "Manually Processed, PDF Proof 24 Hrs."
+              }
+            },
+            {
+              "id": 103142056,
+              "name": "INSTANT_PROOF",
+              "type": {
+                "id": 31,
+                "label": "Instant Processing Proof"
+              }
+            }
+          ],
+          "total_items": 2
+        }
+      ]
+    }
+  ],
+  "source": "Previously saved public options response bodies from modern-post-numeric-live-review/snapshot.json",
+  "source_calls": 0
+}

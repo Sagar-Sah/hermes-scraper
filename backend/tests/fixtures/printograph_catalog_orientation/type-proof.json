@@ -1,0 +1,64 @@
+{
+  "SQLite_mode": "ro single transaction",
+  "private_capture_identifiers_omitted": true,
+  "records": [
+    {
+      "origin": "https://www.printograph.com",
+      "path": "/service/rest/v1/settings/product/specifications",
+      "product_type_query": [
+        [
+          "productType",
+          "6"
+        ]
+      ],
+      "status": 200
+    },
+    {
+      "origin": "https://www.printograph.com",
+      "path": "/service/rest/v1/settings/product/specifications",
+      "product_type_query": [
+        [
+          "productType",
+          "6"
+        ]
+      ],
+      "status": 200
+    },
+    {
+      "origin": "https://www.printograph.com",
+      "path": "/service/rest/v1/settings/product/specifications",
+      "product_type_query": [
+        [
+          "productType",
+          "6"
+        ]
+      ],
+      "status": 200
+    },
+    {
+      "origin": "https://www.printograph.com",
+      "path": "/service/rest/v1/settings/product/specifications",
+      "product_type_query": [
+        [
+          "productType",
+          "6"
+        ]
+      ],
+      "status": 200
+    },
+    {
+      "origin": "https://www.printograph.com",
+      "path": "/service/rest/v1/settings/product/specifications",
+      "product_type_query": [
+        [
+          "productType",
+          "6"
+        ]
+      ],
+      "status": 200
+    }
+  ],
+  "runtime_mutations": 0,
+  "schema": "catalog17493-archived-type-proof/v1",
+  "source_requests": 0
+}

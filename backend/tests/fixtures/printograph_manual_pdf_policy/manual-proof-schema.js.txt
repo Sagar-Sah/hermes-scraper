@@ -1,0 +1,1 @@
+proofTypeForManual:{list:[{id:1,label:"PDF Proof"},{id:36,label:"No Proof"},{id:38,label:"PDF Proof 24Hrs"},{id:37,label:"High-Res Hard Copy Proof"}],type:"radio",inline:"no",hasPrice:"yes",required:"yes",label:"gp.label.proofType"}

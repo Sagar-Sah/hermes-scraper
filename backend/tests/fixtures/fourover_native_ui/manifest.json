@@ -1,0 +1,27 @@
+{
+  "schema": "public-native-ui-source-fixtures/v1",
+  "purpose": "Exact public registry and native project UI module proof for source-free tests. No account data or private responses.",
+  "modules": [
+    {
+      "path": "Magento_Ui__js__lib__registry__registry.js",
+      "public_asset_suffix": "Magento_Ui/js/lib/registry/registry.js",
+      "public_url": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/registry/registry.js",
+      "sha256": "f6a9135d5d2cd61c8c11e2d39c693daeaaf6e5a1a85de570980f5ed6b254bd70",
+      "bytes": 12904
+    },
+    {
+      "path": "FourOver_Project__js__view__project.js",
+      "public_asset_suffix": "FourOver_Project/js/view/project.js",
+      "public_url": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/FourOver_Project/js/view/project.js",
+      "sha256": "8190f0529ba686c99594b4ec3162acc3535517baf469ba856dde762505a7016e",
+      "bytes": 6036
+    },
+    {
+      "path": "FourOver_Project__js__view__project-tabs.js",
+      "public_asset_suffix": "FourOver_Project/js/view/project-tabs.js",
+      "public_url": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/FourOver_Project/js/view/project-tabs.js",
+      "sha256": "861824cc1243a53d35b9998959e50ae8a04300768be50d1e4b0b3e8c53f3f332",
+      "bytes": 13848
+    }
+  ]
+}

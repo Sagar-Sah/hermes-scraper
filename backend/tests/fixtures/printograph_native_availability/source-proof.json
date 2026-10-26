@@ -1,0 +1,188 @@
+{
+  "schema": "printograph-native-availability-reference-source-proof/v1",
+  "sources": [
+    {
+      "file": "common-22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7.js",
+      "sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "bytes": 962420,
+      "characters": 962408,
+      "literal_word_available_occurrences": [
+        {
+          "start_character": 67127,
+          "excerpt": "oduct. Note: Different products and paper stocks will have a different range of available cover stocks.\":\"Cover paper type.\";break;case\"coverColor\":o=\"quote\"==t?\"We offer four-col"
+        },
+        {
+          "start_character": 69439,
+          "excerpt": "ting\":o='Note: Different products and stocks may have different coating options available.<br><br><strong>High Gloss UV Coating</strong> is a high-quality coating that accentuates"
+        },
+        {
+          "start_character": 245145,
+          "excerpt": "blished on at least one site.\",\"deleteRestrictionPublished\":\"This action is not available because the product has been published on at least one site.\"}')},4441:function(e,t,i){\"u"
+        },
+        {
+          "start_character": 321127,
+          "excerpt": "oduct. Note: Different products and paper stocks will have a different range of available cover stocks.\":\"Cover paper type.\";break;case\"coverColor\":r=\"quote\"==o?\"We offer four-col"
+        },
+        {
+          "start_character": 323435,
+          "excerpt": "ting\":r='Note: Different products and stocks may have different coating options available.<br><br><strong>High Gloss UV Coating</strong> is a high-quality coating that accentuates"
+        },
+        {
+          "start_character": 333015,
+          "excerpt": "es not qualify based on Shipping Carrier requirements, only residential will be available at checkout.</div><div class='mt-2'><strong>At Checkout:</strong><br/>Pricing may differ "
+        },
+        {
+          "start_character": 334140,
+          "excerpt": "es not qualify based on Shipping Carrier requirements, only residential will be available at checkout.</div><div class='mt-2'><strong>At Checkout:</strong><br/>Pricing may differ "
+        },
+        {
+          "start_character": 342773,
+          "excerpt": "services may eliminate previous shipping options and mailing services that were available for a single item order or split shipments.\",\"cancel\":\"Cancel\",\"useNewAddress\":\"Use New A"
+        },
+        {
+          "start_character": 343102,
+          "excerpt": "ne? Selecting this option may eliminate a desired shipping method that was only available for an individual item.\",\"shippingMethod\":\"Shipping Method\",\"normal\":\"Normal\",\"included\":"
+        },
+        {
+          "start_character": 352949,
+          "excerpt": "at selecting this feature may eliminate a desired shipping method that was only available for an individual item.\",\"samePaymentInfo\":\"This option allows the use of the same billin"
+        },
+        {
+          "start_character": 353684,
+          "excerpt": " the shipment. The delivery point needs to be on the ground level. If no one is available at time of delivery, shipment will be sent back and will require a re-shipping cost. Pric"
+        },
+        {
+          "start_character": 360934,
+          "excerpt": "ilities and qualifies for free delivery. This delivery option will appear as an available shipping method.<span class=\\'fontBold\\' style=\\'font-size:1rem;\\'> Note: Group shipments"
+        },
+        {
+          "start_character": 361905,
+          "excerpt": " options may eliminate previous shipping options and mailing services that were available for single item orders.\",\"feelFreeToContactCustomerCare\":\"Please feel free to contact Cus"
+        },
+        {
+          "start_character": 488730,
+          "excerpt": " the shipment. The delivery point needs to be on the ground level. If no one is available at time of delivery, shipment will be sent back and will require a re-shipping cost. Pric"
+        },
+        {
+          "start_character": 489667,
+          "excerpt": " the shipment. The delivery point needs to be on the ground level. If no one is available at time of delivery, shipment will be sent back and will require a re-shipping cost. Pric"
+        },
+        {
+          "start_character": 491256,
+          "excerpt": "le to the shipping carrier&apos;s vehicle when elevator or escalator service is available and labor, when necessary to operate it, is provided without cost to the carrier. Please "
+        },
+        {
+          "start_character": 702778,
+          "excerpt": "omAlertBox(\"alert\",\"Cancel\",\"OK\",\"Some specifications/options are currently not available. Changing to any other specification/option may result in a deviation from the original i"
+        },
+        {
+          "start_character": 908859,
+          "excerpt": "d\",style:{\"margin-bottom\":\"0.5rem\",\"margin-top\":\"0.5rem\"}},\"No shipping methods available for your order. Please contact customer support.\")])])],-1)]))):(0,o.Q3)(\"\",!0)])),_:1}),"
+        },
+        {
+          "start_character": 913626,
+          "excerpt": "E)(\"div\",$,[10==ye.userShippingMethod?((0,o.uX)(),(0,o.CE)(\"span\",ee,\"Pickup is available at \"+(0,r.v_)(ye.pickupAddress),1)):(0,o.Q3)(\"\",!0),t[26]||(t[26]=(0,o.Lk)(\"br\",null,null"
+        },
+        {
+          "start_character": 914658,
+          "excerpt": "erShippingMethod?((0,o.uX)(),(0,o.CE)(\"div\",ne,[(0,o.Lk)(\"span\",null,\"Pickup is available at \"+(0,r.v_)(ye.pickupAddress),1)])):(0,o.Q3)(\"\",!0)])):(0,o.Q3)(\"\",!0),1==ye.orderingSh"
+        },
+        {
+          "start_character": 928712,
+          "excerpt": "hipping costs are based on residential type addresses and its zip code.<br/>The available shipping methods for this order will be determined after the full shipping address has be"
+        }
+      ]
+    },
+    {
+      "file": "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js",
+      "sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "bytes": 1958579,
+      "characters": 1958569,
+      "literal_word_available_occurrences": [
+        {
+          "start_character": 148415,
+          "excerpt": "tantly Processed\",iopDisabledOnPerfectBinding:\"Instantly Processed Proof is not available for booklets with Perfect Binding\",proceedToCheckout:\"Proceed to Checkout\",shoppingCart:\""
+        },
+        {
+          "start_character": 169229,
+          "excerpt": "tantly Processed\",iopDisabledOnPerfectBinding:\"Instantly Processed Proof is not available for booklets with Perfect Binding\",shoppingCart:\"Shopping Cart\",productWasAddedToCart:\"Th"
+        },
+        {
+          "start_character": 202518,
+          "excerpt": "ErrorMessage(\"Please select different combinations, Selected combination is not available.\",i),e.loader=!1,document.getElementById(\"ajaxLoader\").style.display=\"none\"),i.userSelect"
+        },
+        {
+          "start_character": 1324302,
+          "excerpt": "p class=\"mt-2 pt-0 mb-3\"> Production time is switched to regular as rush is not available with selected quantity. </p></div><div class=\"modal-footer center mb-4\"><button style=\"pa"
+        },
+        {
+          "start_character": 1439411,
+          "excerpt": "hipping costs are based on residential type addresses and its zip code.<br/>The available shipping methods for this order will be determined after the full shipping address has be"
+        },
+        {
+          "start_character": 1908334,
+          "excerpt": "omAlertBox(\"alert\",\"Cancel\",\"OK\",\"Some specifications/options are currently not available. Changing to any other specification/option may result in a deviation from the original i"
+        }
+      ]
+    }
+  ],
+  "slices": [
+    {
+      "source": "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_character": 219457,
+      "end_character": 222123,
+      "file": "source/generic-price-applier.js",
+      "sha256": "17bf71c0b6f06d57d2ff7c296657c400b8fd037be05d6e7c93f0f19eb8f3e245"
+    },
+    {
+      "source": "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_character": 215836,
+      "end_character": 219055,
+      "file": "source/generic-price-builder.js",
+      "sha256": "22c76e15cab2f7d5777d674aa6ceaca8181a4650239804d1cb7888af80239066"
+    },
+    {
+      "source": "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_character": 1284423,
+      "end_character": 1284880,
+      "file": "source/button-disabled.js",
+      "sha256": "76256f106e5a54fadb274c433b49c9244ee61f1ca2addaa9502053e91a182aa3"
+    },
+    {
+      "source": "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_character": 1256334,
+      "end_character": 1259861,
+      "file": "source/button-render.js",
+      "sha256": "d5654c816bc5e6542ee3073776a05773f80def5e7367d639894a38cccde77af1"
+    },
+    {
+      "source": "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_character": 1600346,
+      "end_character": 1600450,
+      "file": "source/quantity-filled.js",
+      "sha256": "a5293dd165ccd1cc719c12d5df6362a9da302b484fe18c11cb146078a434e6f1"
+    }
+  ],
+  "property_lookup_scan": {
+    "common-22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7.js": {
+      "pattern": "\\.available\\b|\\[\\s*[\\'\\\"]available[\\'\\\"]\\s*\\]|\\bavailable\\s*:",
+      "count": 0,
+      "case_insensitive_text_occurrences": 37
+    },
+    "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js": {
+      "pattern": "\\.available\\b|\\[\\s*[\\'\\\"]available[\\'\\\"]\\s*\\]|\\bavailable\\s*:",
+      "count": 0,
+      "case_insensitive_text_occurrences": 19
+    }
+  },
+  "scope_notes": [
+    "Inventory covers every saved public JS file in private-printograph-current-assets (two pinned bundles), not an assertion about unobserved scripts.",
+    "All literal-word hits are prose/messages/labels rather than a row.available lookup.",
+    "Pinned native button render/disable excerpts are observational proof; no click/cart/order/checkout function was executed."
+  ]
+}

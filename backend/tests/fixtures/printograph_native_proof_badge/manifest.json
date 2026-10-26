@@ -1,0 +1,39 @@
+{
+  "members": {
+    "observed-no-proof-price-table.json": "fcb3f33e8e1c3b861ba993c413c95707a9b4d59632f351905ad211ff953f5e00",
+    "observed-proof-option-mapping.json": "031133b0e1aa585d6b8439e662f4e68c0b2b84889705b5c2aa3816d68b37649d",
+    "proof-badge-class.js.txt": "2cdec19b9c685ce92a00f73f22509f91384b98de7c699a58cf731526fd669cf4",
+    "proof-label-render.js.txt": "272ba65e3980daaf5c8a7717a573f51a439b2f405157734a41ca934de228ab5d",
+    "proof-schema.js.txt": "8ef67e3d0bb63721809faa8beb855192e787fe8f78170a1d4960431fd09e7bbb"
+  },
+  "schema": "printograph-native-proof-price-badge-fixtures/v1",
+  "source_asset": {
+    "sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+    "url": "https://static.printograph.com/tl/cli-app/dist/production/js/orderForm.js?v=0109_20261007_202205-101"
+  },
+  "source_slices": [
+    {
+      "file": "proof-schema.js.txt",
+      "length": 650,
+      "sha256": "8ef67e3d0bb63721809faa8beb855192e787fe8f78170a1d4960431fd09e7bbb",
+      "source_start_byte": 134298
+    },
+    {
+      "file": "proof-badge-class.js.txt",
+      "length": 300,
+      "sha256": "2cdec19b9c685ce92a00f73f22509f91384b98de7c699a58cf731526fd669cf4",
+      "source_start_byte": 1492424
+    },
+    {
+      "file": "proof-label-render.js.txt",
+      "length": 1700,
+      "sha256": "272ba65e3980daaf5c8a7717a573f51a439b2f405157734a41ca934de228ab5d",
+      "source_start_byte": 1498276
+    }
+  ],
+  "supplier_response_scope": {
+    "full_domain_or_current_freshness_claim": false,
+    "proof_price_fixture_is_synthetic": true,
+    "semantic_type": "36"
+  }
+}

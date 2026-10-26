@@ -1,0 +1,10 @@
+{
+  "files": {
+    "product-run-size.html": "6419edbca1adeb6df447fbd32e7e275d8a77e214e110e060d2158be28f45cee3",
+    "product-run-size.js": "c3e017c7385ea35882adab433d5a721157dd7670b8353592569843ba133bf216",
+    "quantities.json": "103f7a9258b2056fe5621b0367747bdf2f8b8174dcbdc428f176a4aab8842bef",
+    "replay.js": "1cb6e5dd8ebdc3d1be265d8711fcfbd53d257256eb17aefae493402e3cbc8ba3",
+    "source-pins.json": "4dfc9f2e4c1a1574fe761b91125488a6df6314d9500cb01664e48f8cdd6aadb5"
+  },
+  "schema": "saved-public-native-quantity-expand-fixture/v1"
+}

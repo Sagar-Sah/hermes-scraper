@@ -1,0 +1,17 @@
+{
+  "product-run-size.js": {
+    "source_object": "objects/c3/c3e017c7385ea35882adab433d5a721157dd7670b8353592569843ba133bf216.fourover-public-source-asset",
+    "sha256": "c3e017c7385ea35882adab433d5a721157dd7670b8353592569843ba133bf216",
+    "public_suffix": "FourOver_ProductRunSize/js/view/product-run-size.js"
+  },
+  "product-run-size.html": {
+    "source_object": "objects/64/6419edbca1adeb6df447fbd32e7e275d8a77e214e110e060d2158be28f45cee3.fourover-public-source-asset",
+    "sha256": "6419edbca1adeb6df447fbd32e7e275d8a77e214e110e060d2158be28f45cee3",
+    "public_suffix": "FourOver_ProductRunSize/template/product-run-size.html"
+  },
+  "job-price.js": {
+    "source_object": "objects/c4/c40f876c82824a046d3e93d58845a9ade65a53da49b235d14ea69425c40fc9ea.fourover-public-source-asset",
+    "sha256": "c40f876c82824a046d3e93d58845a9ade65a53da49b235d14ea69425c40fc9ea",
+    "public_suffix": "FourOver_Project/js/view/project/job-price.js"
+  }
+}

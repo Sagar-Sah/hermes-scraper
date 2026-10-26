@@ -1,0 +1,15 @@
+ALIASES = {
+    "stock": "paper",
+    "paperstock": "paper",
+    "colorspec": "color",
+    "colors": "color",
+    "runsize": "quantity",
+    "qty": "quantity",
+    "production": "productionTime",
+    "productiontime": "productionTime",
+    "turnaround": "productionTime",
+    "turnaroundtime": "productionTime",
+    "blankenvelopes": "blankEnvelopes",
+    "windposition": "windPosition",
+    "roundedcorners": "roundedCorners",
+}

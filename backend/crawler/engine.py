@@ -45,6 +45,7 @@ def row_identity(row):
                 key: value
                 for key, value in row.get("pricing_context", {}).items()
                 if key != "source_base_product_id"
+                and not (key == "native_freshness" and row.get("service_context_schema") == "printograph-native-services/v3")
             },
         }
     )

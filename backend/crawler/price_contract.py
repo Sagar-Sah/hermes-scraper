@@ -18,6 +18,46 @@ SOURCE_CONTRACT = {
     "order_form_sha256": "fd26a9c72ba1a162d5d12aa0f0f845dfed7d1a136f276440f1b5b06a465a1d8b",
     "common_sha256": "577bddf60b70e3c2c8362de3f358cd9477dc21232aa1d3c41839d5e1db1ed88d",
 }
+# Keep historical identities unchanged. The new exact pair is reviewed only
+# for this mapped broker family; hashes from different releases never combine.
+SPECIAL_SHAPES_SOURCE_CONTRACT = {
+    "order_form_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+    "common_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+}
+SPECIAL_SHAPES_SOURCE_URL = "https://www.printograph.com/products/special-shapes/order"
+# Restricted arithmetic support only: source-observed manual proof + upload now.
+# Other source services and every freshness/catalog/commerce gate stay separate.
+STAGGERED_CUT_SOURCE_URL = "https://www.printograph.com/products/staggered-cut-flyers/order"
+STAGGERED_CUT_SOURCE_CONTRACT = dict(SPECIAL_SHAPES_SOURCE_CONTRACT)
+# A distinct source-native request variant, never asserted equivalent to no query.
+# Only the exact literal strings are safe to project; actual item/customer IDs stay excluded.
+STAGGERED_LITERAL_BASE_QUERY = {"mode": "source_literal_pair_v1", "itemId": "null", "cid": ""}
+
+
+def staggered_literal_base_query(value):
+    return (type(value) is dict and value == STAGGERED_LITERAL_BASE_QUERY
+            and all(type(value.get(key)) is str for key in STAGGERED_LITERAL_BASE_QUERY))
+
+REVIEWED_SOURCE_SCOPES = (
+    {"source_contract": SOURCE_CONTRACT, "product_types": ("1", "2", "27", "36"), "source_url": None},
+    {"source_contract": SPECIAL_SHAPES_SOURCE_CONTRACT, "product_types": ("39",), "source_url": SPECIAL_SHAPES_SOURCE_URL},
+    {"source_contract": STAGGERED_CUT_SOURCE_CONTRACT, "product_types": ("38",), "source_url": STAGGERED_CUT_SOURCE_URL},
+)
+
+
+def reviewed_source_scope(contract, product_type=None):
+    # Hash-only callers report bundle identity, not supported product coverage.
+    # Type-aware callers must distinguish families sharing the same exact pair.
+    matches = [scope for scope in REVIEWED_SOURCE_SCOPES
+               if isinstance(contract, dict) and contract == scope["source_contract"]]
+    if product_type is not None:
+        matching = next((scope for scope in matches
+                         if str(product_type) in scope["product_types"]), None)
+        if matching is not None:
+            return matching
+    return matches[0] if matches else None
+
+
 OPTION_FIELDS = {
     "1": (
         "roundedCorners",
@@ -46,12 +86,21 @@ OPTION_FIELDS = {
         "paperFinish",
     ),
     "36": ("windPosition",),
+    "39": ("coating", "spotCoating", "paperFinish"),
+    "38": ("coating",),
 }
 BASE_FIELDS = {
     "1": ("size", "orientation", "paper", "color"),
     "2": ("size", "orientation", "paper", "color"),
     "27": ("size", "orientation", "paper", "color"),
     "36": ("shape", "size", "orientation", "paper", "finish", "color"),
+    "39": ("shape", "size", "orientation", "paper", "color"),
+    "38": ("size", "orientation", "paper", "color"),
+}
+SPECIAL_SHAPES_VALUE_DOMAINS = {
+    "orientation": ("1", "2"), "color": ("1", "2", "3"),
+    "coating": ("", "5", "6", "40"), "spotCoating": ("", "3", "4", "39"),
+    "paperFinish": ("", "1"), "productionTime": ("1", "3"),
 }
 PRICED_OPTIONS = {
     "roundedCorners": {"2"},
@@ -150,7 +199,9 @@ def normalize_price_context(capture: dict[str, Any]) -> dict[str, Any]:
     reasons = []
     if not isinstance(capture, dict):
         capture = {}
-    if capture.get("source_contract") != SOURCE_CONTRACT:
+    product_type = str(capture.get("product_type", ""))
+    scope = reviewed_source_scope(capture.get("source_contract"), product_type)
+    if scope is None:
         reasons.append("unreviewed_source_contract")
     if capture.get("observed") is not True:
         reasons.append("state_not_explicitly_observed")
@@ -158,14 +209,19 @@ def normalize_price_context(capture: dict[str, Any]) -> dict[str, Any]:
         reasons.append("state_not_settled")
     if capture.get("capture_kind") not in {"controller", "explicit_request"}:
         reasons.append("unknown_capture_kind")
-    product_type = str(capture.get("product_type", ""))
     if product_type not in OPTION_FIELDS or capture.get("store_type") != "broker":
         reasons.append("unsupported_product_or_store")
+    if scope is not None and product_type not in scope["product_types"]:
+        reasons.append("unreviewed_product_for_source_contract")
+    if scope is not None and scope["source_url"] is not None and capture.get("source_url") != scope["source_url"]:
+        reasons.append("unreviewed_source_url")
     if capture.get("currency") != "USD":
         reasons.append("unsupported_or_missing_currency")
     expected = OPTION_FIELDS.get(product_type, ())
     if capture.get("field_options") != list(expected):
         reasons.append("unreviewed_option_field_order")
+    if product_type in {"39", "38"} and capture.get("field_specs") != list(BASE_FIELDS[product_type]):
+        reasons.append("unreviewed_base_field_order")
     selected = capture.get("userSelectedOptions")
     selected = selected if isinstance(selected, dict) else {}
     normalized = {}
@@ -197,6 +253,10 @@ def normalize_price_context(capture: dict[str, Any]) -> dict[str, Any]:
             *PRICED_OPTIONS[key],
         }:
             reasons.append(f"unsupported_selected_option:{key}")
+    if product_type == "39":
+        for key, values in SPECIAL_SHAPES_VALUE_DOMAINS.items():
+            if key in normalized and normalized[key] not in values:
+                reasons.append(f"unsupported_selected_option:{key}")
     proof = normalized.get("proofType")
     if proof not in DELIVERY_VALUES:
         reasons.append("unsupported_proof_mode")
@@ -206,6 +266,38 @@ def normalize_price_context(capture: dict[str, Any]) -> dict[str, Any]:
         reasons.append("unsupported_manual_proof")
     if proof == "101" and normalized.get("designServices") not in DESIGN_PACKAGES:
         reasons.append("unsupported_design_package")
+    retained_manual_controls = None
+    if product_type == "38":
+        # No service defaults: source-rendered controls must positively retain
+        # this explicit restricted mode, independent of residual cache values.
+        if proof != "100" or normalized.get("fileDelivery") != "5":
+            reasons.append("unsupported_staggered_service_scope")
+        if normalized.get("productionTime") not in {"1", "3"}:
+            reasons.append("unsupported_staggered_production")
+        guard = capture.get("manual_controls")
+        expected_guard = {
+            "proof_type": {"value": "100", "checked": True, "enabled": True, "visible": True},
+            "manual_proof": {"value": normalized.get("manualProofType"), "checked": True, "enabled": True, "visible": True},
+            "file_delivery": {"value": "5", "checked": True, "enabled": True, "visible": True},
+        }
+        guard_valid = (isinstance(guard, dict) and guard == expected_guard
+                       and all(isinstance(guard.get(name), dict)
+                               and type(guard[name].get("value")) is str
+                               and all(type(guard[name].get(flag)) is bool
+                                       for flag in ("checked", "enabled", "visible"))
+                               for name in expected_guard))
+        if not guard_valid:
+            reasons.append("staggered_manual_controls_not_retained")
+        else:
+            retained_manual_controls = expected_guard
+    base_query = None
+    if product_type == "38" and "base_price_query" in capture:
+        if "productSpecificationId" in selected:
+            reasons.append("unsupported_staggered_specification_context")
+        if staggered_literal_base_query(capture["base_price_query"]):
+            base_query = dict(STAGGERED_LITERAL_BASE_QUERY)
+        else:
+            reasons.append("unsupported_base_price_query_profile")
     context_flags = capture.get("other_context")
     context_flags = context_flags if isinstance(context_flags, dict) else {}
     flags = {}
@@ -220,7 +312,7 @@ def normalize_price_context(capture: dict[str, Any]) -> dict[str, Any]:
     reasons.extend(coupon_reasons)
     context = {
         "schema_version": 1,
-        "source_contract": dict(SOURCE_CONTRACT),
+        "source_contract": dict(scope["source_contract"]) if scope is not None else {},
         "product_type": product_type,
         "store_type": capture.get("store_type"),
         "currency": capture.get("currency"),
@@ -229,6 +321,15 @@ def normalize_price_context(capture: dict[str, Any]) -> dict[str, Any]:
         "other_context": flags,
         "coupon": coupon,
     }
+    if scope is not None and scope["source_url"] is not None:
+        context["source_url"] = capture.get("source_url") if capture.get("source_url") == scope["source_url"] else None
+    if product_type in {"39", "38"}:
+        context["field_specs"] = list(BASE_FIELDS[product_type])
+    if retained_manual_controls is not None:
+        context["manual_controls"] = retained_manual_controls
+    if base_query is not None:
+        # Hash this exact variant instead of collapsing it into ordinary no-query prices.
+        context["base_price_query"] = base_query
     hash_context = {
         **context,
         "coupon": {
@@ -487,13 +588,16 @@ def calculate_source_total(capture: dict[str, Any]) -> dict[str, Any]:
 
 
 # This follows only the mounted source controller path observed in updatePrice.
-# The caller must verify the actual loaded bundles against SOURCE_CONTRACT first
+# The caller must supply the actual loaded exact reviewed bundle pair first
 # and supply settled=True only after its ordinary page/request stability checks.
 # It never reads cookies, storage, account tokens, artwork, addresses or notes.
 CONTROLLER_PRICE_STATE_JS = (
     r"""({source_contract, settled = false}) => {
-  const expected = __SOURCE_CONTRACT__;
-  if (!source_contract || Object.keys(expected).some(k => source_contract[k] !== expected[k]))
+  const scopes = __REVIEWED_SOURCE_SCOPES__;
+  const matches = source_contract && scopes.filter(rule =>
+    Object.keys(source_contract).length === Object.keys(rule.source_contract).length &&
+    Object.keys(rule.source_contract).every(k => source_contract[k] === rule.source_contract[k]));
+  if (!matches || !matches.length)
     return {observed:false, reason:'unreviewed_source_contract'};
   if (!['www.printograph.com','printograph.com'].includes(location.hostname) || location.protocol !== 'https:')
     return {observed:false, reason:'unsupported_source_origin'};
@@ -506,13 +610,64 @@ CONTROLLER_PRICE_STATE_JS = (
   if (!data || !data.userSelectedOptions || !data.appliedPrices || !data.others)
     return {observed:false, reason:'controller_state_missing'};
   const type = String(c.printProductType), attrType = element.getAttribute('data-printproducttype');
-  if (type !== attrType || !['1','2','27','36'].includes(type))
-    return {observed:false, reason:'controller_product_mismatch'};
+  const scope = matches.find(rule => rule.product_types.includes(type)) || matches[0];
+  const expected = scope.source_contract;
+  if (type !== attrType || !scope.product_types.includes(type)) {
+    // Schema names identify the unsupported contract without reading selections,
+    // prices, account state or arbitrary properties from the controller.
+    const typeName = value => typeof value === 'string' && /^[0-9]{1,16}$/.test(value) ? value : null;
+    const controllerType = typeName(type);
+    const store = element.getAttribute('data-currentstoretype');
+    const fields = controllerType !== null && Array.isArray(c.fields?.[controllerType]?.options) ? c.fields[controllerType].options : [];
+    const optionNames = [...new Set(fields.slice(0,256).filter(value =>
+      typeof value === 'string' && /^[A-Za-z][A-Za-z0-9]{0,63}$/.test(value)))].slice(0,64);
+    return {observed:false, reason:'controller_product_mismatch', diagnostic_metadata:{
+      declared_type:typeName(attrType), controller_type:controllerType,
+      store_type:typeof store === 'string' && /^[A-Za-z0-9]{1,32}$/.test(store) ? store : null,
+      option_names:optionNames}};
+  }
+  if (element.getAttribute('data-currentstoretype') !== 'broker')
+    return {observed:false, reason:'unsupported_source_store'};
+  if (scope.source_url !== null && location.href !== scope.source_url)
+    return {observed:false, reason:'unreviewed_source_url'};
   const options = __OPTION_FIELDS__[type], bases = __BASE_FIELDS__[type];
+  if (!Array.isArray(c.fields?.[type]?.options) || JSON.stringify(c.fields[type].options) !== JSON.stringify(options))
+    return {observed:false, reason:'controller_schema_mismatch'};
+  if (['39','38'].includes(type) && (!Array.isArray(c.fields?.[type]?.specs) || JSON.stringify(c.fields[type].specs) !== JSON.stringify(bases)))
+    return {observed:false, reason:'controller_base_schema_mismatch'};
   const scalar = value => typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null;
   const selected = {};
   for (const key of [...bases,...options,'proofType','manualProofType','designServices','fileDelivery','quantity','productId','productionTime'])
     if (Object.hasOwn(data.userSelectedOptions,key) && scalar(data.userSelectedOptions[key])) selected[key] = data.userSelectedOptions[key];
+  if (type === '39') {
+    const domains = __SPECIAL_SHAPES_VALUE_DOMAINS__;
+    for (const [key,values] of Object.entries(domains))
+      if (Object.hasOwn(selected,key) && (typeof selected[key] === 'boolean' || !values.includes(String(selected[key]))))
+        return {observed:false,reason:'unsupported_selected_option:'+key};
+  }
+  if (type === '38' && Object.hasOwn(data.userSelectedOptions,'productSpecificationId'))
+    return {observed:false,reason:'unsupported_staggered_specification_context'};
+  let manualControls;
+  if (type === '38') {
+    if (String(selected.proofType) !== '100' || String(selected.fileDelivery) !== '5' ||
+        !['1','36','37','38'].includes(String(selected.manualProofType)) ||
+        !['1','3'].includes(String(selected.productionTime)))
+      return {observed:false,reason:'unsupported_staggered_service_scope'};
+    const visible = el => el.getClientRects().length > 0 &&
+      getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden';
+    const control = (name,value) => {
+      const checked = [...element.querySelectorAll('input[type="radio"][name="'+name+'"]')].filter(el => el.checked);
+      if (checked.length !== 1 || String(checked[0].value) !== value || checked[0].disabled || !visible(checked[0])) return null;
+      return {value,checked:true,enabled:true,visible:true};
+    };
+    manualControls = {
+      proof_type:control('proofType','100'),
+      manual_proof:control('proofTypeForManual',String(selected.manualProofType)),
+      file_delivery:control('fileDeliveryForManual','5')
+    };
+    if (Object.values(manualControls).some(value => value === null))
+      return {observed:false,reason:'staggered_manual_controls_not_retained'};
+  }
   const prices = {};
   if (scalar(data.appliedPrices.productPrice)) prices.productPrice = data.appliedPrices.productPrice;
   for (const key of [...options,'proofType','designServices']) {
@@ -536,6 +691,13 @@ CONTROLLER_PRICE_STATE_JS = (
     settled:settled === true, product_type:type, store_type:element.getAttribute('data-currentstoretype'),
     currency:'USD', userSelectedOptions:selected, appliedPrices:prices, other_context:flags,
     field_options:Array.isArray(c.fields?.[type]?.options) ? [...c.fields[type].options] : null};
+  if (scope.source_url !== null) result.source_url = location.href;
+  if (['39','38'].includes(type)) result.field_specs = [...c.fields[type].specs];
+  if (type === '38') {
+    result.manual_controls = manualControls;
+    if (typeof data.others.itemId === 'string' && data.others.itemId === 'null')
+      result.base_price_query = {mode:'source_literal_pair_v1',itemId:'null',cid:''};
+  }
   if (scalar(c.totalPrice)) result.controller_total = c.totalPrice;
   const couponData = c.couponData;
   if (couponData && typeof couponData === 'object' && couponData.coupon && typeof couponData.coupon === 'object' && !Array.isArray(couponData.coupon)) {
@@ -551,12 +713,13 @@ CONTROLLER_PRICE_STATE_JS = (
     result.coupon = {observed:true,mode:'source_state',coupon_object_observed:true,
       coupon_object_key_count:Object.keys(coupon).length,parameters,source_quantity:selected.quantity};
     if (typeof couponData.isCouponSpecChanged === 'boolean') result.coupon.is_coupon_spec_changed = couponData.isCouponSpecChanged;
-  } else if (typeof c.getCouponPrice === 'function' && scalar(c.totalPrice)) {
+  } else if (type !== '38' && typeof c.getCouponPrice === 'function' && scalar(c.totalPrice)) {
     const couponResult = c.getCouponPrice(c.totalPrice);
     if (scalar(couponResult)) result.coupon = {observed:true, mode:'result_only', argument_subtotal:c.totalPrice, result:couponResult};
   }
   return result;
-}""".replace("__SOURCE_CONTRACT__", json.dumps(SOURCE_CONTRACT))
+}""".replace("__REVIEWED_SOURCE_SCOPES__", json.dumps(REVIEWED_SOURCE_SCOPES))
     .replace("__OPTION_FIELDS__", json.dumps(OPTION_FIELDS))
     .replace("__BASE_FIELDS__", json.dumps(BASE_FIELDS))
+    .replace("__SPECIAL_SHAPES_VALUE_DOMAINS__", json.dumps(SPECIAL_SHAPES_VALUE_DOMAINS))
 )

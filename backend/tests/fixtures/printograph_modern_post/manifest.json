@@ -1,0 +1,65 @@
+{
+  "actual_request_body_retained": false,
+  "files": {
+    "generic-api-post.js": "369d4db05b2b6d183027426007d3a53983d1fec1e8f5c5274ce4970bb316e274",
+    "generic-parameters.js": "03c3b858d5019da999827a9d9d06c70d982cc6b667e8a1d5b56e3e889448e1e3",
+    "generic-price-builder.js": "22c76e15cab2f7d5777d674aa6ceaca8181a4650239804d1cb7888af80239066",
+    "native-options.js": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776",
+    "native-total.js": "e631284345856c79c0b4545d619a3b1696bca89b785bf5ccd47b20eef3b73a22",
+    "native-turnaround-builder.js": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
+    "native-unavailable-price-response.json": "08005f96b57e6fa58878d87c37a2935ee97f3f4241d6cfb93bafb225c31e119b"
+  },
+  "historical_unavailable_row_count": 150,
+  "price_rows_are_synthetic": true,
+  "schema": "printograph-modern-post-public-fixtures/v1",
+  "source_slices": [
+    {
+      "end_character": 256003,
+      "fixture": "generic-parameters.js",
+      "fixture_sha256": "03c3b858d5019da999827a9d9d06c70d982cc6b667e8a1d5b56e3e889448e1e3",
+      "source_bundle": "common-22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7.js",
+      "source_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_character": 250533
+    },
+    {
+      "end_character": 219055,
+      "fixture": "generic-price-builder.js",
+      "fixture_sha256": "22c76e15cab2f7d5777d674aa6ceaca8181a4650239804d1cb7888af80239066",
+      "source_bundle": "order_form-0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6.js",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_character": 215836
+    },
+    {
+      "end_character": 440426,
+      "fixture": "generic-api-post.js",
+      "fixture_sha256": "369d4db05b2b6d183027426007d3a53983d1fec1e8f5c5274ce4970bb316e274",
+      "source_bundle": "common-22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7.js",
+      "source_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_character": 440220
+    },
+    {
+      "end_character": 258172,
+      "fixture": "native-turnaround-builder.js",
+      "fixture_sha256": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
+      "source_bundle": "common-22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7.js",
+      "source_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_character": 256911
+    },
+    {
+      "end_character": 270111,
+      "fixture": "native-options.js",
+      "fixture_sha256": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776",
+      "source_bundle": "common-22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7.js",
+      "source_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_character": 267710
+    },
+    {
+      "end_character": 250532,
+      "fixture": "native-total.js",
+      "fixture_sha256": "e631284345856c79c0b4545d619a3b1696bca89b785bf5ccd47b20eef3b73a22",
+      "source_bundle": "common-22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7.js",
+      "source_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_character": 249058
+    }
+  ]
+}

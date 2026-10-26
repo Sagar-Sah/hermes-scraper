@@ -1,0 +1,62 @@
+[
+  {
+    "quantities_exact_1_through150": true,
+    "reason_type_counts": {
+      "disableReasons": {
+        "NoneType": 150
+      },
+      "messages": {
+        "NoneType": 150
+      },
+      "reasons": {
+        "NoneType": 150
+      }
+    },
+    "unavailable_positive_product_price_count": 150
+  },
+  {
+    "quantities_exact_1_through150": true,
+    "reason_type_counts": {
+      "disableReasons": {
+        "NoneType": 150
+      },
+      "messages": {
+        "NoneType": 150
+      },
+      "reasons": {
+        "NoneType": 150
+      }
+    },
+    "unavailable_positive_product_price_count": 150
+  },
+  {
+    "quantities_exact_1_through150": true,
+    "reason_type_counts": {
+      "disableReasons": {
+        "NoneType": 150
+      },
+      "messages": {
+        "NoneType": 150
+      },
+      "reasons": {
+        "NoneType": 150
+      }
+    },
+    "unavailable_positive_product_price_count": 150
+  },
+  {
+    "quantities_exact_1_through150": true,
+    "reason_type_counts": {
+      "disableReasons": {
+        "NoneType": 150
+      },
+      "messages": {
+        "NoneType": 150
+      },
+      "reasons": {
+        "NoneType": 150
+      }
+    },
+    "unavailable_positive_product_price_count": 150
+  }
+]

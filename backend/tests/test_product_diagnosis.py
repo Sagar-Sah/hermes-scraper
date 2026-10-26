@@ -16,6 +16,7 @@ from crawler.product_diagnosis import (
     ProductDiagnosisManager,
     _loaded_bundle_contract,
     _printograph_bundle_key,
+    _safe_controller_diagnostics,
     merge_dps_snapshot,
     normalize_snapshot,
 )
@@ -278,8 +279,76 @@ async def test_scoped_price_requires_current_revision_and_observed_controller(ma
     result = await m.read_scoped_price(record['id'], record['revision'])
     assert result['status'] == 'unavailable'
     assert result['revision'] == record['revision']
+    assert result['source_bundle_verified'] is False
+    assert result['loaded_contract'] == {}
     with pytest.raises(ValueError, match='diagnosis_revision_conflict'):
         await m.read_scoped_price(record['id'], record['revision'] - 1)
+
+
+def test_unsupported_controller_metadata_forwarder_excludes_unknown_private_fields():
+    result = _safe_controller_diagnostics({
+        "declared_type": "39", "controller_type": "39", "store_type": "broker",
+        "option_names": ["coating", "paperFinish", "coating", {"email": "PRIVATE_SENTINEL"},
+                         "PRIVATE_SENTINEL", "invalid-name", "x" * 65],
+        "quantity": "50", "accountToken": "PRIVATE_SENTINEL", "subtotal": "123.45",
+        "qualification": {"email": "PRIVATE_SENTINEL"},
+    })
+    assert result == {"declared_type": "39", "controller_type": "39", "store_type": "broker",
+                      "option_names": ["coating", "paperFinish"]}
+    assert _safe_controller_diagnostics(None) is None
+
+
+@pytest.mark.asyncio
+async def test_unsupported_scoped_price_awaits_loaded_hashes_without_quoting(manager, monkeypatch):
+    m, pool = manager
+    record = await completed(m)
+    page = m._pages[record['id']]
+    await page.evaluate("""() => {
+        const element = document.querySelector('#order-form');
+        element.setAttribute('data-printproducttype','39');
+        element.setAttribute('data-currentstoretype','broker');
+        const controller = {printProductType:39,fields:{39:{options:['coating','spotCoating','paperFinish']}},
+          privateAccount:'PRIVATE_SENTINEL',jsonObj:{
+            userSelectedOptions:{quantity:'50',email:'PRIVATE_SENTINEL'},
+            appliedPrices:{productPrice:'123.45'},others:{oauth:'PRIVATE_SENTINEL'}},
+          get totalPrice(){throw new Error('No unsupported price read')},
+          getCouponPrice(){throw new Error('No unsupported qualification read')}};
+        const child = {_: {subTree: {component: {refs: {orderFormInstance: controller}}}}};
+        element._vnode = {component: {proxy: {$refs: {childComponents: child}}}};
+    }""")
+    monkeypatch.setattr(m, '_settle_initial', AsyncMock(return_value=True))
+    observed = m._bundle_hashes[record['id']]
+
+    async def finish_already_loaded_hashes():
+        await asyncio.sleep(0.02)
+        observed.update({key: {digest} for key, digest in SOURCE_CONTRACT.items()})
+
+    pending = asyncio.create_task(finish_already_loaded_hashes())
+    m._bundle_tasks[record['id']].add(pending)
+    pending.add_done_callback(m._bundle_tasks[record['id']].discard)
+    requests_before = list(pool.requests)
+    result = await m.read_scoped_price(record['id'], record['revision'])
+    assert result == {
+        "status": "unavailable", "reason": "controller_product_mismatch",
+        "diagnosis_id": record['id'], "revision": record['revision'],
+        "source_bundle_verified": True, "loaded_contract": SOURCE_CONTRACT,
+        "diagnostic_metadata": {
+            "declared_type": "39", "controller_type": "39", "store_type": "broker",
+            "option_names": ["coating", "spotCoating", "paperFinish"],
+        },
+    }
+    assert pending.done()
+    assert pool.requests == requests_before
+    assert "PRIVATE_SENTINEL" not in json.dumps(result)
+    assert not ({'capture', 'subtotal', 'reconciliation', 'qualification'} & result.keys())
+
+    # A different actually loaded bundle remains visible but never verified.
+    observed['order_form_sha256'] = {'0' * 64}
+    unverified = await m.read_scoped_price(record['id'], record['revision'])
+    assert unverified['status'] == 'unavailable'
+    assert unverified['source_bundle_verified'] is False
+    assert unverified['loaded_contract']['order_form_sha256'] == '0' * 64
+    assert pool.requests == requests_before
 
 
 @pytest.mark.asyncio

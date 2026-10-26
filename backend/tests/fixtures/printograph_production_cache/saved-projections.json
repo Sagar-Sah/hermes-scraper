@@ -1,0 +1,6 @@
+{
+  "note": "Public native production functions are pinned separately. Owned-page/selection/price boundaries are exercised with synthetic fixtures in the test module.",
+  "private_capture_records_omitted": true,
+  "schema": "publication-production-cache-fixture-provenance/v1",
+  "source_price_evidence": false
+}

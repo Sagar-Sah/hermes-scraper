@@ -1,0 +1,102 @@
+<!--
+/**
+ * Created by FindCanary, LLC.
+ * Project: 4over
+ */
+-->
+<!-- ko if: isVisible -->
+<div class="option-group__title">
+    <span class="option-group__icon option-group__icon--runsize" aria-hidden="true"></span>
+    <span class="option-group__label" data-bind="text: panelTitle"></span>
+    <!-- ko if: isPrintReadyEnabled -->
+    <!-- ko template: {name: 'FourOver_ProductStepConfig/field-tooltip', data: {text: $t('The total number of pieces you want printed. Larger quantities usually lower your cost per piece.'), src: tooltipImageUrl}} --><!-- /ko -->
+    <!-- /ko -->
+</div>
+
+<!-- ko if: isMarkupEnabled -->
+<p class="qty-box__note">
+    <!-- ko i18n: '*Price Per Unit and Markup Price update automatically when quantity or markup changes.' --><!-- /ko -->
+</p>
+<!-- /ko -->
+
+<!-- ko if: hasRunSizeSearchEnabled() -->
+<div class="runsizes_head runsizes_search">
+    <span class="runsize-search-cell">
+        <input id="run-size-search" name="run-size-search" class="product-4over-input runsize-search" type="number"
+               data-bind="value: searchQuery, valueUpdate: 'keyup', attr: { placeholder: $t('Search'), 'aria-label': $t('Search') }">
+    </span>
+    <span class="runsize-search-actions">
+        <button type="button" class="clear-runsize-search" data-bind="click: function(){ searchQuery('') }, visible: searchQuery().length">
+            <!-- ko i18n: 'Clear' --><!-- /ko -->
+        </button>
+    </span>
+</div>
+<!-- ko if: customRunSizeSearchErrorMessage -->
+<div class="custom_runsize_row_error">
+    <span data-bind="i18n: 'No matching run sizes found'"></span>
+</div>
+<!--/ko-->
+<!-- /ko -->
+
+
+<ul class="runsizes-table">
+    <li class="runsizes_head">
+        <span><!-- ko i18n: 'Run Size' --><!-- /ko --></span>
+        <span>
+            <span class="runsizes_head-full"><!-- ko i18n: 'Price Per Unit' --><!-- /ko --></span>
+            <span class="runsizes_head-short"><!-- ko i18n: 'Price/Unit' --><!-- /ko --></span>
+        </span>
+        <span data-bind="i18n: 'Total Price'"></span>
+        <!-- ko if: isMarkupEnabled -->
+        <span class="markup-price">
+            <!-- ko i18n: 'Markup Price' --><!-- /ko -->
+            <input class="product-4over-input" type="number" min="0" data-bind="textInput: markupInterest" />
+            <!-- ko i18n: '%' --><!-- /ko -->
+        </span>
+        <!-- /ko -->
+    </li>
+
+    <!-- ko if: isCustomRunSizeEnable() -->
+    <li class="runsizes_row custom_runsize_row"
+        data-bind="css: {'selected-qty': isCustomRunSizeSelected()}, click: selectQty.bind($data, 'custom')">
+        <span class="runsize-qty-cell">
+            <label for="runsize-custom" data-bind="i18n: 'Custom'" class="custom-run-size-label"></label>
+            <input id="runsize-custom" class="product-4over-input custom-run-size-input" type="number" min="0"
+                   data-bind="value: runSizeInput,
+                              event: { keyup: customRunSizePriceUpdate }">
+            <!-- ko if: isPrintReadyEnabled -->
+            <!-- ko template: {name: 'FourOver_ProductStepConfig/field-tooltip', data: {text: $t('Type any quantity within the accepted range. Its price is worked out from the two run sizes either side of it, and the one it is built from is highlighted in the table below.'), src: tooltipImageUrl}} --><!-- /ko -->
+            <!-- /ko -->
+        </span>
+        <span class="custom-run-size-unitprice" data-bind="text: customRunSizeUnitPrice"></span>
+        <span class="custom-run-size-totalprice" data-bind="text: customRunSizeTotalPrice"></span>
+        <!-- ko if: isMarkupEnabled -->
+        <span class="markup-price custom-run-size-markup-price" data-bind="text: customRunSizeMarkUpPrice()"></span>
+        <!-- /ko -->
+    </li>
+    <!-- ko if: customRunSizeErrorMessage -->
+    <li class="custom_runsize_row_error">
+        <span role="alert" data-bind="text: customRunSizeErrorMessage"></span>
+    </li>
+    <!--/ko-->
+    <!-- /ko -->
+
+    <!-- ko foreach: { data: filteredPackagePrices().slice(0, lineLimit()), as: 'priceItem' } -->
+    <li class="runsizes_row" data-bind="css: {'selected-qty': $parent.isSelectedQty(priceItem)}, click: $parent.selectQty.bind($parent)">
+        <span class="runsize" data-bind="text: priceItem.qty"></span>
+        <span data-bind="text: $parent.getUnitPrice(priceItem)"></span>
+        <span data-bind="text: $parent.getTotalPrice(priceItem)"></span>
+        <!-- ko if: $parent.isMarkupEnabled -->
+        <span class="markup-price" data-bind="text: $parent.getMarkupPrice(priceItem)"></span>
+        <!-- /ko -->
+    </li>
+    <!--/ko-->
+
+    <li class="runsizes-table_actions" data-bind="css: {'active': isExpanded()}, visible: isCollapsable()">
+        <span data-bind="click: collapsibleToggle, i18n: isExpanded() ? 'Show Less' : 'Show More'"></span>
+    </li>
+</ul>
+<!-- ko foreach: getRegion('run-size-actions') -->
+<!-- ko template: getTemplate() --><!-- /ko -->
+<!--/ko-->
+<!--/ko-->

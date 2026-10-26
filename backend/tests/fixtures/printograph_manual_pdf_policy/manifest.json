@@ -1,0 +1,20 @@
+{
+  "files": {
+    "catalog-proof-type-mapping.js.txt": "d596067976c80b8a0d3e506a9404e43cbf13eaec6e59577c1940b46aec767b7d",
+    "get-stateless.js.txt": "bca7f98e8e29c48d74f9dad960723a5e4202a9c6a02d25db87195e2a79c3f53c",
+    "legacy-default-compatibility.json": "e2a60d614ade0a9c8da80a59d2e680c9448c66b5db57f99eebfdcbdac47dfde6",
+    "manual-proof-display.js.txt": "df86524ea745b63400b1c21de93a87ca48693f717ea675f92f2b033852929a3a",
+    "manual-proof-render.js.txt": "140ba61bbeff9e0185326357cba07fecac2c6ced440971c4f0b1065bb936ddfd",
+    "manual-proof-schema.js.txt": "672c056418ff570c21b1089a16dd5a581d84031681cba653d7f3bc01b0b7aa7c",
+    "native-pdf-builder.js": "fb69bc4ca92613a80da1bd47cac01149f580208ed00480538cf5766ce83b2c6d",
+    "observed-public-proof-options.json": "bcd9e3c93d0986eec48efb96c1bc2f67e7ccb69c4d6e87d1aac67e925b9efa37",
+    "turnaround-param.js.txt": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
+    "update-options.js.txt": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776"
+  },
+  "frozen_candidate_manifest_sha256": "dd4862b59d5552dd975c3755ccc8dc3d4af190f99c6b90b936c8b968d64c2c8f",
+  "original_public_bundle_sha256": [
+    "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+    "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7"
+  ],
+  "schema": "printograph-manual-pdf-policy-public-fixtures/v1"
+}

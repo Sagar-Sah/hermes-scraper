@@ -1,0 +1,27 @@
+{
+  "interpretation": "Native schema maps alternativeSizeId to idv; current options use idv under orientation2; ordinary orientation handler swaps selected size to the paired source ID. No source requests were made.",
+  "slices": [
+    {
+      "character_end": 1860410,
+      "character_start": 1859730,
+      "file": "source/size-schema.js",
+      "sha256": "c07b25183f515b68aa7a741b6da3aa50da76029ce9c5b87e9efb31cb28cd8598",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6"
+    },
+    {
+      "character_end": 1407330,
+      "character_start": 1406900,
+      "file": "source/native-option-value.js",
+      "sha256": "8714f9fcf14106aa8f144eee17377d5a0e8837e11491ffd6e315c93bb8ddda32",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6"
+    },
+    {
+      "character_end": 1460460,
+      "character_start": 1459820,
+      "file": "source/orientation-action.js",
+      "sha256": "abb90a38b4b9240afc3c3fcea380a44d9fc10fc577d73ef4ba2d5927260b60fc",
+      "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6"
+    }
+  ],
+  "source_provenance": "Original public bundle SHA256 and character offsets retained; local capture paths omitted."
+}

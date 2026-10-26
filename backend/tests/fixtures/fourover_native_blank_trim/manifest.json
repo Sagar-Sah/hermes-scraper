@@ -1,0 +1,15 @@
+{
+  "files": {
+    "custom-trim-size.js": "d8b19144993cfd8accd304e147f09f9aa8b5f856f36b7462471dee746292c24d",
+    "digital-proof-source.js": "5249740537e7510747082a17e3db24049f2f289f0c25ff9cb3fa7a610cf1c7bf",
+    "job-sample-source.js": "29affebd619264221c8445e3a225c0dea367a5b635dd3ed6b334ec9228241ec7",
+    "post-request.js": "9144f5a9e273017909765c59922f769eb60383d38ff4052d160795efd719f807",
+    "product-options-manager.js": "e5a3c0b5a25a46efe41751f2f46624914d955df6c7c3d9d0cc5fbadfeb5c0f5b",
+    "product-options-processors.js": "a2e51eb4589596af522ba54aaa8ed317a02d772af9eeb97efb74b491018c4323",
+    "project-name-source.js": "05e6c78d14f51950dede0377ad6e1c2340b594ca99747102066b501b88b40786",
+    "register-options-manager.js": "9fd9d14b87a9976f23adb22485f070512fae3f2e442d5553779b2020dc9163c4",
+    "selected-custom-run-size.js": "4076e1c4a3669735fc023291ae0cd04a4347245bf3cd1a60dc8968491f89bdf0",
+    "trim-size-options-manager.js": "6c64b1c058c7dd03ec5ea32abe0a92af2cee7000cc7faef324d672be711d56ec"
+  },
+  "schema": "public-native-blank-trim-proof/v1"
+}

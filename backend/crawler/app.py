@@ -16,7 +16,7 @@ from fastapi import FastAPI, HTTPException, Request, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse, Response as RawResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr, model_validator
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from sqlalchemy import select, update, func
 
@@ -41,6 +41,7 @@ from .source_domains import DomainJob, SourceDomainCoordinator
 from .source_domain_session import SourceDomainSessions
 from .variation_plan import VariationPlanCache
 from .product_diagnosis import ProductDiagnosisManager
+from .dps_workflow_references import DPS_ACCOUNT_URL
 from .diagnosis_policy import normalize_selection
 from .product_finalization import saved_products, review_product, review_file
 from .transport import validate_url, ExtractionError
@@ -65,6 +66,8 @@ async def lifespan(app):
     app.state.dps_pilots = None
     app.state.dps_exact_quotes = None
     app.state.campaigns = CampaignManager(store)
+    app.state.fourover_child_prices = None
+    app.state.fourover_native_observer = None
     app.state.source_collections = None
     app.state.b2sign_harvests = None
     app.state.b2sign_canaries = None
@@ -75,8 +78,34 @@ async def lifespan(app):
                                                        on_stage_finished=engine.finish_run,
                                                        context_validator=app.state.domain_sessions.validate_context)
     engine.source_domains = app.state.source_domains
+    from .campaign_automation_registry import build_campaign_automation
+    async def create_owned_browser_run(spec):
+        created = await create_run(JobSpec(**spec))
+        # Same event-loop turn: the engine cannot begin the queued child
+        # before this synchronous normal pause fences it. The profile saves
+        # its owner/ID before it checks scope again and resumes the child.
+        return control(created['id'], 'pause')
+
+    async def read_owned_browser_run(run_id):
+        return get_run(run_id)
+
+    async def control_owned_browser_run(run_id, action):
+        return control(run_id, action)
+
+    async def find_owned_browser_runs(owner):
+        with store.session() as session:
+            ids = list(session.scalars(select(Run.id).where(
+                Run.spec['source_metadata']['automation_owner'].as_string() == owner).limit(2)))
+        return [get_run(run_id) for run_id in ids]
+
+    app.state.campaign_automation = build_campaign_automation(
+        store, app.state.campaigns, app.state.product_diagnoses, engine.browser_pool,
+        browser_run_callbacks={'create': create_owned_browser_run, 'read': read_owned_browser_run,
+            'control': control_owned_browser_run, 'find_owned': find_owned_browser_runs})
+    await app.state.campaign_automation.open()
     await engine.start()
     yield
+    await app.state.campaign_automation.close()
     await app.state.campaigns.close()
     if app.state.source_collections is not None:
         await app.state.source_collections.close()
@@ -109,6 +138,10 @@ async def authenticated(request: Request):
         supplied = request.headers.get("authorization", "").removeprefix("Bearer ")
         if not secrets.compare_digest(supplied, settings.api_token):
             raise HTTPException(401, "API token required")
+
+
+from .campaign_automation_routes import automation_router
+app.include_router(automation_router(lambda: app.state.campaign_automation, authenticated))
 
 
 def active_campaign_product(campaign_id:str,product_id:str):
@@ -963,6 +996,163 @@ async def harvest_fourover_price_tables(campaign_id:str, product_id:str):
     try:return app.state.campaigns.attach_fourover_price_tables(
         campaign_id,product_id,source_url,children,observations)
     except ValueError as exc:raise HTTPException(422,str(exc)) from exc
+
+
+class FourOverChildPricesRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    snapshot_id: StrictStr = Field(pattern=r'^[a-f0-9]{32}$')
+    child_ids: list[StrictStr] = Field(max_length=10)
+    request_budget: StrictInt = Field(ge=1, le=11)
+    sets: StrictInt = Field(ge=1, le=1)
+    job_sample: StrictBool
+    digital_proof: StrictBool
+
+
+class FourOverCollectedEvidenceRequest(BaseModel):
+    model_config = {"extra":"forbid"}
+    snapshot_id: StrictStr = Field(pattern=r'^[a-f0-9]{32}$')
+    expected_checkpoint_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+    expected_option_rows_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+    sets: StrictInt = Field(ge=1,le=1)
+    job_sample: StrictBool
+    digital_proof: StrictBool
+    materialize_rows: StrictBool
+    finalize: StrictBool
+
+
+class FourOverNativeObservationRequest(BaseModel):
+    model_config = {"extra":"forbid", "json_schema_extra":{
+        "description":"One reviewed, once-only native10359/160495/q2000 source-cost observation. Zeroed example provenance/fingerprint values are placeholders; replace only with separately reviewed exact pins. Historical q500/q1000 pairs are read-only and never repeatable. Services remain off; this does not finalize a product or import retail prices.",
+        "examples":[{"snapshot_id":"0"*32,"expected_checkpoint_sha256":"0"*64,
+            "expected_option_rows_sha256":"0"*64,"child_id":"160495","package_quantity":2000,
+            "sets":1,"job_sample":False,"digital_proof":False,
+            "allow_summary_panel_without_shipping":True,"attach_canary":False,
+            "expected_observer_sha256":"0"*64}]}}
+    snapshot_id: StrictStr = Field(pattern=r'^[a-f0-9]{32}$')
+    expected_checkpoint_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+    expected_option_rows_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+    child_id: StrictStr = Field(pattern=r'^(?:160399|160492|160495)$')
+    package_quantity: StrictInt = Field(ge=500,le=2000)
+    sets: StrictInt = Field(ge=1,le=1)
+    job_sample: StrictBool
+    digital_proof: StrictBool
+    allow_summary_panel_without_shipping: StrictBool
+    attach_canary: StrictBool
+    expected_observer_sha256: StrictStr | None = Field(default=None,pattern=r'^[a-f0-9]{64}$')
+
+    @model_validator(mode='after')
+    def exact_reviewed_pair(self):
+        if ((self.child_id,self.package_quantity) not in {
+                ('160399',500),('160492',500),('160495',500),('160495',1000),('160495',2000)}
+                or self.package_quantity in (1000,2000) and self.expected_observer_sha256 is None):
+            raise ValueError('Only exact historical pairs or the reviewed native2000 pair are supported')
+        return self
+
+
+class FourOverBootstrapDiagnosisRequest(BaseModel):
+    model_config = {"extra":"forbid"}
+    snapshot_id: StrictStr = Field(pattern=r'^[a-f0-9]{32}$')
+    expected_checkpoint_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+    expected_option_rows_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+    expected_observer_sha256: StrictStr = Field(pattern=r'^[a-f0-9]{64}$')
+
+
+@app.post('/api/v1/campaigns/{campaign_id}/fourover-bootstrap-diagnosis/{product_id}',
+          dependencies=[Depends(authenticated),Depends(active_campaign_product)])
+async def diagnose_fourover_static_bootstrap(campaign_id:str,product_id:str,payload:FourOverBootstrapDiagnosisRequest):
+    """One asset-only diagnosis per reviewed observer import; no quote selections."""
+    if product_id!='10359':raise HTTPException(422,'Only the fixed queued10359 bootstrap diagnosis is supported')
+    from .fourover_native_observation import NativeObserver,Held
+    if getattr(app.state,'fourover_native_observer',None) is None:
+        app.state.fourover_native_observer=NativeObserver(store,app.state.engine.browser_pool)
+    try:
+        return await app.state.fourover_native_observer.diagnose_bootstrap(app.state.campaigns,campaign_id,
+            payload.snapshot_id,payload.expected_checkpoint_sha256,payload.expected_option_rows_sha256,
+            expected_observer_sha256=payload.expected_observer_sha256)
+    except FileNotFoundError:raise HTTPException(404,'Pinned source cache unavailable') from None
+    except (Held,ValueError,KeyError,TypeError,OSError):raise HTTPException(409,'Pinned bootstrap diagnosis scope needs review') from None
+
+
+@app.post('/api/v1/campaigns/{campaign_id}/fourover-collected-evidence/{product_id}',
+          dependencies=[Depends(authenticated),Depends(active_campaign_product)])
+async def attach_fourover_collected_evidence(campaign_id:str,product_id:str,payload:FourOverCollectedEvidenceRequest):
+    """Attach all pinned historical 10359 tables/bindings; no source/CSV/import."""
+    if (product_id!='10359' or payload.job_sample is not False or payload.digital_proof is not False
+            or payload.materialize_rows is not False or payload.finalize is not False):
+        raise HTTPException(422,'Only the fixed queued historical evidence scope is supported')
+    from .fourover_collected_evidence import attach_cache,mapped_product,SOURCE
+    from .fourover_child_prices import FourOverChildPriceCollector
+    manager=app.state.campaigns
+    async def check():mapped_product(manager,campaign_id)
+    reader=FourOverChildPriceCollector(store,None)
+    try:
+        async with reader._locked(reader._path(payload.snapshot_id,SOURCE),check):
+            return await asyncio.to_thread(attach_cache,manager,campaign_id,payload.snapshot_id,
+                payload.expected_checkpoint_sha256,payload.expected_option_rows_sha256)
+    except FileNotFoundError:raise HTTPException(404,'Pinned source cache unavailable') from None
+    except (ValueError,KeyError,TypeError,OSError):raise HTTPException(409,'Pinned source evidence or campaign needs review') from None
+
+
+@app.post('/api/v1/campaigns/{campaign_id}/fourover-native-observation/{product_id}',
+          dependencies=[Depends(authenticated),Depends(active_campaign_product)])
+async def observe_fourover_native_context(campaign_id:str,product_id:str,payload:FourOverNativeObservationRequest):
+    """One retained 10359 native context; forbidden routes blocked before transport."""
+    if (product_id!='10359' or payload.job_sample is not False or payload.digital_proof is not False
+            or payload.allow_summary_panel_without_shipping is not True or payload.attach_canary is not False):
+        raise HTTPException(422,'Only the approved one-context no-shipping observation is supported')
+    from .fourover_native_observation import NativeObserver,Held
+    if getattr(app.state,'fourover_native_observer',None) is None:
+        app.state.fourover_native_observer=NativeObserver(store,app.state.engine.browser_pool)
+    try:
+        kwargs={'child_id':payload.child_id,'package_quantity':payload.package_quantity}
+        if payload.package_quantity in (1000,2000):
+            kwargs['expected_observer_sha256']=payload.expected_observer_sha256
+        return await app.state.fourover_native_observer.observe(app.state.campaigns,campaign_id,
+            payload.snapshot_id,payload.expected_checkpoint_sha256,payload.expected_option_rows_sha256,
+            **kwargs)
+    except FileNotFoundError:raise HTTPException(404,'Pinned source cache unavailable') from None
+    except (Held,ValueError,KeyError,TypeError,OSError):raise HTTPException(409,'Pinned native source scope needs review') from None
+
+
+def fourover_child_price_collector():
+    if app.state.fourover_child_prices is None:
+        from .fourover_child_prices import FourOverChildPriceCollector
+        app.state.fourover_child_prices = FourOverChildPriceCollector(
+            store, app.state.engine.browser_pool)
+    return app.state.fourover_child_prices
+
+
+@app.post('/api/v1/campaigns/{campaign_id}/fourover-child-prices/{product_id}',
+          dependencies=[Depends(authenticated), Depends(active_campaign_product)])
+async def collect_fourover_child_prices(campaign_id: str, product_id: str,
+                                       payload: FourOverChildPricesRequest):
+    """Read a bounded subset; no legacy table attachment or completion claim."""
+    campaign = active_campaign_product(campaign_id, product_id)
+    product = next((p for p in campaign['products'] if p['id'] == product_id), None)
+    if not product or product.get('supplier') != 'fourover' or product.get('stage') == 'excluded':
+        raise HTTPException(409, 'An active mapped 4over product is required')
+    if payload.job_sample is not False or payload.digital_proof is not False:
+        raise HTTPException(422, 'Only one-set, sample-off, proof-off table evidence is supported')
+    source_url = product.get('supplier_url')
+
+    async def check_scope():
+        current = active_campaign_product(campaign_id, product_id)
+        matched = next((p for p in current['products'] if p['id'] == product_id), None)
+        if (not matched or matched.get('supplier') != 'fourover'
+                or matched.get('stage') == 'excluded'
+                or matched.get('supplier_url') != source_url):
+            raise ValueError('The active supplier mapping changed; stop this collection')
+
+    try:
+        from .fourover_child_prices import _url
+        _url(source_url)
+        return await fourover_child_price_collector().collect(
+            payload.snapshot_id, source_url, payload.child_ids,
+            request_budget=payload.request_budget,
+            scope={'sets': payload.sets, 'job_sample': payload.job_sample,
+                   'digital_proof': payload.digital_proof}, check=check_scope)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @app.post('/api/v1/campaigns/{campaign_id}/fourover-option-map/{product_id}', dependencies=[Depends(authenticated),Depends(active_campaign_product)])
@@ -2332,6 +2522,8 @@ async def resume_b2sign_canary(canary_id:str):
 class DiagnosisRequest(BaseModel):
     model_config = {"extra": "forbid"}
     url: str = Field(min_length=1, max_length=4096)
+    focus: StrictBool = False
+    observe_printograph_prices: StrictBool = False
 
 
 class DiagnosisSelectionRequest(BaseModel):
@@ -2350,6 +2542,13 @@ class DiagnosisObservedChoiceRequest(BaseModel):
 class DiagnosisScopedPriceRequest(BaseModel):
     model_config = {"extra": "forbid"}
     revision: StrictInt
+
+
+
+class DiagnosisSourceReferencesRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    revision: StrictInt = Field(ge=0)
+    source_url: StrictStr = Field(min_length=1, max_length=768)
 
 
 def diagnosis_error(exc):
@@ -2393,10 +2592,29 @@ async def delete_supplier_session(supplier_id: str):
     return {"deleted": supplier_id}
 
 
+class SupplierSessionOpenRequest(BaseModel):
+    model_config = {'extra':'forbid'}
+    target_url: Literal[DPS_ACCOUNT_URL] | None = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def explicit_target_is_nonnull(cls, value):
+        if isinstance(value, dict) and 'target_url' in value and value['target_url'] is None:
+            raise ValueError('Explicit target_url must be the known DPS account URL')
+        return value
+
+
+class SupplierWorkflowReferencesRequest(BaseModel):
+    model_config = {'extra':'forbid'}
+    expected_url: Literal[DPS_ACCOUNT_URL]
+
+
 @app.post("/api/v1/supplier-sessions/{supplier_id}/open", dependencies=[Depends(authenticated)])
-async def open_supplier_session(supplier_id: str):
+async def open_supplier_session(supplier_id: str, payload: SupplierSessionOpenRequest | None = None):
     try:
-        return await app.state.product_diagnoses.open_supplier(supplier_id)
+        if payload is None or payload.target_url is None:
+            return await app.state.product_diagnoses.open_supplier(supplier_id)
+        return await app.state.product_diagnoses.open_supplier(supplier_id, target_url=payload.target_url)
     except (LookupError, ValueError, ExtractionError) as exc:
         raise diagnosis_error(exc) from exc
 
@@ -2405,6 +2623,14 @@ async def open_supplier_session(supplier_id: str):
 async def check_supplier_session(supplier_id: str):
     try:
         return await app.state.product_diagnoses.check_supplier(supplier_id)
+    except (LookupError, ValueError, ExtractionError) as exc:
+        raise diagnosis_error(exc) from exc
+
+
+@app.post('/api/v1/supplier-sessions/{supplier_id}/workflow-references', dependencies=[Depends(authenticated)])
+async def supplier_workflow_references(supplier_id: str, payload: SupplierWorkflowReferencesRequest):
+    try:
+        return await app.state.product_diagnoses.read_supplier_workflow_references(supplier_id, payload.expected_url)
     except (LookupError, ValueError, ExtractionError) as exc:
         raise diagnosis_error(exc) from exc
 
@@ -2434,8 +2660,79 @@ def product_diagnoses():
 @app.post("/api/v1/product-diagnoses", dependencies=[Depends(authenticated)])
 async def start_product_diagnosis(payload: DiagnosisRequest):
     try:
-        return await app.state.product_diagnoses.start(payload.url)
+        if payload.observe_printograph_prices:
+            from .price_contract import SPECIAL_SHAPES_SOURCE_URL
+            if payload.url != SPECIAL_SHAPES_SOURCE_URL:
+                raise HTTPException(422, "passive_price_evidence_source_scope_required")
+            return await app.state.product_diagnoses.start(
+                payload.url, focus=payload.focus, observe_printograph_prices=True)
+        # Preserve legacy/default manager signatures: no new keyword unless explicitly opted in.
+        return await app.state.product_diagnoses.start(payload.url, focus=payload.focus)
     except (LookupError, ValueError, ExtractionError) as exc:
+        raise diagnosis_error(exc) from exc
+
+
+class SupplierProfileQuoteRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    profile_id: StrictStr
+    configuration: dict
+    focus: StrictBool = False
+
+
+@app.post('/api/v1/campaigns/{campaign_id}/supplier-profile-quote/{product_id}',
+          dependencies=[Depends(authenticated), Depends(active_campaign_product)])
+async def execute_supplier_profile_quote(campaign_id: str, product_id: str, payload: SupplierProfileQuoteRequest):
+    """Registered native supplier driver. No endpoint per supplier/Woo product."""
+    from .supplier_profile_executor import association_for, normalize_configuration
+    try:
+        current=active_campaign_product(campaign_id,product_id)
+        matched=next((p for p in current['products'] if p['id']==product_id),None)
+        if not matched or matched.get('stage')=='excluded':
+            raise ValueError('active_product_required')
+        association={'campaign_id':campaign_id,'product_id':product_id,
+                     'supplier':matched.get('supplier'),'source_url':matched.get('supplier_url')}
+        association_for(payload.profile_id,association)
+        normalize_configuration(payload.configuration)
+        async def check_scope():
+            latest=active_campaign_product(campaign_id,product_id)
+            item=next((p for p in latest['products'] if p['id']==product_id),None)
+            if (not item or item.get('stage')=='excluded' or item.get('supplier')!=association['supplier']
+                    or item.get('supplier_url')!=association['source_url']):
+                raise ValueError('active_product_mapping_changed')
+        return await app.state.product_diagnoses.execute_supplier_profile_quote(
+            payload.profile_id,association,payload.configuration,check_scope=check_scope,focus=payload.focus)
+    except (LookupError,ValueError,ExtractionError) as exc:
+        if str(exc)=='needs_profile':
+            return {'status':'needs_profile','reason':'needs_profile','source_data_finalized':False}
+        raise diagnosis_error(exc) from exc
+
+
+class StaggeredPassiveDiagnosisRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    focus: StrictBool = False
+
+
+@app.post('/api/v1/campaigns/{campaign_id}/printograph-passive-diagnosis/{product_id}',
+          dependencies=[Depends(authenticated), Depends(active_campaign_product)])
+async def start_staggered_passive_diagnosis(campaign_id: str, product_id: str,
+                                           payload: StaggeredPassiveDiagnosisRequest):
+    """One active mapped product; no completion or supplier request replay."""
+    from .price_contract import STAGGERED_CUT_SOURCE_URL
+    if product_id != '17792':
+        raise HTTPException(422, 'Only the reviewed Staggered Cut source is supported')
+
+    async def check_scope():
+        current=active_campaign_product(campaign_id,product_id)
+        matched=next((p for p in current['products'] if p['id']==product_id),None)
+        if (not matched or matched.get('supplier')!='printograph' or matched.get('stage')=='excluded'
+                or matched.get('supplier_url')!=STAGGERED_CUT_SOURCE_URL):
+            raise ValueError('The active Printograph mapping changed')
+
+    try:
+        await check_scope()
+        return await app.state.product_diagnoses.start_staggered_passive(
+            check_scope=check_scope,focus=payload.focus)
+    except (LookupError,ValueError,ExtractionError) as exc:
         raise diagnosis_error(exc) from exc
 
 
@@ -2468,6 +2765,24 @@ async def select_product_observed_choice(diagnosis_id: str, payload: DiagnosisOb
 async def read_product_scoped_price(diagnosis_id: str, payload: DiagnosisScopedPriceRequest):
     try:
         return await app.state.product_diagnoses.read_scoped_price(diagnosis_id, payload.revision)
+    except (LookupError, ValueError, ExtractionError) as exc:
+        raise diagnosis_error(exc) from exc
+
+
+@app.post("/api/v1/product-diagnoses/{diagnosis_id}/passive-price-evidence", dependencies=[Depends(authenticated)])
+async def read_product_passive_price_evidence(diagnosis_id: str, payload: DiagnosisScopedPriceRequest):
+    """Read an opted-in owned diagnosis journal; never initiate source work."""
+    try:
+        return await app.state.product_diagnoses.read_passive_price_evidence(diagnosis_id, payload.revision)
+    except (LookupError, ValueError, ExtractionError) as exc:
+        raise diagnosis_error(exc) from exc
+
+
+@app.post("/api/v1/product-diagnoses/{diagnosis_id}/source-references", dependencies=[Depends(authenticated)])
+async def read_product_source_references(diagnosis_id: str, payload: DiagnosisSourceReferencesRequest):
+    try:
+        return await app.state.product_diagnoses.read_source_references(
+            diagnosis_id, payload.revision, payload.source_url)
     except (LookupError, ValueError, ExtractionError) as exc:
         raise diagnosis_error(exc) from exc
 

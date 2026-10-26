@@ -1,0 +1,1 @@
+fg={key:0,class:"badge badge-danger"},wg={key:0},Og={style:{"text-decoration":"line-through","font-weight":"normal",color:"#333"}},Tg=["data-content"],Sg={key:0,class:"container"},zg={class:"row"},Ng={class:"col",style:{"border-top":".1rem solid #ccc"}},xg={style:{"margin-top":"1rem"}},vg=["id","val

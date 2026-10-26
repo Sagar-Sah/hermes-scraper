@@ -1,0 +1,1 @@
+paperFinish:{list:[{id:1,label:"Velvet"}],type:"dropdown",inline:"no",hasPrice:"no",required:"yes",label:"gp.PrintProductSpecifications.finish"},folding:{list:[],type:"dropdown",inline:"no",hasPrice:"

@@ -102,6 +102,8 @@ async def validate_url(url: str):
 
 
 class RateLimiter:
+    PERMIT_SECONDS = 45
+
     def __init__(self, store):
         self.store = store
 
@@ -133,7 +135,7 @@ class RateLimiter:
                 if wait > 0:
                     return None, min(wait, 2)
                 token = uid()
-                s.add(Permit(id=token, origin=origin, expires=now + 45))
+                s.add(Permit(id=token, origin=origin, expires=now + self.PERMIT_SECONDS))
                 row.next_at = now + 1 / max(0.1, min(row.rps, rps))
                 return token, 0
         except IntegrityError:
@@ -149,10 +151,17 @@ class RateLimiter:
 
     def release(self, origin, token, elapsed, status, retry_after, cap):
         with self.store.session(immediate=True) as s:
-            s.execute(delete(Permit).where(Permit.id == token))
+            permit = s.get(Permit, token)
+            s.execute(delete(Permit).where(Permit.id == token, Permit.origin == origin))
             row = s.get(Origin, origin, with_for_update=not self.store.sqlite)
             if not row:
                 return
+            # Callers may start timing before acquire. Supplier latency cannot
+            # exceed the duration of a verified permit, and a no-request release
+            # must not change adaptive latency or health.
+            held = (self.store.now(s) - (permit.expires - self.PERMIT_SECONDS)
+                    if permit is not None and permit.origin == origin else 0)
+            elapsed = min(elapsed, held) if elapsed > 0 and held > 0 else 0
             if status in {429, 503}:
                 row.rps = max(0.1, row.rps / 2)
                 row.backoff_until = max(
@@ -162,14 +171,15 @@ class RateLimiter:
             elif elapsed > max(2, row.latency * 2) and row.latency:
                 row.rps = max(0.1, row.rps * 0.8)
                 row.healthy = 0
-            elif 200 <= status < 400:
+            elif elapsed and 200 <= status < 400:
                 row.healthy += 1
                 if row.healthy >= 30:
                     row.rps = min(cap, row.rps + 0.1)
                     row.healthy = 0
-            row.latency = (
-                elapsed if not row.latency else 0.9 * row.latency + 0.1 * elapsed
-            )
+            if elapsed:
+                row.latency = (
+                    elapsed if not row.latency else 0.9 * row.latency + 0.1 * elapsed
+                )
 
 
 class Transport:

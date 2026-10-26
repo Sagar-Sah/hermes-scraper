@@ -1,0 +1,45 @@
+{
+  "schema": "public-printograph-computed-fixture/v1",
+  "provenance_sha256": "761f44ae7bc90a06abb038498ff23825ff0aee37eadb36b6c1b15e9f36bc072f",
+  "total_variants": [
+    {
+      "file_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "byte_offset": 1595802,
+      "bytes": 1799,
+      "sha256": "4ffbccec82bd27d51a188a8c1739f9b946c012857f87f2146edc980d03952e57",
+      "function": "function(){var e=this;if(0==e.jsonObj.userSelectedOptions.quantity||\"\"==e.jsonObj.userSelectedOptions.quantity)return(0).toFixed(2);var t=parseFloat(e.jsonObj.appliedPrices.productPrice),i=0;100==e.jsonObj.userSelectedOptions.proofType&&(i=parseFloat(e.jsonObj.appliedPrices.proofType[e.jsonObj.userSelectedOptions.manualProofType]));var r=0;101==e.jsonObj.userSelectedOptions.proofType&&1002!=e.printProductType&&(r=parseFloat(e.jsonObj.appliedPrices.designServices[e.jsonObj.userSelectedOptions.designServices]));var o=0;Object.entries(e.fields[e.printProductType].options).forEach((t=>{let[,i]=t;if(\"flagAccessories\"==i)for(var r=0;r<e.jsonObj.userSelectedOptions.accessoriesSubItems.length;r++)e.jsonObj.appliedPrices[i]&&e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions.accessoriesSubItems[r].id]&&(o+=parseFloat(e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions.accessoriesSubItems[r].id])*parseInt(e.jsonObj.userSelectedOptions.accessoriesSubItems[r].value));else e.jsonObj.appliedPrices[i]&&e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions[i]]&&(o+=parseFloat(e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions[i]]))}));var s=t+i+o+r;return w.A.isGeneric(e.printProductType)&&(s+=parseFloat(e.jsonObj.appliedPrices.holeDrillingPrice),void 0!=e.jsonObj.userSelectedOptions.standType&&0!=e.jsonObj.userSelectedOptions.standType&&(s+=parseFloat(e.jsonObj.appliedPrices.standType[e.jsonObj.userSelectedOptions.standType])),void 0!=e.jsonObj.userSelectedOptions.frame&&78==e.jsonObj.userSelectedOptions.frame&&(s+=parseFloat(e.jsonObj.appliedPrices.frame[e.jsonObj.userSelectedOptions.frame]))),e.parameter.canOrderFreeSampleKit(e.jsonObj,e.printProductType)&&(s=0),10018==e.printProductType&&(s=parseFloat(e.jsonObj.userSelectedOptions.eddm.totalCost)),s.toFixed(2)}"
+    },
+    {
+      "file_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "byte_offset": 1737527,
+      "bytes": 1728,
+      "sha256": "0d10860b90c2ea23409d0dd2a03b3c2156fa03eb01a8b9fdd5bd3cd031e9e5c6",
+      "function": "function(){var e=this;if(0==e.jsonObj.userSelectedOptions.quantity||\"\"==e.jsonObj.userSelectedOptions.quantity)return(0).toFixed(2);var t=parseFloat(e.jsonObj.appliedPrices.productPrice),i=0;100==e.jsonObj.userSelectedOptions.proofType&&(i=parseFloat(e.jsonObj.appliedPrices.proofType[e.jsonObj.userSelectedOptions.manualProofType]));var r=0;101==e.jsonObj.userSelectedOptions.proofType&&1002!=e.printProductType&&(r=parseFloat(e.jsonObj.appliedPrices.designServices[e.jsonObj.userSelectedOptions.designServices]));var o=0;Object.entries(e.fields[e.printProductType].options).forEach((t=>{let[,i]=t;if(\"flagAccessories\"==i)for(var r=0;r<e.jsonObj.userSelectedOptions.accessoriesSubItems.length;r++)e.jsonObj.appliedPrices[i]&&e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions.accessoriesSubItems[r].id]&&(o+=parseFloat(e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions.accessoriesSubItems[r].id])*parseInt(e.jsonObj.userSelectedOptions.accessoriesSubItems[r].value));else e.jsonObj.appliedPrices[i]&&e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions[i]]&&(o+=parseFloat(e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions[i]]))}));var s=t+i+o+r;return w.A.isGeneric(e.printProductType)&&(s+=parseFloat(e.jsonObj.appliedPrices.holeDrillingPrice),void 0!=e.jsonObj.userSelectedOptions.standType&&0!=e.jsonObj.userSelectedOptions.standType&&(s+=parseFloat(e.jsonObj.appliedPrices.standType[e.jsonObj.userSelectedOptions.standType])),void 0!=e.jsonObj.userSelectedOptions.frame&&78==e.jsonObj.userSelectedOptions.frame&&(s+=parseFloat(e.jsonObj.appliedPrices.frame[e.jsonObj.userSelectedOptions.frame]))),10018==e.printProductType&&(s=parseFloat(e.jsonObj.userSelectedOptions.eddm.totalCost)),s.toFixed(2)}"
+    },
+    {
+      "file_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "byte_offset": 1774371,
+      "bytes": 1728,
+      "sha256": "0d10860b90c2ea23409d0dd2a03b3c2156fa03eb01a8b9fdd5bd3cd031e9e5c6",
+      "function": "function(){var e=this;if(0==e.jsonObj.userSelectedOptions.quantity||\"\"==e.jsonObj.userSelectedOptions.quantity)return(0).toFixed(2);var t=parseFloat(e.jsonObj.appliedPrices.productPrice),i=0;100==e.jsonObj.userSelectedOptions.proofType&&(i=parseFloat(e.jsonObj.appliedPrices.proofType[e.jsonObj.userSelectedOptions.manualProofType]));var r=0;101==e.jsonObj.userSelectedOptions.proofType&&1002!=e.printProductType&&(r=parseFloat(e.jsonObj.appliedPrices.designServices[e.jsonObj.userSelectedOptions.designServices]));var o=0;Object.entries(e.fields[e.printProductType].options).forEach((t=>{let[,i]=t;if(\"flagAccessories\"==i)for(var r=0;r<e.jsonObj.userSelectedOptions.accessoriesSubItems.length;r++)e.jsonObj.appliedPrices[i]&&e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions.accessoriesSubItems[r].id]&&(o+=parseFloat(e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions.accessoriesSubItems[r].id])*parseInt(e.jsonObj.userSelectedOptions.accessoriesSubItems[r].value));else e.jsonObj.appliedPrices[i]&&e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions[i]]&&(o+=parseFloat(e.jsonObj.appliedPrices[i][e.jsonObj.userSelectedOptions[i]]))}));var s=t+i+o+r;return w.A.isGeneric(e.printProductType)&&(s+=parseFloat(e.jsonObj.appliedPrices.holeDrillingPrice),void 0!=e.jsonObj.userSelectedOptions.standType&&0!=e.jsonObj.userSelectedOptions.standType&&(s+=parseFloat(e.jsonObj.appliedPrices.standType[e.jsonObj.userSelectedOptions.standType])),void 0!=e.jsonObj.userSelectedOptions.frame&&78==e.jsonObj.userSelectedOptions.frame&&(s+=parseFloat(e.jsonObj.appliedPrices.frame[e.jsonObj.userSelectedOptions.frame]))),10018==e.printProductType&&(s=parseFloat(e.jsonObj.userSelectedOptions.eddm.totalCost)),s.toFixed(2)}"
+    }
+  ],
+  "is_generic": [
+    {
+      "file_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "byte_offset": 695091,
+      "bytes": 34,
+      "sha256": "3b00f969740a74dc9abc0559555f2a4c1522a7b6bf43bb060b7ab69dbbf2e5e9",
+      "function": "function(e){return 1e5!=e&&e>=1e4}"
+    }
+  ],
+  "free_sample_gate": [
+    {
+      "file_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "byte_offset": 256026,
+      "bytes": 374,
+      "sha256": "e6344a364b93dc2cfd3cda3f93ad66958052df29bef0d635cedfe72b8fd1adb3",
+      "function": "function(e,t){var i=!1;let o=window.cacheCart;if(1e5==t&&2006==e.userSelectedOptions.type&&\"undefined\"!=typeof o)if(i=!0,o.userSettings&&o.userSettings.flags)i=o.userSettings.flags.canOrderFreeSampleKit;else{let e=r.Ay.loadAllItems();e&&(0==e.items.length?i=!0:Object.entries(e.items).forEach((e=>{let[,t]=e;if(2006==t.specifications.productType)return i=!1,!1})))}return i}"
+    }
+  ]
+}

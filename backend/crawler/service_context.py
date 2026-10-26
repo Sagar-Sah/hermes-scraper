@@ -58,7 +58,18 @@ def _validated_signature(value):
 
 def canonical_service_context(source: Mapping) -> dict:
     """Read a snapshot/row without treating omitted diagnostics as absence."""
+    # Explicit schema3 opt-in; legacy omitted/raw v2 diagnostics keep their exact
+    # historical behavior. Never reinterpret old rows as modern service proof.
+    from .printograph_modern_browser import SCHEMA, modern_bound, service_signature
     context = source.get("pricing_context")
+    if source.get("service_context_schema") == SCHEMA:
+        observed = service_signature(source.get("modern_service_observation"))
+        if isinstance(context, Mapping) and "service_context" in context:
+            signature = context["service_context"]
+            if not modern_bound(signature) or ("modern_service_observation" in source and observed != signature):
+                return service_signature({})
+            return {**signature, "groups": {k: {**v, "values": list(v["values"])} for k,v in signature["groups"].items()}, "model_services": dict(signature["model_services"])}
+        return observed
     if isinstance(context, Mapping) and "service_context" in context:
         signature = _validated_signature(context["service_context"])
         if "service_context" in source or "service_context_observed" in source:
@@ -127,6 +138,9 @@ def canonical_service_context(source: Mapping) -> dict:
 
 
 def service_context_is_bound(signature: Mapping) -> bool:
+    from .printograph_modern_browser import SCHEMA, modern_bound
+    if isinstance(signature, Mapping) and signature.get("schema") == SCHEMA:
+        return modern_bound(signature)
     cleaned = _validated_signature(signature)
     return cleaned["status"] == "observed" and all(
         group["status"] in {"selected", "absent"}

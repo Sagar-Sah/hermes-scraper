@@ -21,6 +21,11 @@ from ..config import settings
 from ..commerce import unit_price
 from ..service_context import canonical_service_context
 from ..browser_stability import SettledSnapshot, supports_stable_reuse
+from ..printograph_modern_browser import (
+    SCHEMA as MODERN_SERVICE_SCHEMA, SERVICE_KEYS as MODERN_SERVICE_KEYS,
+    ModernHeld, FreshQuoteGate, SERVICE_READ_JS, prepare_services, modern_bound,
+    validate_service_policy, bind_service_policy,
+)
 from ..browser_capacity import browser_workload
 from ..pacing import retry_after_seconds, source_pacing
 from ..transport import RunInterrupted
@@ -164,7 +169,7 @@ def filter_choices(control: dict, requested=None) -> list[dict]:
     ]
 
 
-SNAPSHOT_JS = r"""({priceSelector}) => {
+SNAPSHOT_JS = r"""({priceSelector,modernServices=false}) => {
  // These caches live for one synchronous observation only. They avoid repeated
  // layout/style/ancestor scans without retaining stale controls between reads.
  const visibility = new WeakMap(), paths = new WeakMap(), siblingIndexes = new WeakMap(), labels = new WeakMap();
@@ -208,7 +213,7 @@ SNAPSHOT_JS = r"""({priceSelector}) => {
  // The source's collapsed service section can hide priced proof/design choices.
  // Record only these known product-service radio selections as diagnostics.
  // They remain outside traversed controls and prices; never read hidden inputs.
- if(serviceContextObserved){
+ if(serviceContextObserved&&!modernServices){
    for(const e of document.querySelectorAll('#collapseOne input[type="radio"][name="proofType"],#collapseOne input[type="radio"][name="fileDeliveryForIop"]')){
      if(!e.disabled&&!visible(e)&&!Array.from(e.labels||[]).some(visible))coverageGaps.add('collapsed_service_control:'+e.name);
    }
@@ -225,7 +230,7 @@ SNAPSHOT_JS = r"""({priceSelector}) => {
  for(const e of root.querySelectorAll('select')) {
    if(!visible(e)||e.disabled)continue;
    const text=label(e),rawKey=(e.id||e.name||text).replace(/_[a-z0-9]{5,}$/i,'');
-   if(excluded.test(text+' '+rawKey))continue;
+   if(excluded.test(text+' '+rawKey)||modernServices&&e.closest('#collapseOne'))continue;
    const choices=Array.from(e.options).map(o=>({value:o.value,label:clean(o.textContent),disabled:o.disabled,
      placeholder:o.disabled||/^\s*(?:[-–—]+|select(?:\s|$)|please select|choose(?:\s|$))/i.test(o.textContent||'')}));
    if(choices.some(o=>/^(custom|other)(?:\s|$)/i.test(o.label)))unsupported.push('custom_values:'+rawKey);
@@ -234,18 +239,44 @@ SNAPSHOT_JS = r"""({priceSelector}) => {
  }
  const groups=new Map();
  const printographRollLabels=root.getAttribute('data-printproducttype')==='36';
+ // Native generic-spec radios use name/id = declared spec + source index, but
+ // Vue binds every sibling to the ONE declared userSelectedOptions[spec].
+ // Read the current normal controller only; this is grouping, never price proof.
+ let modernRadioSpecs=[];
+ if(modernServices&&document.querySelectorAll('#order-form').length===1&&root.id==='order-form'&&root.getAttribute('data-currentstoretype')==='broker'){
+   const proxies=[root._vnode?.component?.proxy,root.__vue_app__?._instance?.proxy].filter(Boolean);
+   const cs=[...new Set(proxies.map(p=>p.$refs?.childComponents?._?.subTree?.component?.refs?.orderFormInstance).filter(Boolean))];
+   if(cs.length===1){const c=cs[0],selected=c.jsonObj?.userSelectedOptions,others=c.jsonObj?.others,fields=c.fields?.[String(c.printProductType)];
+     const own=(o,k)=>Object.hasOwn(o,k),empty=v=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&[Object.prototype,null].includes(Object.getPrototypeOf(v))&&Object.keys(v).length===0&&Object.getOwnPropertySymbols(v).length===0;
+     if(String(c.printProductType)===root.getAttribute('data-printproducttype')&&selected&&others&&
+       own(others,'isAdmin')&&others.isAdmin===false&&own(others,'waiveFees')&&others.waiveFees===false&&own(others,'itemId')&&others.itemId==='null'&&own(others,'editOrderItem')&&empty(others.editOrderItem)&&
+       ['shoppingCartItemId','priceGroupId'].every(k=>own(selected,k)&&['',null,undefined].includes(selected[k]))&&
+       Array.isArray(fields?.specs)&&fields.specs.length<=30&&new Set(fields.specs).size===fields.specs.length&&
+       fields.specs.every(k=>typeof k==='string'&&/^[A-Za-z][A-Za-z0-9]{0,63}$/.test(k)&&!/account|address|name|instructions|file|zip|country|billing|shipping|token|coupon|password/i.test(k)))modernRadioSpecs=fields.specs;
+   }
+ }
+ const modernRadioKey=e=>{
+   if(!modernServices||e.id!==e.name)return null;
+   const matches=modernRadioSpecs.filter(k=>e.name.startsWith(k)&&/^(?:0|[1-9][0-9]{0,2})$/.test(e.name.slice(k.length)));
+   if(matches.length!==1)return null;
+   const spec=matches[0],siblings=[...root.querySelectorAll('input[type="radio"]')].filter(n=>n.id===n.name&&n.name.startsWith(spec)&&/^(?:0|[1-9][0-9]{0,2})$/.test(n.name.slice(spec.length)));
+   if(siblings.length>100||new Set(siblings.map(n=>n.id)).size!==siblings.length||new Set(siblings.map(n=>n.value)).size!==siblings.length||siblings.some(n=>!/^[1-9][0-9]{0,11}$/.test(n.value)))return null;
+   return spec;
+ };
  for(const e of root.querySelectorAll('input[type=radio]')) {
    const associated=Array.from(e.labels||[]).find(visible);if((!visible(e)&&!associated)||e.disabled)continue;
+   if(modernServices&&e.closest('#collapseOne'))continue;
    if(!e.name){unsupported.push('unnamed_radio');continue;}
    if(excluded.test(e.name+' '+label(e)))continue;
    // This source's Vue wind selector uses distinct native names despite being
    // one mutually exclusive product field. Keep the exception product-specific.
-   const groupName=printographRollLabels&&/^windPosition\d+$/.test(e.name)?'windPosition':e.name;
+   const groupName=modernRadioKey(e)||(printographRollLabels&&/^windPosition\d+$/.test(e.name)?'windPosition':e.name);
    if(!groups.has(groupName))groups.set(groupName,[]);groups.get(groupName).push(e);
  }
  for(const [name,group] of groups){
    const checked=group.find(e=>e.checked),first=group[0];
    const groupLabel=clean(first.closest('fieldset')?.querySelector('legend')?.textContent || (printographRollLabels&&name==='windPosition'?'Wind position':name));
+   if(modernServices&&group.filter(e=>e.checked).length>1)unsupported.push('ambiguous_modern_radio_selection:'+name);
    controls.push({kind:'radio',raw_key:name.replace(/_[a-z0-9]{5,}$/i,''),label:groupLabel,selector:path(first),
      value:checked?.value??null,selected_label:checked?label(checked):'',
      choices:group.map(e=>({value:e.value,label:label(e),selector:path(e),label_selector:Array.from(e.labels||[]).find(visible)?path(Array.from(e.labels||[]).find(visible)):null}))});
@@ -393,7 +424,7 @@ def make_record(
         for c in controls
         if c["key"] not in {"quantity", "productionTime"}
     }
-    return {
+    row = {
         "record_schema_version": 2,
         "product_url": url,
         "title": snapshot["title"],
@@ -431,6 +462,17 @@ def make_record(
             "product_slug": snapshot.get("product_slug"),
         },
     }
+    if snapshot.get("service_context_schema") == MODERN_SERVICE_SCHEMA:
+        freshness = snapshot.get("modern_native_freshness")
+        services = canonical_service_context(snapshot)
+        if not modern_bound(services) or not isinstance(freshness,dict) or freshness.get("schema") != "printograph-native-dom-quote-freshness/v1":
+            raise AdapterError("modern_quote_unbound", "Native services or same-selection price/production evidence is unavailable")
+        row["record_schema_version"] = row["pricing_context"]["schema_version"] = 3
+        row["service_context_schema"] = MODERN_SERVICE_SCHEMA
+        row["modern_service_observation"] = deepcopy(snapshot["modern_service_observation"])
+        row["pricing_context"]["native_freshness"] = deepcopy(freshness)
+        row["source_data_finalized"] = row["woocommerce_import_ready"] = False
+    return row
 
 
 def pricing_table_observation(url, observed):
@@ -479,13 +521,20 @@ class BrowserAdapter:
         from crawler.transport import validate_url
         from crawler.browser_session import browser_page
 
-        await validate_url(spec["url"])
         url = spec["url"]
+        metadata = spec.get("source_metadata") or {}
+        modern_requested = metadata.get("printograph_modern_services") is True
+        modern_policy = metadata.get("printograph_modern_service_policy")
+        try:
+            if modern_policy is not None and not modern_requested: raise ModernHeld("modern_service_policy_scope_unproven")
+            validate_service_policy(modern_policy, url)
+        except ModernHeld as exc:
+            raise AdapterError("invalid_modern_scope", exc.reason) from None
+        await validate_url(url)
         source_origin = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
         filters = {
             field_key(k): v for k, v in spec.get("selection_filters", {}).items()
         }
-        metadata = spec.get("source_metadata") or {}
         limit = spec.get("max_configurations")
         if limit is not None and (
             not isinstance(limit, int) or isinstance(limit, bool) or limit < 1
@@ -495,6 +544,8 @@ class BrowserAdapter:
             )
         maximum_requests = spec.get("max_requests")
         bulk_requested = spec.get("browser_bulk_quantities") is True
+        if modern_requested and (urlparse(url).hostname not in {"www.printograph.com","printograph.com"} or bulk_requested):
+            raise AdapterError("invalid_modern_scope", "Modern native services require a Printograph ordinary browser walk")
         inactivity_seconds = max(
             1.0, float(os.getenv("ATLAS_BROWSER_INACTIVITY_SECONDS", "30"))
         )
@@ -568,10 +619,32 @@ class BrowserAdapter:
                 closing = False
                 source_progress = {"sequence": 0, "events": deque(maxlen=512)}
                 settled_snapshot = SettledSnapshot()
+                modern_gate = FreshQuoteGate(service_policy=modern_policy, source_url=url)
+                modern_recoveries = set()
+                modern_header_diagnostics = set()
+
+                async def modern_read():
+                    await transport.check()
+                    result = bind_service_policy(await page.evaluate(SERVICE_READ_JS, {"source_url": url}), modern_policy, url)
+                    diagnostic = result.get("process_header") if isinstance(result, dict) else None
+                    if result.get("reason") == "modern_process_header_unproven" and isinstance(diagnostic, dict):
+                        key = (navigation["generation"], json.dumps(diagnostic, sort_keys=True))
+                        if key not in modern_header_diagnostics and len(modern_header_diagnostics) < 32:
+                            modern_header_diagnostics.add(key)
+                            await emit("modern_process_header_diagnostic", dict(diagnostic))
+                    return result
+
+                async def modern_mark_action():
+                    nonlocal selection_epoch
+                    await transport.check()
+                    selection_epoch += 1
+
 
                 def navigated(frame):
+                    nonlocal modern_gate
                     if frame == page.main_frame:
                         navigation["generation"] += 1
+                        modern_gate = FreshQuoteGate(service_policy=modern_policy, source_url=url)
                         responses.clear()
                         table_captures.clear()
                         specification_captures.clear()
@@ -641,6 +714,7 @@ class BrowserAdapter:
                     epoch = selection_epoch
                     requested_selection = dict(current_selection)
                     request_state = None
+                    modern_before = None
                     guarded = request.resource_type in {"document", "xhr", "fetch"}
                     main_document = (
                         request.resource_type == "document"
@@ -681,6 +755,10 @@ class BrowserAdapter:
                             await route.continue_()
                             return
                         await transport.check()
+                        if modern_requested and origin == source_origin and api_path.search(request.url):
+                            # Read safe product/service scalars before the real
+                            # native request; no callback, request replay or body write.
+                            modern_before = await modern_read()
                         if bulk_requested and api_path.search(request.url):
                             try:
                                 request_state = normalize_snapshot(
@@ -864,6 +942,12 @@ class BrowserAdapter:
                                     count_request=False,
                                 )
                                 responses.append(observed.response_id)
+                                if modern_requested and origin == source_origin:
+                                    modern_gate.observe(request.url,status,observed.data,
+                                        modern_before,await modern_read(),observed.response_id,
+                                        generation,navigation["generation"],epoch,selection_epoch,request.method,
+                                        request.post_data if parsed.path in {"/service/rest/v1/rules/turnarounds", "/service/rest/v1/product/prices"} and modern_before and modern_before.get("observed") is True else None)
+
                                 if bulk_requested and (
                                     (request_state and epoch == selection_epoch)
                                     or specification_request
@@ -1148,7 +1232,7 @@ class BrowserAdapter:
                         try:
                             state = await page.evaluate(
                                 SNAPSHOT_JS,
-                                {"priceSelector": metadata.get("price_selector")},
+                                {"priceSelector": metadata.get("price_selector"), "modernServices": modern_requested},
                             )
                             break
                         except Exception as exc:
@@ -1165,6 +1249,9 @@ class BrowserAdapter:
                                 ) from exc
                             await asyncio.sleep(0.2)
                     state = normalize_snapshot(state)
+                    if modern_requested:
+                        state["service_context_schema"] = MODERN_SERVICE_SCHEMA
+                        state["modern_service_observation"] = await modern_read()
                     observed_controls.update(c["key"] for c in state["controls"])
                     partial.observe_snapshot(state)
                     if "network_body_unavailable" in capture_warnings:
@@ -1770,6 +1857,9 @@ class BrowserAdapter:
                         "product_type": final.get("product_type"),
                         "store_type": final.get("store_type"),
                         "independent_cart_verification": False,
+                        **({"service_context_schema": MODERN_SERVICE_SCHEMA,
+                            "modern_service_observation": deepcopy(final["modern_service_observation"]),
+                            "native_freshness": deepcopy(final["modern_native_freshness"])} if modern_requested else {}),
                     }
                     evidence = await transport.record_observation(
                         url,
@@ -2101,9 +2191,22 @@ class BrowserAdapter:
                             yield row
                         return
                     checkpoint_state = await settle()
+                    if modern_requested and checkpoint_state["controls"] and all(
+                        c["key"] in prefix and str(c["value"]) == str(prefix[c["key"]])
+                        for c in checkpoint_state["controls"]
+                    ):
+                        try:
+                            # Fix the observed service policy before the leaf's
+                            # checkpoint frame begins, so durable rows cannot be
+                            # attributed to the page's former service defaults.
+                            await prepare_services(page,url,transport.check,modern_mark_action,settle,service_policy=modern_policy)
+                            checkpoint_state = await settle(allow_reuse=False)
+                        except ModernHeld:
+                            # walk_live owns the bounded leaf recovery/hold.
+                            pass
                     checkpoint_services = (
                         canonical_service_context(checkpoint_state)
-                        if str(checkpoint_state.get("product_type"))
+                        if modern_requested or str(checkpoint_state.get("product_type"))
                         in {"1", "27", "36"}
                         else None
                     )
@@ -2166,6 +2269,9 @@ class BrowserAdapter:
                         return
                     source_dependencies = str(state.get("product_type")) in {
                         "1",
+                        "6",
+                        "10016",
+                        "10019",
                         "27",
                         "36",
                     }
@@ -2394,7 +2500,7 @@ class BrowserAdapter:
                                 progress_journal is not None
                                 and str(state.get("product_type"))
                                 not in {"1", "27", "36"}
-                                and progress_journal.contains(child_prefix)
+                                and progress_journal.contains(child_prefix, canonical_service_context(state) if modern_requested else None)
                             ):
                                 # Skip before changing the UI: otherwise a saved
                                 # branch still triggers its lookup and price XHRs.
@@ -2482,7 +2588,34 @@ class BrowserAdapter:
                     ):
                         partial.add("requested_control_missing")
                         return
-                    final = await settle(require_price=True)
+                    if modern_requested:
+                        # One bounded ordinary fresh-page recovery per previously
+                        # unpublished leaf. No recursion and no retry of saved rows.
+                        key = json.dumps(prefix,sort_keys=True,separators=(",",":"))
+                        try:
+                            await prepare_services(page,url,transport.check,modern_mark_action,settle,service_policy=modern_policy)
+                            final = await settle(require_price=True,allow_reuse=False)
+                            production = next((c for c in final["controls"] if c["key"] == "productionTime"),None)
+                            final["modern_native_freshness"] = modern_gate.verify(final["modern_service_observation"],production,final["controls"],observed_amount(final))
+                        except ModernHeld as first:
+                            if key in modern_recoveries:
+                                partial.add(first.reason);counters["invalid_branches"] += 1;return
+                            modern_recoveries.add(key)
+                            await emit("modern_quote_recovery",{"reason":first.reason,"attempt":1,"maximum_attempts":1, **({"details":first.details} if first.details is not None else {})})
+                            await navigate();await settle()
+                            rebuilt = await restore(prefix)
+                            if rebuilt is None:
+                                partial.add("modern_fresh_page_restore_failed");counters["invalid_branches"] += 1;return
+                            try:
+                                await prepare_services(page,url,transport.check,modern_mark_action,settle,service_policy=modern_policy)
+                                final = await settle(require_price=True,allow_reuse=False)
+                                production = next((c for c in final["controls"] if c["key"] == "productionTime"),None)
+                                final["modern_native_freshness"] = modern_gate.verify(final["modern_service_observation"],production,final["controls"],observed_amount(final))
+                            except ModernHeld as final_error:
+                                await emit("modern_quote_held", {"reason":final_error.reason, **({"details":final_error.details} if final_error.details is not None else {})})
+                                partial.add(final_error.reason);counters["invalid_branches"] += 1;return
+                    else:
+                        final = await settle(require_price=True)
                     if any(
                         str(c["value"]) != str(prefix.get(c["key"]))
                         for c in final["controls"]

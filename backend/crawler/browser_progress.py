@@ -33,6 +33,7 @@ def adapter_semantics():
             "commerce.py",
             "browser_progress.py",
             "service_context.py",
+            "printograph_modern_browser.py",
             "record_scope.py",
         )
     }

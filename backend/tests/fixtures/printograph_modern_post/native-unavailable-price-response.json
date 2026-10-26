@@ -1,0 +1,909 @@
+{
+  "fixture_provenance": {
+    "purpose": "150 source-shaped unavailable rows for parser/domain and quote-rejection regressions; no captured supplier prices.",
+    "source_price_evidence": false,
+    "synthetic": true
+  },
+  "items": [
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 1,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 2,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 3,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 4,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 5,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 6,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 7,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 8,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 9,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 10,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 11,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 12,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 13,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 14,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 15,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 16,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 17,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 18,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 19,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 20,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 21,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 22,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 23,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 24,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 25,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 26,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 27,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 28,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 29,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 30,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 31,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 32,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 33,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 34,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 35,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 36,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 37,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 38,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 39,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 40,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 41,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 42,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 43,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 44,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 45,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 46,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 47,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 48,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 49,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 50,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 51,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 52,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 53,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 54,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 55,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 56,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 57,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 58,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 59,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 60,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 61,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 62,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 63,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 64,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 65,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 66,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 67,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 68,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 69,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 70,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 71,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 72,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 73,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 74,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 75,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 76,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 77,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 78,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 79,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 80,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 81,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 82,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 83,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 84,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 85,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 86,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 87,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 88,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 89,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 90,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 91,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 92,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 93,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 94,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 95,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 96,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 97,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 98,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 99,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 100,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 101,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 102,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 103,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 104,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 105,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 106,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 107,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 108,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 109,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 110,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 111,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 112,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 113,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 114,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 115,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 116,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 117,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 118,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 119,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 120,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 121,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 122,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 123,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 124,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 125,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 126,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 127,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 128,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 129,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 130,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 131,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 132,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 133,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 134,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 135,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 136,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 137,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 138,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 139,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 140,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 141,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 142,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 143,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 144,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 145,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 146,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 147,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 148,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 149,
+      "subtotal": null
+    },
+    {
+      "available": false,
+      "productPrice": 13.43,
+      "quantity": 150,
+      "subtotal": null
+    }
+  ]
+}

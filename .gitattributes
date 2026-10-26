@@ -1,0 +1,3 @@
+# Preserve the exact bytes of these hash-pinned public supplier fixtures.
+backend/tests/fixtures/fourover_local_quote_label/source/FourOver_Project__js__model__project-builder.js whitespace=-blank-at-eol
+backend/tests/fixtures/fourover_native_proceed/FourOver_Project__js__model__project-builder.js whitespace=-blank-at-eol

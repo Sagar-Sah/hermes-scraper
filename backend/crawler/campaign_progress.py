@@ -31,6 +31,7 @@ from .soardist_account import ACCOUNT_CHECK_JS, PRODUCT_PRICE_JS, ORIGIN as SOAR
 from .itoris_options import project_itoris_dpo, project_itoris_tiers
 from .tls import tls_context
 from .transport import RateLimiter, validate_url
+from .fourover_bulk import child_configuration_limit
 
 
 def now():
@@ -804,7 +805,7 @@ class CampaignManager:
         product=next((p for p in data['products'] if p['id']==str(product_id)),None)
         if (product is None or _excluded(product) or product.get('supplier')!='fourover'
                 or source_url!=product.get('supplier_url') or not isinstance(children,list)
-                or not isinstance(observations,list) or len(children)>2000):
+                or not isinstance(observations,list) or len(children)>child_configuration_limit(source_url)):
             raise ValueError('Price tables do not match a mapped 4over product')
         child_ids={x.get('child_id') for x in children if isinstance(x,dict)}
         observed_ids={x.get('child_id') for x in observations if isinstance(x,dict)}
@@ -837,7 +838,7 @@ class CampaignManager:
         price_evidence=(product or {}).get('fourover_price_table_evidence') or {}
         if (product is None or _excluded(product) or product.get('supplier')!='fourover'
                 or source_url!=product.get('supplier_url') or not price_evidence.get('complete_child_routes')
-                or not isinstance(rows,list) or len(rows)>2000):
+                or not isinstance(rows,list) or len(rows)>child_configuration_limit(source_url)):
             raise ValueError('Option map requires complete source child prices')
         path=(Path(self.store.root)/price_evidence['object_path']).resolve()
         if not path.is_relative_to(Path(self.store.root).resolve()) or not path.is_file():

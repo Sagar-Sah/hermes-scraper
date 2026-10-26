@@ -1,0 +1,95 @@
+{
+  "schema": "native-local-quote-project-label-source/v1",
+  "modules": [
+    {
+      "public_asset_suffix": "Magento_Ui/js/lib/registry/registry.js",
+      "sha256": "f6a9135d5d2cd61c8c11e2d39c693daeaaf6e5a1a85de570980f5ed6b254bd70",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 12904,
+      "mime": "application/javascript",
+      "path": "source/Magento_Ui__js__lib__registry__registry.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/js/view/project/name.js",
+      "sha256": "05e6c78d14f51950dede0377ad6e1c2340b594ca99747102066b501b88b40786",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 1722,
+      "mime": "application/javascript",
+      "path": "source/FourOver_Project__js__view__project__name.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/js/view/project.js",
+      "sha256": "8190f0529ba686c99594b4ec3162acc3535517baf469ba856dde762505a7016e",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 6036,
+      "mime": "application/javascript",
+      "path": "source/FourOver_Project__js__view__project.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_ProjectBookmark/js/view/project-bookmark.js",
+      "sha256": "fffc7c40cb67991edb5ed7c4a4d3d1ae226229857e416659467d3ee87b005131",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 4572,
+      "mime": "application/javascript",
+      "path": "source/FourOver_ProjectBookmark__js__view__project-bookmark.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/js/view/project-tabs.js",
+      "sha256": "861824cc1243a53d35b9998959e50ae8a04300768be50d1e4b0b3e8c53f3f332",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 13848,
+      "mime": "application/javascript",
+      "path": "source/FourOver_Project__js__view__project-tabs.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/js/model/project.js",
+      "sha256": "99ece405a5d506875a32845953fa69ce65a9e4c94f3769fabb7ca7eb2c925b8f",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 304,
+      "mime": "application/javascript",
+      "path": "source/FourOver_Project__js__model__project.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_ProjectBookmark/js/action/save-project-bookmark.js",
+      "sha256": "c6cd7fc79c30cc99d53594b0a5581aaedea35baa7309885ef50b2d1967b83beb",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 676,
+      "mime": "application/javascript",
+      "path": "source/FourOver_ProjectBookmark__js__action__save-project-bookmark.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/js/model/project-builder.js",
+      "sha256": "5ca25247a50dac80b55008ac5cd9742e069eadeb5efee7b1b25adc62b1e7fb00",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 4987,
+      "mime": "application/javascript",
+      "path": "source/FourOver_Project__js__model__project-builder.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/js/view/project/summary.js",
+      "sha256": "2fb7fd2816385e51f0ef401fc560b3f42a9b56bdcaefa59bb03d8e8bc3acf974",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 13175,
+      "mime": "application/javascript",
+      "path": "source/FourOver_Project__js__view__project__summary.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/js/action/project/to-cart.js",
+      "sha256": "8c7adf65e4db03f11ef453d43d48813cbc646e5c1c0b314197c8844ee8a86d59",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 646,
+      "mime": "application/javascript",
+      "path": "source/FourOver_Project__js__action__project__to-cart.js"
+    },
+    {
+      "public_asset_suffix": "FourOver_Project/template/project/name.html",
+      "sha256": "a8232caba96d6464c920fce0b7b7a500b00c06b33bfb3405454203efa66bac00",
+      "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+      "bytes": 1070,
+      "mime": "text/html",
+      "path": "source/FourOver_Project__template__project__name.html"
+    }
+  ],
+  "proof": "Visible source textInput changes local project name; name subscription updates native validity/model; view saveProject only assigns local projectData. External saved project bookmark and cart require distinct explicit actions that remain blocked.",
+  "side_effect_limit": "No name overwrite, saved/cart/bookmark/default-unknown state, or unseen module is accepted. Only blank visible new/default local model under exact native binding can receive fixed nonpersonal label."
+}

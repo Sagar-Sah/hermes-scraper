@@ -1,0 +1,9 @@
+{
+  "schema": "saved-native-summary-totals-fixture/v1",
+  "files": {
+    "native-summary.html": "e0072358fa769301f08c696a57b579c3c6920f2e7d792b0ccd8354e4dfbabcb2",
+    "native-summary.js": "2fb7fd2816385e51f0ef401fc560b3f42a9b56bdcaefa59bb03d8e8bc3acf974",
+    "native-job-price.html": "8da5e5f25f952e2f992e1ff376f9d82b7d87f8b0d500377acacd8b4cc5512818",
+    "native-post-request.js": "9144f5a9e273017909765c59922f769eb60383d38ff4052d160795efd719f807"
+  }
+}

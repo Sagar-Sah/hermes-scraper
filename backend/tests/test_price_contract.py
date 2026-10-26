@@ -465,3 +465,89 @@ async def test_controller_extractor_only_whitelisted_state_no_network_or_secrets
             assert unknown["observed"] is False
         finally:
             await browser.close()
+
+
+async def test_unsupported_controller_reports_only_bounded_schema_identifiers():
+    playwright = pytest.importorskip("playwright.async_api")
+    async with playwright.async_playwright() as runtime:
+        if not Path(runtime.chromium.executable_path).exists():
+            pytest.skip("Playwright Chromium not installed")
+        browser = await runtime.chromium.launch()
+        try:
+            page = await browser.new_page()
+            requests = []
+
+            async def route(request):
+                requests.append(request.request.url)
+                await request.fulfill(
+                    body='<div id="order-form" data-printproducttype="39" data-currentstoretype="broker"></div>',
+                    content_type="text/html",
+                )
+
+            await page.route("**/*", route)
+            await page.goto("https://www.printograph.com/products/special-shapes/order")
+            await page.evaluate("""() => {
+                const element = document.querySelector('#order-form');
+                const controller = {printProductType:39,fields:{39:{
+                  options:['coating','spotCoating','paperFinish','coating','PRIVATE_SENTINEL',
+                    'invalid-name','space name','',null,{email:'PRIVATE_SENTINEL'},'x'.repeat(65)],
+                  unknownPrivateField:'PRIVATE_SENTINEL'}},
+                  accountToken:'PRIVATE_SENTINEL',
+                  jsonObj:{userSelectedOptions:{quantity:'50',email:'PRIVATE_SENTINEL'},
+                    appliedPrices:{productPrice:'123.45'},others:{oauth:'PRIVATE_SENTINEL'}},
+                  get totalPrice(){throw new Error('Unsupported price must not be read')},
+                  getCouponPrice(){throw new Error('Unsupported coupon must not be called')}};
+                const child = {_: {subTree: {component: {refs: {orderFormInstance: controller}}}}};
+                element._vnode = {component: {proxy: {$refs: {childComponents: child}}}};
+            }""")
+            result = await page.evaluate(
+                CONTROLLER_PRICE_STATE_JS,
+                {"source_contract": SOURCE_CONTRACT, "settled": True},
+            )
+            assert result == {
+                "observed": False,
+                "reason": "controller_product_mismatch",
+                "diagnostic_metadata": {
+                    "declared_type": "39", "controller_type": "39", "store_type": "broker",
+                    "option_names": ["coating", "spotCoating", "paperFinish"],
+                },
+            }
+            # Type39 is available only under its separately reviewed current pair;
+            # the historical tuple used above remains outside that product scope.
+            assert "39" in OPTION_FIELDS and "39" in BASE_FIELDS
+            assert "PRIVATE_SENTINEL" not in json.dumps(result)
+            assert calculate_source_total(result)["subtotal"] is None
+            assert calculate_source_total(result)["status"] == "unresolved"
+            assert len(requests) == 1  # Only the intercepted local document.
+
+            await page.evaluate("""() => {
+                const element = document.querySelector('#order-form');
+                const controller = element._vnode.component.proxy.$refs.childComponents._.subTree.component.refs.orderFormInstance;
+                controller.fields[39] = {options:Array.from({length:300},(_,i)=>'field'+i)};
+                element.setAttribute('data-printproducttype','PRIVATE_SENTINEL');
+                element.setAttribute('data-currentstoretype','private store');
+            }""")
+            bounded = await page.evaluate(
+                CONTROLLER_PRICE_STATE_JS,
+                {"source_contract": SOURCE_CONTRACT, "settled": True},
+            )
+            assert bounded["observed"] is False
+            assert bounded["diagnostic_metadata"] == {
+                "declared_type": None, "controller_type": "39", "store_type": None,
+                "option_names": [f"field{i}" for i in range(64)],
+            }
+            await page.evaluate("""() => {
+                const controller = document.querySelector('#order-form')._vnode.component.proxy.$refs.childComponents._.subTree.component.refs.orderFormInstance;
+                controller.printProductType = '9'.repeat(17);
+                controller.fields[controller.printProductType] = {options:['unknownPrivateField']};
+            }""")
+            invalid_type = await page.evaluate(
+                CONTROLLER_PRICE_STATE_JS,
+                {"source_contract": SOURCE_CONTRACT, "settled": True},
+            )
+            assert invalid_type["diagnostic_metadata"] == {
+                "declared_type": None, "controller_type": None, "store_type": None,
+                "option_names": [],
+            }
+        finally:
+            await browser.close()

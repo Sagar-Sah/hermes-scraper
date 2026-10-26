@@ -1,0 +1,16 @@
+{
+  "schema": "fourover-public-controller-test-fixtures/v1",
+  "purpose": "Exact public JavaScript factories/methods for source-free native readiness regressions. No account or quote receipts.",
+  "source_static_prefix": "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/",
+  "files": {
+    "FourOver_ProductRunSize__js__model__price-processor.js": "89fad984856cc83532261a9a43bbff1eb4d1cb8b6490c2937d5c8ba80182d19f",
+    "FourOver_ProductRunSize__js__view__register-price-processor.js": "e13dc7af33f35b9076fff2f64fefe0ca4437a724e025d2bde17951f85a76b834",
+    "FourOver_Project__js__model__product-package-prices.js": "a80bd0448414bbf28f4aa3aad3c166caac1177d8592484aba123f019c6342a54",
+    "FourOver_Project__js__model__product-price-processor.js": "98454e865c070b82e6c768081b89678b86794e22e9c92350d68880b534219552",
+    "FourOver_Project__js__model__product-selected-id.js": "34341da962968168abbb194d5be7426c78461d2936721490e013d55216de8bfb",
+    "FourOver_Project__js__model__selected-runsize.js": "0bddd560b3a51d1cdefefb1fa87a018b4de239900cf40dfc11a81c66ea9352c5",
+    "FourOver_TurnaroundTime__js__model__product__turnaround-time.js": "3e77ec80fbd7bcd91fbd572bcf857ccd0a1d3faf5c2939224d28c00aa3459505",
+    "FourOver_TurnaroundTime__js__view__product__turnaround-time.js": "de4715c368b0505e35336c65b0dcba85da953251a9bb8a04d61b270b376382cc",
+    "product-run-size.js": "c3e017c7385ea35882adab433d5a721157dd7670b8353592569843ba133bf216"
+  }
+}

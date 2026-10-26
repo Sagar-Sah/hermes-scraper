@@ -1,0 +1,46 @@
+{
+  "actual_source_product_type": 10019,
+  "full_original_body_not_required_by_portable_test": true,
+  "installed_previous_requirement": {
+    "native_field": "hidCoreColorId",
+    "selected_field": "coreColor"
+  },
+  "length": 845,
+  "mapping": {
+    "native_field": "hidCoreColorId",
+    "selected_field": "materialColor"
+  },
+  "new_current_quote_claim": false,
+  "old_native_request_body_or_before_after_projection_persisted": false,
+  "prior_service_read_sha256": "6ce255c0232b120e9c6584962488132fa76e862cd15f36642f5f0c4c680b91c4",
+  "recorded_type_witness": [
+    {
+      "source_product_type_query": [
+        "10019"
+      ]
+    },
+    {
+      "source_product_type_query": [
+        "10019"
+      ]
+    },
+    {
+      "source_product_type_query": [
+        "10019"
+      ]
+    },
+    {
+      "source_product_type_query": [
+        "10019"
+      ]
+    }
+  ],
+  "schema": "printograph-type10019-core-color-mapping-proof/v1",
+  "sha256": "2439766da75d8db525988b5e8161cfff436f81d84d10eafb5e1a3243f46848c8",
+  "source_calls": 0,
+  "source_file": "type10019-fields.js.txt",
+  "source_file_is_bounded_original_slice": true,
+  "source_reference": "Original public bundle SHA256 and bounded slice metadata retained; local capture path omitted.",
+  "source_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+  "start_byte": 69946
+}

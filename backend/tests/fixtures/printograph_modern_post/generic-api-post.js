@@ -1,0 +1,1 @@
+getGenericProductsPrice:function(e,t){if(t){t=JSON.stringify(t);const i={method:"POST",url:e,data:t,dataType:"json",headers:{"Content-Type":"application/json"}},r=(0,o.A)(i),s=r.then((e=>e.data));return s}}

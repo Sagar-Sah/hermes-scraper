@@ -1,0 +1,17 @@
+{
+  "files": {
+    "source-proof.json": "9ab3fb5e1bfbd2660801d4e8110fb5bfa72ac8a26c155f63f7c73244187e2da8",
+    "source/adapter-ALIASES.py": "000909140cb3eec81011fc5365e4badf8587f25c9bc968c7550375d621a54609",
+    "source/adapter-SNAPSHOT_JS.py": "7fe857061021b4724d14ad608f737550ca8b94e4e35c224608b093a0ea04247a",
+    "source/adapter-field_key.py": "4b4a053646568c31a6d3db322d3c64216ba9e682093bc2505e3fe1e0f3b92401",
+    "source/adapter-normalize_snapshot.py": "1c13ca1cc2247303ef1d4e7f1dfdcac9a161f7fbd63fde9dcef14011a4851000",
+    "source/button-disabled.js": "76256f106e5a54fadb274c433b49c9244ee61f1ca2addaa9502053e91a182aa3",
+    "source/button-render.js": "d5654c816bc5e6542ee3073776a05773f80def5e7367d639894a38cccde77af1",
+    "source/generic-price-applier.js": "17bf71c0b6f06d57d2ff7c296657c400b8fd037be05d6e7c93f0f19eb8f3e245",
+    "source/generic-price-builder.js": "22c76e15cab2f7d5777d674aa6ceaca8181a4650239804d1cb7888af80239066",
+    "source/quantity-filled.js": "a5293dd165ccd1cc719c12d5df6362a9da302b484fe18c11cb146078a434e6f1",
+    "source/readonly-evidence.json": "0fca755253890763255edc777497fbec819990d31e245a6618fa13fdfafb3d4e",
+    "source/reason-domain-projection.json": "b67f11cbec2ba2036f148e8c43b0091f497f9c219e0f5eaa789ed515d68920c8"
+  },
+  "schema": "printograph-native-availability-portable-fixtures/v1"
+}

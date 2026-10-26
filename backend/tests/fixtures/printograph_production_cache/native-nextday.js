@@ -1,0 +1,1 @@
+nextDay:function(){var e=this,t="2 Business Days"==e.jsonObj.turnaroundRange.rush,i=[16,10022,10020,18,19,41,10013,10017,10015,10016,10014,37],r=-1!=i.indexOf(e.printProductType);return 101==e.store&&t&&r}

@@ -1,0 +1,1 @@
+case 31:o.proofType.list.push(r.type);break;case 1:o.proofType.list.push(r.type);break;case 36:case 37:case 38:10018!=i&&(o.proofType.list.push(r.type),36==r.type.id&&t.others.onload&&!t.others.isAdmin&&(t.others.setNoProof&&(t.userSelectedOptions.manualProofType=r.type.id),t.others.onload=!1));break}})),

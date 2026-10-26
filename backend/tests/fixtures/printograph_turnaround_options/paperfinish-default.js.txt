@@ -1,0 +1,1 @@
+paperFinish:1,folding:"",preScoredFolding:"",color:"",coverPaper:"",panel:"",tray:"",frontInstructions:"",backInstructions:"",generalInstructions:"",quantity:0,productId:

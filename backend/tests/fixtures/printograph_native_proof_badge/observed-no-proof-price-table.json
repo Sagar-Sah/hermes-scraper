@@ -1,0 +1,144 @@
+{
+  "fixture_provenance": {
+    "purpose": "Quantity-spanning fixed proof-fee shape with an arbitrary test amount; not supplier costs.",
+    "source_price_evidence": false,
+    "synthetic": true
+  },
+  "items": [
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 25
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 50
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 100
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 250
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 500
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 1000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 2500
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 5000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 10000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 15000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 20000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 25000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 30000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 35000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 40000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 45000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 50000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 55000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 60000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 65000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 70000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 75000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 80000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 85000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 90000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 95000
+    },
+    {
+      "listPrice": null,
+      "markupPrice": "7.25",
+      "quantity": 100000
+    }
+  ]
+}

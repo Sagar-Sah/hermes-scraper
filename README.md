@@ -1,12 +1,16 @@
 # Hermes · Product intelligence
 
+The [October 25 automatic collection update](UPDATE-2026-10-25.md) adds a resumable,
+AI-free supplier worker and source-specific browser repairs. Its release notes
+describe the verified progress and remaining live integration holds.
+
 The [October 14 performance update](UPDATE-2026-10-14.md) reduces repeated waits on supported Printograph forms, speeds up DOM reads and exports, and exposes concurrent browser capacity, with reproducible local before/after benchmarks.
 
 A self-hosted product extraction service and dashboard. Give it product URLs or product titles within a source site, capture configurations with source evidence, and export CSV/Parquet datasets. The architecture reuses complete source responses wherever the adapter supports them; ordinary browser extraction handles visible calculators.
 
 This is the first implementation, with explicit coverage and verification states. It does not claim that Printograph's entire catalog can be harvested in ten minutes, that three million live supplier prices have been verified, or that every supplier exposes reusable price tables.
 
-The [September 25 forensic audit](docs/forensic-audit.md) documents the live failures, their evidence, implemented repairs and remaining capability gaps. New browser records use service-scoped schema version 2. Historical records and example exports without this scope remain evidence, not members of the corrected current dataset; default analysis and current exports exclude them. Re-observation is required rather than guessing their missing proof/file-delivery selections.
+The [September 25 forensic audit](docs/forensic-audit.md) documents the live failures, their evidence, implemented repairs and remaining capability gaps. Browser records use service-scoped schema version 2, or version 3 for the modern Printograph profile. Historical records and example exports without the required scope remain evidence, not members of the corrected current dataset; default analysis and current exports exclude them. Re-observation is required rather than guessing their missing proof/file-delivery selections.
 
 The [optimization status](docs/optimization-status.md) links the zero-request
 repeat inventory, complete-component pricing audit, bounded dependency probes,
@@ -48,6 +52,43 @@ In the dashboard:
 4. Follow product states, coverage, and activity; inspect rows and download exports as products finish. Partial coverage remains visible.
 
 The saved [real-source sample exports](examples/README.md) include five direct quotes across the three supplied product URLs and the separate 26-tier Business Cards table pilot.
+
+### Automatic campaign collection
+
+See the [step-by-step automatic collection guide](docs/AUTOMATIC-COLLECTION.md).
+
+Use **Sources & AI → Open browser** to sign in through Hermes's own supplier
+window. Signing in through another Chrome profile does not update that session.
+Then choose **Campaigns → Automatic supplier collection → Check remaining
+products**. This makes a plan from the active campaign group and saved evidence;
+it does not request supplier prices. **Start product tasks** runs the supported
+work without a model provider or a chat supervising each choice.
+
+The worker saves its cursor and source receipts, runs different suppliers
+independently, and shares each supplier's existing rate limits. After each
+finite batch, a continuing product gives other eligible products a turn. That
+order is saved and survives a service restart. The configured 99-product
+capacity is a queue ceiling; it does not override supplier limits.
+Leave the Hermes service and computer running. **Pause collection** fences
+active work; **Resume queued work** resumes queued work. Completed selections
+remain saved. An interrupted selection whose result is uncertain is held rather
+than automatically sent again. Expired supplier authentication and unsupported
+source controls appear as explicit blockers.
+
+The task table shows saved collection steps separately from attempts. These
+steps confirm durable progress; they are not a count of completed products.
+Supplier sign-in, account setup, and required project details have separate
+messages. For a new 4over quote, Hermes can give a blank project name the fixed
+label “Hermes source quote.” Existing names and saved projects are preserved.
+If a source still needs attention, other eligible suppliers continue.
+
+Registered supplier profiles discover native dependent choices and validate
+their exact source scope. Package quantities and area-priced/custom products
+use different source contracts. Neither a quoted sample nor an inferred area
+coefficient supplies prices for unobserved combinations. A completed collection
+task is separate from whole-product source finalization, retail markup,
+shipping, and publishing to WooCommerce. Hermes records supplier costs;
+PrintItPrints applies its own selling-price and shipping rules.
 
 **Fixture benchmark** is a separate, explicitly synthetic adapter. Its default is 3 products × 30,000 rows. You can request 100 × 30,000 to exercise three million generated rows, but those results measure this engine and storage path, not a supplier's throughput or pricing accuracy. Run that benchmark on appropriately sized hardware and inspect its actual results.
 

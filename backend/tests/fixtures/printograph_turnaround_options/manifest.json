@@ -1,0 +1,64 @@
+{
+  "schema": "printograph-turnaround-options-public-fixtures/v1",
+  "files": {
+    "get-stateless.js.txt": "bca7f98e8e29c48d74f9dad960723a5e4202a9c6a02d25db87195e2a79c3f53c",
+    "type39-fields.js.txt": "0285b6d1156179c9e790cc5eefa8339401a69f440b21b4fc0397297291120528",
+    "paperfinish-schema.js.txt": "c02a7dff83a6f26d532f15d5328834a506a86188c77bc54af100ac2a6e8bf32f",
+    "normal-family-lists.js.txt": "13417d461b968bbaacdf520f172565485c9896a0803b0bc26ef3074c71bb14b2",
+    "paperfinish-default.js.txt": "7cb55b412db30ce9b55383f2a2074281b57dca81da842f6b37e2c53055d5ab4c",
+    "turnaround-param.js.txt": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
+    "source_builder.js": "6a9a78f2c6b9e0456a179d8681ba87ae74ceb74ff0707978d1c7ba80acc9249e",
+    "update-options.js.txt": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776"
+  },
+  "source_slices": [
+    {
+      "file": "source/update-options.js.txt",
+      "source_bundle_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_byte": 267710,
+      "length": 2401,
+      "sha256": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776"
+    },
+    {
+      "file": "source/turnaround-param.js.txt",
+      "source_bundle_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_byte": 256911,
+      "length": 1261,
+      "sha256": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738"
+    },
+    {
+      "file": "source/get-stateless.js.txt",
+      "source_bundle_sha256": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+      "start_byte": 245355,
+      "length": 3434,
+      "sha256": "bca7f98e8e29c48d74f9dad960723a5e4202a9c6a02d25db87195e2a79c3f53c"
+    },
+    {
+      "file": "source/type39-fields.js.txt",
+      "source_bundle_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_byte": 63510,
+      "length": 470,
+      "sha256": "0285b6d1156179c9e790cc5eefa8339401a69f440b21b4fc0397297291120528"
+    },
+    {
+      "file": "source/paperfinish-default.js.txt",
+      "source_bundle_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_byte": 44179,
+      "length": 170,
+      "sha256": "7cb55b412db30ce9b55383f2a2074281b57dca81da842f6b37e2c53055d5ab4c"
+    },
+    {
+      "file": "source/paperfinish-schema.js.txt",
+      "source_bundle_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_byte": 130391,
+      "length": 200,
+      "sha256": "c02a7dff83a6f26d532f15d5328834a506a86188c77bc54af100ac2a6e8bf32f"
+    },
+    {
+      "file": "source/normal-family-lists.js.txt",
+      "source_bundle_sha256": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6",
+      "start_byte": 48860,
+      "length": 290,
+      "sha256": "13417d461b968bbaacdf520f172565485c9896a0803b0bc26ef3074c71bb14b2"
+    }
+  ]
+}

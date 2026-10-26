@@ -1,0 +1,239 @@
+<!--
+/**
+ * Created by FindCanary, LLC.
+ * Project: 4over
+ */
+-->
+<div class="project-summary">
+    <div class="project-summary_product-options" data-bind="mageInit: {
+    'collapsible':{
+        'collapsible': true,
+        'openedState': 'active',
+        'active': false
+    }}">
+        <div data-role="title" class="title">
+            <!-- ko i18n: 'Product Options Summary' --><!-- /ko -->
+        </div>
+        <div data-role="content" class="content" data-bind="blockLoader: (getSummaryOptions().length === 0)">
+            <ul>
+                <!-- ko foreach: {data: getSummaryOptions(), as: 'summaryOption'} -->
+                <li>
+                    <strong data-bind="css: 'label', text: summaryOption['label']"></strong>
+                    <span data-bind="css: 'value', html: summaryOption['value']"></span>
+                </li>
+                <!-- /ko -->
+            </ul>
+        </div>
+    </div>
+    <div data-bind="blockLoader: isLoading()">
+        <!-- ko foreach: getRegion('project-summary-details') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+
+        <!-- ko if: getTotals() && getTotals()['subtotal'] -->
+        <div class="project-summary_totals">
+            <ul>
+                <li>
+                    <span data-bind="css:'label', i18n: 'Subtotal'"></span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['subtotal'])"></span>
+                </li>
+
+                <!-- ko if: getTotals()['turnaround_time'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Turnaround Time'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['turnaround_time'])"></span>
+                </li>
+                <!-- /ko -->
+
+                <!-- ko if: getTotals()['job_sample'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Job Sample'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['job_sample'])"></span>
+                </li>
+                <!-- /ko -->
+
+                <!-- ko if: getTotals()['digital_proof'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Digital Proofs'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['digital_proof'])"></span>
+                </li>
+                <!-- /ko -->
+
+                <!-- ko if: getTotals()['postage'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Postage'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['postage'])"></span>
+                </li>
+                <!-- /ko -->
+                <!-- ko if: getTotals()['postage_fee'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Postage Fee'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['postage_fee'])"></span>
+                </li>
+                <!-- /ko -->
+                 <!-- ko if: getTotals()['direct_mailing_tracking_fee'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Mail Tracking'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['direct_mailing_tracking_fee'])"></span>
+                </li>
+                <!-- /ko -->
+
+                <!-- ko if: getTotals()['discount'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Discount'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['discount'])"></span>
+                </li>
+                <!-- /ko -->
+
+                <!-- ko if: getTotals()['small_qty_fee'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Small Quantity Fee'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['small_qty_fee'])"></span>
+                </li>
+                <!-- /ko -->
+                <!-- ko if: getTotals()['shipping'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Shipping & Processing*'"></span>
+                        <!-- ko if: isGroupShippingApplied() -->
+                            <i data-bind="i18n: '*Group shipping was applied'"></i>
+                        <!-- /ko -->
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['shipping'])"></span>
+                </li>
+                <!-- /ko -->
+                <!-- ko if: getTotals()['local_delivery_fee'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Handling Fee'"></span>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['local_delivery_fee'])"></span>
+                </li>
+                <!-- /ko -->
+
+                <!-- ko if: getTotals()['tax'] -->
+                <li>
+                    <span data-bind="css:'label'">
+                        <span data-bind="i18n: 'Tax'"></span>
+                        <i data-bind="i18n: '*Group tax was applied'"></i>
+                    </span>
+                    <span data-bind="css:'value', text: formatPrice(getTotals()['tax'])"></span>
+                </li>
+                <!-- /ko -->
+
+                <li class="grand-total">
+                    <!-- ko if: isClassicPdp -->
+                    <span data-bind="css:'label', i18n: 'Total:'"></span>
+                    <!-- /ko -->
+                    <!-- ko ifnot: isClassicPdp -->
+                    <span data-bind="css:'label', i18n: 'Total'"></span>
+                    <!-- /ko -->
+                    <span data-bind="css:'value'">
+                        <span data-bind="text: formatPrice(getTotals()['grand_total'])"></span>
+                        <i data-bind="i18n: 'Taxes may apply'"></i>
+                    </span>
+                </li>
+            </ul>
+        </div>
+        <!-- /ko -->
+        <div class="project-summary_actions">
+            <!-- ko if: artworkMode === 'default' || artworkMode === 'required' -->
+            <div class="pdp-artwork-wrap">
+                <!-- ko if: (isClassicPdp && isArtworkStatusSubmitted()) -->
+                <span class="artwork-status" data-bind="css: {
+                    'artwork--default': artworkMode === 'default',
+                    'artwork--required': artworkMode === 'required',
+                    'artwork-status--complete': isArtworkStatusSubmitted()}">
+                    <strong data-bind="i18n: 'Artwork Submitted'"></strong>
+                </span>
+                <button class="action link icon edit" data-bind="enable: !isProjectNameInvalid(),text: $t('Review or Edit Artwork'), click: uploadToArt.bind($data)"></button>
+                <!-- /ko -->
+                <!-- ko if: (!isClassicPdp && isArtworkStatusSubmitted()) -->
+                <div class="artwork-status_wrap">
+                    <div class="artwork-status__info" data-bind="css: {
+                    'artwork--default': artworkMode === 'default',
+                    'artwork--required': artworkMode === 'required'}">
+                        <span class="artwork-status_icon" aria-hidden="true"></span>
+                        <span class="artwork-status_label" data-bind="i18n: 'Artwork Submitted'"></span>
+                    </div>
+                    <button class="artwork-status_action action link" data-bind="enable: !isProjectNameInvalid(),text: $t('Review or Edit Artwork'), click: uploadToArt.bind($data)"></button>
+                </div>
+                <!-- /ko -->
+            </div>
+            <!-- /ko -->
+
+            <!-- ko if: (artworkMode === 'default' || artworkMode === 'required') && !isArtworkStatusSubmitted() -->
+            <div class="artwork-action-buttons">
+                <button class="action primary btn-upload" data-bind="enable: !isProjectNameInvalid() && !allowAddToCart() && isSelectedShippingMethods(), text: $t('Upload Your Artwork'), click: uploadToArt.bind($data)"></button>
+                <!-- ko if: isDesignerEnabled() -->
+                <button class="action quaternary btn-create-design" data-bind="enable: !isProjectNameInvalid() && !allowAddToCart() && isSelectedShippingMethods(), text: $t('Create Design'), click: createDesign.bind($data)"></button>
+                <!-- /ko -->
+            </div>
+            <!-- ko if: !isSelectedShippingMethods() && !allowAddToCart() -->
+            <p class="upload-shipping-notice"><!-- ko i18n: 'Please select a shipping method for each shipment before uploading your artwork.' --><!-- /ko --></p>
+            <!-- /ko -->
+            <!-- /ko -->
+
+            <!-- ko if: artworkMode === 'default' && !isArtworkStatusSubmitted() -->
+            <div class="artwork-info">
+                <div class="field choice">
+                    <input type="checkbox" data-bind="attr: {name: 'allow-add-to-cart', id: 'allow-add-to-cart'}, checked: allowAddToCart">
+                    <label class="label" data-bind="attr: {for: 'allow-add-to-cart'}">
+                        <!-- ko i18n: 'I will assign/upload my artwork after I complete my purchase.' --><!-- /ko -->
+                    </label>
+                </div>
+            </div>
+            <!-- /ko -->
+            <!-- ko if: artworkMode === 'required' && !isArtworkStatusSubmitted() -->
+            <div class="artwork-info">
+                <strong><!-- ko i18n: 'Note: Artwork is required before you can add this item to your cart.' --><!-- /ko --></strong>
+            </div>
+            <!-- /ko -->
+
+            <button class="action secondary tocart" data-bind="enable: isSelectedShippingMethods() && !isProjectNameInvalid() && allowAddToCart(), text: addToCartButton, click: addToCart.bind($data)"></button>
+
+            <!-- ko if: isClassicPdp -->
+            <div class="project-summary_info">
+                <strong><!-- ko i18n: 'Next:' --><!-- /ko --></strong>
+
+                <!-- ko ifnot: artworkMode === 'required' || artworkMode === 'default' -->
+                    <!-- ko i18n: 'Add to cart' --><!-- /ko -->
+                <!--/ko-->
+
+                <!-- ko if: artworkMode === 'required' -->
+                    <!-- ko i18n: 'Assign/Upload your artwork and add to cart' --><!-- /ko -->
+                <!--/ko-->
+
+                <!-- ko if: artworkMode === 'default' -->
+                    <!-- ko i18n: 'Assign/Upload your artwork or add to cart' --><!-- /ko -->
+                <!--/ko-->
+            </div>
+            <!-- /ko -->
+
+            <div class="project-summary_save" data-bind="scope: 'project.project-bookmark'">
+                <!-- ko template: getTemplate() --><!-- /ko -->
+            </div>
+        </div>
+        <!-- ko if: artworkMode === 'default' || artworkMode === 'required' -->
+            <!-- ko foreach: getRegion('artwork-tool') -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        <!--/ko-->
+    </div>
+</div>

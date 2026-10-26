@@ -429,7 +429,7 @@ class ProbeRunner:
                     task = asyncio.current_task()
                     pending.add(task)
                     request, token, attempt = route.request, None, None
-                    began, code, delay = time.monotonic(), 0, 0
+                    began, elapsed, code, delay = None, None, 0, 0
                     try:
                         p = urlparse(request.url)
                         origin = f"{p.scheme}://{p.netloc}"
@@ -456,22 +456,31 @@ class ProbeRunner:
                             code = response.status
                             delay = retry_after_seconds(response.headers.get("retry-after"), default=0)
                             await response.finished()
+                        elapsed = time.monotonic() - began
                     except (ExtractionError, asyncio.CancelledError):
+                        elapsed = time.monotonic() - began if began is not None else 0
                         try:
                             await route.abort()
                         except Exception:
                             pass
                     except Exception:
+                        elapsed = time.monotonic() - began if began is not None else 0
                         try:
                             await route.abort()
                         except Exception:
                             pass
                     finally:
-                        if attempt:
-                            await asyncio.to_thread(budget.finish, attempt, code, time.monotonic() - began)
-                        if token:
-                            await asyncio.to_thread(limiter.release, origin, token, time.monotonic() - began, code, delay, rps)
-                        pending.discard(task)
+                        if elapsed is None:
+                            elapsed = time.monotonic() - began if began is not None else 0
+                        try:
+                            if token:
+                                await asyncio.to_thread(limiter.release, origin, token, elapsed, code, delay, rps)
+                        finally:
+                            try:
+                                if attempt:
+                                    await asyncio.to_thread(budget.finish, attempt, code, elapsed)
+                            finally:
+                                pending.discard(task)
                 await page.route("**/*", route)
                 # A sibling scraper tab already has the ordinary supplier transport.
                 # Observe its next normal product request without issuing another one.

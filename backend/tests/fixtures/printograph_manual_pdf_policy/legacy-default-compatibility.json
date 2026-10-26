@@ -1,0 +1,120 @@
+{
+  "schema": "legacy-no-proof-default-compatibility/v1",
+  "cases": [
+    {
+      "association": {
+        "campaign_id": "pdf-test",
+        "product_id": "17898",
+        "supplier": "printograph",
+        "source_url": "https://www.printograph.com/products/cardboards/order"
+      },
+      "configuration": {
+        "mode": "native_visible_domain_v1"
+      },
+      "spec": {
+        "name": "Campaign native browser 17898",
+        "urls": [
+          "https://www.printograph.com/products/cardboards/order"
+        ],
+        "adapter": "browser",
+        "instructions": "",
+        "provider_id": null,
+        "filters": {},
+        "image_mode": "urls",
+        "shipping_contexts": [],
+        "browser_bulk_quantities": false,
+        "refresh": false,
+        "source_metadata": {
+          "printograph_modern_services": true,
+          "automation_owner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "automation_association": {
+            "campaign_id": "pdf-test",
+            "product_id": "17898",
+            "supplier": "printograph",
+            "source_url": "https://www.printograph.com/products/cardboards/order"
+          }
+        }
+      },
+      "owner_identity_sha256": "f012786904f9781adef81cb87566a452a6806335c86db55cd68c15aa44dbe464"
+    },
+    {
+      "association": {
+        "campaign_id": "pdf-test",
+        "product_id": "17898",
+        "supplier": "printograph",
+        "source_url": "https://www.printograph.com/products/catalogs/order"
+      },
+      "configuration": {
+        "mode": "native_visible_domain_v1"
+      },
+      "spec": {
+        "name": "Campaign native browser 17898",
+        "urls": [
+          "https://www.printograph.com/products/catalogs/order"
+        ],
+        "adapter": "browser",
+        "instructions": "",
+        "provider_id": null,
+        "filters": {},
+        "image_mode": "urls",
+        "shipping_contexts": [],
+        "browser_bulk_quantities": false,
+        "refresh": false,
+        "source_metadata": {
+          "printograph_modern_services": true,
+          "automation_owner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "automation_association": {
+            "campaign_id": "pdf-test",
+            "product_id": "17898",
+            "supplier": "printograph",
+            "source_url": "https://www.printograph.com/products/catalogs/order"
+          }
+        }
+      },
+      "owner_identity_sha256": "b42a59c0b3c15607bcc55157c3d92d8282a2c057fef6dc9f181bf875553635ae"
+    }
+  ],
+  "service_signature": {
+    "version": 3,
+    "schema": "printograph-native-services/v3",
+    "status": "observed",
+    "groups": {
+      "proofType": {
+        "status": "selected",
+        "values": [
+          "902"
+        ]
+      },
+      "proofTypeForManual": {
+        "status": "selected",
+        "values": [
+          "712"
+        ]
+      },
+      "fileDeliveryForManual": {
+        "status": "selected",
+        "values": [
+          "502"
+        ]
+      },
+      "fileDeliveryForIop": {
+        "status": "absent",
+        "values": []
+      },
+      "designServices": {
+        "status": "absent",
+        "values": []
+      },
+      "fileDeliveryForDs": {
+        "status": "absent",
+        "values": []
+      }
+    },
+    "model_services": {
+      "proofType": "902",
+      "manualProofType": "712",
+      "fileDelivery": "502",
+      "designServices": "608"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "fourover-native-readonly-address-source-fixtures/v1",
+  "source_files": {
+    "address-manager.js": "ddcd935cd9246d866eaa2bb163da76c1d141a1bbc5807e254d7e483d075440e8",
+    "b2c-company-modal.js": "0d45a85ef9cb763e0f44b8e2e23d5433a0d03ee8e8dec6fe1dab6aa7aa9e99de",
+    "load-addresses.js": "04304d24fab6d22c1be590a079c09a3ffa93bcd8bd58c4f24048f3f778095dec",
+    "magento-modal.js": "6fb2742d57998eb9ae895cae753008f7908436e9744dfe9f60631d8536368287"
+  },
+  "source_assertions": [
+    "load-addresses returns storage.post of JSON.stringify({addressIds}) to /project/mine/addresses.",
+    "address-manager caches returned list and resolves addresses; no save action.",
+    "b2c-company-modal uses exact modal ID and popup class; Magento modal defines _show visibility."
+  ],
+  "private_customer_or_address_data": false
+}

@@ -1,0 +1,20 @@
+<!--
+/**
+ * Created by FindCanary, LLC.
+ * Project: 4over
+ */
+-->
+<div class="project_name field required project-required">
+    <label class="label" for="project_name">
+        <span><!-- ko i18n: 'Project Name / P.O.' --><!-- /ko -->&nbsp;<em>*</em></span>
+        <!-- ko if: isPrintReadyEnabled -->
+        <span class="tooltip-icon" data-bind="attr: { 'data-tooltip': $t('A title you assign to your job for easy tracking and reordering. It appears only in your account — not on the printed piece.') }">
+            <img data-bind="attr: {src: tooltipImageUrl, alt: 'Print Ready Image'}" class="tooltip-icon" />
+        </span>
+        <!-- /ko -->
+    </label>
+    <div class="control">
+        <input type="text" name="project_name" id="project_name" data-bind="textInput: projectName, attr: {placeholder: $t('Enter your project name')}, css: {'mage-error': isProjectNameInvalid()}" maxlength="60" />
+        <div data-bind="css: 'project-error', visible: isProjectNameInvalid()"><!-- ko i18n: 'This is a required field.' --><!-- /ko --></div>
+    </div>
+</div>

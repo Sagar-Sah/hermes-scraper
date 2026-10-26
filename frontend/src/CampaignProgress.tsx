@@ -4,6 +4,7 @@ import { api, count, dateTime, downloadExport, errorMessage, humanize, isActive,
 import './CampaignProgress.css';
 import B2HarvestProgress from './B2HarvestProgress';
 import DPSPilotProgress from './DPSPilotProgress';
+import CampaignAutomation from './CampaignAutomation';
 
 const stages: Record<CampaignStage, string> = { queued: 'Queued', diagnosed: 'Diagnosed', extracting: 'Extracting', extracted: 'Rows extracted', verified: 'Verified', finalized: 'Finalized', blocked: 'Blocked', excluded: 'Excluded' };
 const active = (status: string) => isActive(status) || status === 'extracting';
@@ -134,6 +135,7 @@ export default function CampaignProgress({ onOpenRun }: { onOpenRun: (id: string
       {data.b2sign_scoped_drafts_collected != null && data.b2sign_scoped_drafts_collected > 0 && <p className="campaign-source-count"><strong>{count(data.b2sign_scoped_draft_rows ?? 0)} B2Sign scoped draft rows across {count(data.b2sign_scoped_drafts_collected)} products</strong><span>These completed request scopes are downloadable per product; open quantities, cart totals, shipping, and production still need validation.</span></p>}
       {data.fourover_shipping_baselines_collected != null && data.fourover_shipping_baselines_collected > 0 && <p className="campaign-source-count"><strong>{count(data.fourover_shipping_baselines_collected)} 4over shipping selector baselines saved</strong><span>These rates are for one rendered configuration in the logged-in account; destination and rate dependencies still need verification.</span></p>}
       <p className="campaign-source-count"><strong>{count(activeProducts.filter(product => product.diagnosis_id).length)} / {count(activeCount)} supplier option snapshots linked</strong><span>Visible fields are a starting point; dependent choices and prices still require validation.</span></p>
+      <CampaignAutomation campaignId={data.id} titles={Object.fromEntries(data.products.map(product => [product.id, product.title]))} />
       <B2HarvestProgress products={activeProducts} refreshToken={refreshKey} />
       <DPSPilotProgress products={activeProducts} refreshToken={refreshKey} />
       <section className="panel" aria-label="Campaign products"><div className="explorer-toolbar"><div className="search-field"><Search size={16} /><input aria-label="Search campaign products" placeholder="Search products, suppliers, or blockers…" value={query} onChange={event => setQuery(event.target.value)} /></div><select aria-label="Filter campaign stage" value={stage} onChange={event => setStage(event.target.value as CampaignStage | 'all')}><option value="all">All stages</option>{Object.entries(stages).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></div>

@@ -1,4 +1,4 @@
-"""One-page, user-operated product diagnosis. No traversal or price verification.
+"""One-page diagnosis with optional passive current price-component evidence.
 
 Only duplicate pages belong to this manager. Browser contexts/profiles belong to
 BrowserSessionPool; neither credentials nor browser storage are inspected here.
@@ -21,8 +21,18 @@ from urllib.parse import urlsplit, urlunsplit
 from .transport import RateLimiter, validate_url
 from .b2sign_diagnosis import inspect_b2sign, merge_b2sign_snapshot
 from .dps_pilot import DPS_DOM_JS
-from .price_contract import CONTROLLER_PRICE_STATE_JS, SOURCE_CONTRACT, calculate_source_total
+from .price_contract import (CONTROLLER_PRICE_STATE_JS, SOURCE_CONTRACT, SPECIAL_SHAPES_SOURCE_CONTRACT,
+                             SPECIAL_SHAPES_SOURCE_URL, BASE_FIELDS, OPTION_FIELDS, calculate_source_total, reviewed_source_scope)
+from .printograph_price_journal import (PriceJournal, OwnedPageCDPObserver, project_context,
+    SPECIAL_FAMILY, STAGGERED_FAMILY, family_for_url)
+from .printograph_initial_quantity import InitialQuantityPriceJournal, read_initial_body
+from .supplier_profile_executor import (SupplierProfileExecutorMixin, TableQuantityJournal,
+    LiveTableAnchor, read_binding_script, executor_binding_script, executor_action_script, require as profile_require)
 from .supplier_registry import SupplierRegistry
+from .dps_workflow_references import (DPS_ACCOUNT_URL, WORKFLOW_REFERENCES_JS,
+                                      validate_dps_target, project_workflow_references)
+from .printograph_source_references import SOURCE_URLS, SOURCE_REFERENCES_JS, project_references
+from .printograph_turnaround_metadata import TURNAROUND_METADATA_JS, project_turnaround_metadata
 
 
 SUPPLIERS = {
@@ -144,10 +154,370 @@ def _blocked_product_path(path):
     return bool(_BLOCKED_PATH.search(path)) and not bool(re.fullmatch(r"/products/[a-zA-Z0-9_-]+/order/?", path))
 
 
+# Passive projection never invokes a source price-request or coupon method.
+# The one mounted totalPrice scalar read is permitted only by the exact pinned
+# exact pinned arithmetic callgraphs reviewed for the closed type39/type38 families.
+def _passive_script(template, family):
+    return (template.replace('__PASSIVE_CONTRACT__', json.dumps(SPECIAL_SHAPES_SOURCE_CONTRACT))
+            .replace('__PASSIVE_URL__', json.dumps(family.source_url))
+            .replace('__PASSIVE_TYPE__', json.dumps(family.product_type))
+            .replace('__PASSIVE_SPECS__', json.dumps(list(family.base_fields)))
+            .replace('__PASSIVE_OPTIONS__', json.dumps(list(family.option_fields)))
+            .replace('__PASSIVE_FIELDS__', json.dumps([*family.base_fields,*family.option_fields,
+                'quantity','productionTime','proofType','manualProofType','designServices','fileDelivery'])))
+
+
+_PASSIVE_PRICE_CAPTURE_TEMPLATE = r'''({source_contract,settled}) => {
+  const expected=__PASSIVE_CONTRACT__;
+  if (!source_contract || JSON.stringify(Object.keys(source_contract).sort())!==JSON.stringify(Object.keys(expected).sort()) ||
+      !Object.keys(expected).every(k=>source_contract[k]===expected[k]) || location.href!==__PASSIVE_URL__)
+    return {observed:false,reason:'passive_scope_unproven'};
+  const element=document.querySelector('#order-form');
+  if (!element || element.getAttribute('data-printproducttype')!==__PASSIVE_TYPE__ || element.getAttribute('data-currentstoretype')!=='broker')
+    return {observed:false,reason:'passive_controller_scope_unproven'};
+  const roots=[element._vnode?.component?.proxy,element.__vue_app__?._instance?.proxy].filter(Boolean);
+  const controllers=[...new Set(roots.map(r=>r.$refs?.childComponents?._?.subTree?.component?.refs?.orderFormInstance).filter(Boolean))];
+  if (controllers.length!==1) return {observed:false,reason:'passive_controller_missing'};
+  const c=controllers[0],d=c.jsonObj;
+  const specs=__PASSIVE_SPECS__,options=__PASSIVE_OPTIONS__;
+  if (String(c.printProductType)!==__PASSIVE_TYPE__ || JSON.stringify(c.fields?.[__PASSIVE_TYPE__]?.specs)!==JSON.stringify(specs) ||
+      JSON.stringify(c.fields?.[__PASSIVE_TYPE__]?.options)!==JSON.stringify(options) || !d?.userSelectedOptions || !d.appliedPrices || !d.others)
+    return {observed:false,reason:'passive_controller_schema_unproven'};
+  if (__PASSIVE_TYPE__ === '38' && Object.hasOwn(d.userSelectedOptions,'productSpecificationId'))
+    return {observed:false,reason:'unsupported_staggered_specification_context'};
+  const scalar=v=>typeof v==='string'&&v.length<=64 || typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<1e12;
+  const selected={};
+  for(const k of [...specs,...options,'proofType','manualProofType','designServices','fileDelivery','quantity','productId','productionTime'])
+    if(Object.hasOwn(d.userSelectedOptions,k)&&scalar(d.userSelectedOptions[k]))selected[k]=d.userSelectedOptions[k];
+  const prices={};
+  if(scalar(d.appliedPrices.productPrice))prices.productPrice=d.appliedPrices.productPrice;
+  for(const k of [...options,'proofType','designServices']) {
+    const bucket=d.appliedPrices[k];if(bucket===undefined)continue;prices[k]={};
+    const v=k==='proofType'?selected.manualProofType:selected[k];
+    if(bucket&&typeof bucket==='object'&&Object.hasOwn(bucket,String(v))&&scalar(bucket[String(v)]))prices[k][String(v)]=bucket[String(v)];
+  }
+  const flags={};
+  for(const [out,k]of[['is_admin','isAdmin'],['waive_fees','waiveFees']])if(typeof d.others[k]==='boolean')flags[out]=d.others[k];
+  const present=v=>v!==''&&v!==null&&v!==undefined;
+  if(Object.hasOwn(d.others,'itemId'))flags.has_item_id=present(d.others.itemId)&&d.others.itemId!=='null';
+  if(Object.hasOwn(d.others,'editOrderItem')&&d.others.editOrderItem&&typeof d.others.editOrderItem==='object')flags.has_edit_order_item=Object.keys(d.others.editOrderItem).length>0;
+  for(const [out,k]of[['has_shopping_cart_item','shoppingCartItemId'],['has_price_group','priceGroupId']])if(Object.hasOwn(d.userSelectedOptions,k))flags[out]=present(d.userSelectedOptions[k]);
+  let manualControls;
+  if (__PASSIVE_TYPE__ === '38') {
+    if ([...document.querySelectorAll('#esCollapse')].some(e=>e.classList.contains('show')))
+      return {observed:false,reason:'estimated_shipping_panel_open'};
+    const visible=el=>el.getClientRects().length>0 && getComputedStyle(el).display!=='none' &&
+      getComputedStyle(el).visibility!=='hidden' && !el.closest('[hidden],[aria-hidden="true"]');
+    const checked=(name,value)=>{
+      const values=[...element.querySelectorAll('input[type="radio"][name="'+name+'"]')].filter(e=>e.checked);
+      if(values.length!==1 || String(values[0].value)!==value || values[0].matches(':disabled') || !visible(values[0])) return null;
+      return {value,checked:true,enabled:true,visible:true};
+    };
+    const controls={proof_type:checked('proofType','100'),
+      manual_proof:checked('proofTypeForManual',String(selected.manualProofType)),
+      file_delivery:checked('fileDeliveryForManual','5')};
+    if(Object.values(controls).every(Boolean)) manualControls=controls;
+  }
+  const result={observed:true,capture_kind:'controller',source_contract:expected,source_url:__PASSIVE_URL__,settled:settled===true,
+    product_type:__PASSIVE_TYPE__,store_type:'broker',currency:'USD',field_specs:specs,field_options:options,
+    userSelectedOptions:selected,appliedPrices:prices,other_context:flags};
+  if(manualControls)result.manual_controls=manualControls;
+  if (__PASSIVE_TYPE__ === '38' && typeof d.others.itemId === 'string' && d.others.itemId === 'null')
+    result.base_price_query={mode:'source_literal_pair_v1',itemId:'null',cid:''};
+  const total=c.totalPrice;if(scalar(total))result.controller_total=total;
+  const state=c.couponData;
+  if(state&&typeof state==='object'&&state.coupon&&typeof state.coupon==='object'&&!Array.isArray(state.coupon)) {
+    const coupon=state.coupon,parameters={};
+    for(const [out,k]of[['valid_for_specs','isCouponValidForSpecs'],['qualification_level','qualificationLevel']])if(Object.hasOwn(coupon,k)&&(scalar(coupon[k])||typeof coupon[k]==='boolean'))parameters[out]=coupon[k];
+    if(coupon.status&&Object.hasOwn(coupon.status,'id')&&scalar(coupon.status.id))parameters.status_id=coupon.status.id;
+    const tier=Array.isArray(coupon.amountTiers)?coupon.amountTiers[0]:null;
+    if(tier&&typeof tier==='object')for(const [out,k]of[['amount_percent','amount'],['max_amount','maxAmount']])if(Object.hasOwn(tier,k)&&scalar(tier[k]))parameters[out]=tier[k];
+    result.coupon={observed:true,mode:'source_state',coupon_object_observed:true,coupon_object_key_count:Object.keys(coupon).length,parameters};
+    if(typeof state.isCouponSpecChanged==='boolean')result.coupon.is_coupon_spec_changed=state.isCouponSpecChanged;
+    if(__PASSIVE_TYPE__ === '38')result.coupon.source_quantity=selected.quantity;
+  }
+  if (__PASSIVE_TYPE__ === '38') {
+  const visible=e=>e&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';
+  const totals=[...element.querySelectorAll('.totalSection')].filter(visible);
+  const rows=totals.filter(e=>{
+    const labels=e.querySelectorAll(':scope > .col-8 > .subTotal');
+    return labels.length===1&&visible(labels[0])&&/^Subtotal\s*\(excludes shipping\)\s*:\s*$/i.test(labels[0].textContent.trim());
+  });
+  if(rows.length===1) {
+    const row=rows[0], amounts=row.querySelectorAll(':scope > .col-4');
+    const wrappers=totals.filter(e=>e!==row);
+    const wrappersSafe=wrappers.every(e=>e.contains(row)&&e.matches('.alert.alert-secondary')&&
+      e.querySelectorAll(':scope > .container').length===1&&
+      e.querySelectorAll(':scope > .col-4,:scope > .subTotal').length===0&&
+      [...e.childNodes].every(n=>n.nodeType!==3||!n.textContent.trim()));
+    if(wrappersSafe&&amounts.length===1&&visible(amounts[0])) {
+      const text=amounts[0].textContent.trim();
+      if(text.length<=64&&/^\$(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]{2})?$/.test(text))result.displayed_total=text;
+    }
+  }
+  } else {
+  const totals=[...element.querySelectorAll('.totalSection')].filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden');
+  if(totals.length===1) {
+    const amount=totals[0].querySelector(':scope > .col-4');
+    const text=amount?.textContent||'';
+    if(text.length<=128) {const matches=[...text.matchAll(/\$[0-9,]+(?:\.[0-9]{2})?/g)];if(matches.length&&matches.length<=3)result.displayed_total=matches[matches.length-1][0];}
+  }
+  }
+  return result;
+}'''
+PASSIVE_PRICE_CAPTURE_JS = _passive_script(_PASSIVE_PRICE_CAPTURE_TEMPLATE, SPECIAL_FAMILY)
+
+
+# The exact pinned Vue formSelect template uses props.spec as its model key.
+# An HTML name, label or generated-ID prefix is not equivalent to that key.
+# Inspect only own data descriptors of the mounted VNode/ref graph; no source
+# callback, computed value, accessor, or function body is called/read here.
+_PASSIVE_UNNAMED_SELECT_BINDING_TEMPLATE = r'''({source_contract,source_id,selected_values,target_value}) => {
+  const expected=__PASSIVE_CONTRACT__, allowed=__PASSIVE_FIELDS__;
+  const no=()=>({observed:false,reason:'passive_native_model_binding_unproven'});
+  if(!source_contract||JSON.stringify(Object.keys(source_contract).sort())!==JSON.stringify(Object.keys(expected).sort())||
+     !Object.keys(expected).every(k=>source_contract[k]===expected[k])||location.href!==__PASSIVE_URL__||
+     typeof source_id!=='string'||!(/^[A-Za-z][A-Za-z0-9_-]{0,127}$/).test(source_id)||
+     !Array.isArray(selected_values)||selected_values.length!==1||typeof selected_values[0]!=='string'||
+     typeof target_value!=='string'||!(/^[0-9]{1,12}$/).test(target_value))return no();
+  const root=document.querySelector('#order-form');
+  if(!root||root.getAttribute('data-printproducttype')!==__PASSIVE_TYPE__||root.getAttribute('data-currentstoretype')!=='broker')return no();
+  const matches=root.querySelectorAll('select[id="'+source_id+'"]');
+  if(matches.length!==1)return no();
+  const el=matches[0];
+  if(el.name!==''||el.multiple||el.matches(':disabled')||!el.getClientRects().length||
+     getComputedStyle(el).visibility==='hidden'||el.closest('[hidden],[aria-hidden="true"]'))return no();
+  const retained=[...el.selectedOptions].map(x=>x.value);
+  if(retained.length!==1||retained[0]!==selected_values[0])return no();
+  const targets=[...el.options].filter(x=>x.value===target_value);
+  if(targets.length!==1||targets[0].disabled||targets[0].closest('optgroup')?.disabled||retained[0]===target_value)return no();
+  const own=(obj,key)=>{
+    if(!obj||typeof obj!=='object')return undefined;
+    const d=Object.getOwnPropertyDescriptor(obj,key);
+    if(d===undefined)return undefined;
+    if(!Object.hasOwn(d,'value'))throw Error('accessor');
+    return d.value;
+  };
+  try {
+    const start=own(root,'_vnode');if(!start)return no();
+    const queue=[start],seen=new Set(),bindings=[];
+    for(let cursor=0;cursor<queue.length;cursor++) {
+      if(cursor>=2048||queue.length>2048)return no();
+      const node=queue[cursor];if(!node||typeof node!=='object'||seen.has(node))continue;
+      seen.add(node);
+      if(own(node,'el')===el) {
+        const ref=own(node,'ref'),owner=own(ref,'i'),refs=own(owner,'refs'),type=own(owner,'type'),props=own(owner,'props');
+        const spec=own(props,'spec'),vprops=own(node,'props'),data=own(owner,'data'),unique=own(data,'uniqueId');
+        if(own(node,'type')!=='select'||own(ref,'r')!=='currentInput'||own(type,'name')!=='formSelect'||
+           own(refs,'currentInput')!==el||typeof spec!=='string'||!allowed.includes(spec)||
+           typeof unique!=='string'||!(/^[a-z0-9]{1,9}$/).test(unique)||source_id!==spec+'_'+unique||
+           own(vprops,'id')!==source_id||typeof own(vprops,'onUpdate:modelValue')!=='function')return no();
+        bindings.push(spec);
+      }
+      const component=own(node,'component');if(component){const tree=own(component,'subTree');if(tree)queue.push(tree);}
+      const children=own(node,'children');
+      if(Array.isArray(children)) {
+        if(children.length>2048)return no();
+        for(let index=0;index<children.length;index++) {
+          const child=own(children,String(index));if(child&&typeof child==='object')queue.push(child);
+        }
+      }
+    }
+    if(bindings.length!==1)return no();
+    return {observed:true,field:bindings[0],binding_kind:'pinned_vue_form_select_spec',retained_value:retained[0]};
+  } catch(_) {return no();}
+}'''
+PASSIVE_UNNAMED_SELECT_BINDING_JS = _passive_script(_PASSIVE_UNNAMED_SELECT_BINDING_TEMPLATE, SPECIAL_FAMILY)
+
+
+
+# Event identities/counts only. Never read edit, notes, upload or input values.
+_PASSIVE_PRICE_FENCE_TEMPLATE = r'''({key,action,source_id=null,epoch=null,notify_key=null}) => {
+  if(location.href!==__PASSIVE_URL__)return{ok:false};
+  const root=document.querySelector('#order-form');if(!root)return{ok:false};
+  if(action==='install') {
+    if(Object.hasOwn(window,key))return{ok:false};
+    const state={epoch:null,expected:null,input:0,change:0,unexpected:false,notify:notify_key,root,nativeRadioTarget:null,nativeRadioNext:null};
+    state.handler=e=>{
+      if(!root.contains(e.target)||!(e.target instanceof Element))return;
+      const tag=e.target.tagName,type=e.target.getAttribute('type');
+      if(tag!=='SELECT'&&!(tag==='INPUT'&&(type==='radio'||type==='number')))return;
+      const nativeRadio=__PASSIVE_TYPE__==='38'&&state.nativeRadioTarget!==null;
+      if(state.epoch===null||e.target.id!==state.expected||(e.isTrusted&&!nativeRadio))state.unexpected=true;
+      else if(nativeRadio&&(e.target!==state.nativeRadioTarget||tag!=='INPUT'||type!=='radio'||
+              state.nativeRadioNext!==e.type))state.unexpected=true;
+      else {state[e.type]++;if(state[e.type]>1)state.unexpected=true;
+        if(nativeRadio)state.nativeRadioNext=e.type==='input'?'change':'done';}
+      if(state.unexpected&&typeof window[state.notify]==='function') {try{window[state.notify]('unattributed_control_change').catch(()=>{});}catch(_){}}
+    };
+    document.addEventListener('input',state.handler,true);document.addEventListener('change',state.handler,true);
+    Object.defineProperty(window,key,{value:state,configurable:true});return{ok:true};
+  }
+  const s=window[key];if(!s)return{ok:false};
+  if(action==='arm') {if(s.epoch!==null||s.unexpected)return{ok:false};s.epoch=epoch;s.expected=source_id;s.input=0;s.change=0;}
+  const result={ok:true,unexpected:s.unexpected,input:s.input,change:s.change,epoch:s.epoch};
+  if(action==='disarm'){s.epoch=null;s.expected=null;}
+  if(action==='remove'){document.removeEventListener('input',s.handler,true);document.removeEventListener('change',s.handler,true);delete window[key];if(s.notify)delete window[s.notify];}
+  return result;
+}'''
+PASSIVE_PRICE_FENCE_JS = _passive_script(_PASSIVE_PRICE_FENCE_TEMPLATE, SPECIAL_FAMILY)
+
+
+
+# Same two native DOM events as select_option, with one atomic final guard.
+# A separate guard/read followed by awaited select_option would race panel changes.
+STAGGERED_SELECT_ACTION_JS = r"""(e, {value,source_id,retained_values,fence_key,epoch}) => {
+ const visible=x=>x.getClientRects().length>0 && getComputedStyle(x).display!=='none' &&
+   getComputedStyle(x).visibility!=='hidden' && !x.closest('[hidden],[aria-hidden="true"]');
+ const shippingOpen=()=>[...document.querySelectorAll('#esCollapse')].some(x=>x.classList.contains('show'));
+ const roots=[...document.querySelectorAll('#order-form')],root=roots.length===1?roots[0]:null;
+ const fence=typeof fence_key==='string'&&/^__hermesPassivePriceFence_[a-f0-9]{32}$/.test(fence_key)?window[fence_key]:null;
+ if(!fence || fence.root!==root || fence.epoch!==epoch || fence.expected!==source_id || fence.unexpected!==false ||
+    fence.input!==0 || fence.change!==0 || fence.nativeRadioTarget!==null || fence.nativeRadioNext!==null)throw Error('native selection epoch changed');
+ if(location.href!==__PASSIVE_URL__ || !root || root.getAttribute('data-printproducttype')!=='38' ||
+    root.getAttribute('data-currentstoretype')!=='broker' || !root.contains(e) ||
+    e.tagName!=='SELECT' || e.id!==source_id || root.querySelectorAll('select[id="'+source_id+'"]').length!==1 ||
+    e.multiple || e.matches(':disabled') || !visible(e) || shippingOpen() ||
+    !Array.isArray(retained_values) || retained_values.length!==1 ||
+    JSON.stringify([...e.selectedOptions].map(x=>x.value))!==JSON.stringify(retained_values) ||
+    retained_values[0]===value)throw Error('native select state changed');
+ const targets=[...e.options].filter(x=>x.value===value);
+ if(targets.length!==1 || targets[0].disabled || targets[0].closest('optgroup')?.disabled)
+   throw Error('native select target unavailable');
+ e.selectedIndex=[...e.options].indexOf(targets[0]);
+ e.dispatchEvent(new Event('input',{bubbles:true}));
+ if(shippingOpen())throw Error('native select shipping state changed');
+ e.dispatchEvent(new Event('change',{bubbles:true}));
+ return true;
+}"""
+STAGGERED_SELECT_ACTION_JS = _passive_script(STAGGERED_SELECT_ACTION_JS, STAGGERED_FAMILY)
+
+
+# Source-pinned radio names map to exactly one model field. No callbacks read.
+STAGGERED_RADIO_BINDING_JS = r"""({source_contract,name,value,selected_values}) => {
+ const no=()=>({observed:false,reason:'passive_radio_binding_unproven'});
+ const expected=__PASSIVE_CONTRACT__, policies={proofType:['proofType',['100']],
+  proofTypeForManual:['manualProofType',['1','36','37','38']],fileDeliveryForManual:['fileDelivery',['5']]};
+ if(location.href!==__PASSIVE_URL__ || !source_contract ||
+    JSON.stringify(Object.keys(source_contract).sort())!==JSON.stringify(Object.keys(expected).sort()) ||
+    !Object.keys(expected).every(k=>expected[k]===source_contract[k]) || !Object.hasOwn(policies,name) ||
+    !policies[name][1].includes(value) || !Array.isArray(selected_values) || selected_values.length>1 ||
+    !selected_values.every(x=>typeof x==='string'))return no();
+ const root=document.querySelector('#order-form');
+ if(!root || root.getAttribute('data-printproducttype')!=='38' || root.getAttribute('data-currentstoretype')!=='broker' ||
+    [...document.querySelectorAll('#esCollapse')].some(e=>e.classList.contains('show')))return no();
+ const controls=[...root.querySelectorAll('input[type="radio"][name="'+name+'"]')],
+  retained=controls.filter(e=>e.checked).map(e=>e.value), targets=controls.filter(e=>e.value===value);
+ if(JSON.stringify(retained)!==JSON.stringify(selected_values) || targets.length!==1 || targets[0].checked)return no();
+ const el=targets[0];
+ if(el.matches(':disabled') || !el.getClientRects().length || getComputedStyle(el).display==='none' ||
+    getComputedStyle(el).visibility==='hidden' || el.closest('[hidden],[aria-hidden="true"]') ||
+    !(/^[A-Za-z][A-Za-z0-9_-]{0,127}$/).test(el.id) || root.querySelectorAll('[id="'+el.id+'"]').length!==1)return no();
+ return {observed:true,field:policies[name][0],source_id:el.id,value,binding_kind:'pinned_type38_manual_radio'};
+}"""
+STAGGERED_RADIO_BINDING_JS = _passive_script(STAGGERED_RADIO_BINDING_JS, STAGGERED_FAMILY)
+
+
+# Final native action repeats the source-pinned identity after every awaited
+# binding/fence/locator check. Locator identity alone does not bind name/value.
+STAGGERED_RADIO_ACTION_JS = r"""(e, {source_id,name,value,retained_values,fence_key,epoch}) => {
+ const policies={proofType:['100'],proofTypeForManual:['1','36','37','38'],fileDeliveryForManual:['5']};
+ const roots=[...document.querySelectorAll('#order-form')];
+ const fence=typeof fence_key==='string'&&/^__hermesPassivePriceFence_[a-f0-9]{32}$/.test(fence_key)?window[fence_key]:null;
+ if(location.href!==__PASSIVE_URL__ || roots.length!==1 || typeof name!=='string' ||
+    !Object.hasOwn(policies,name) || !policies[name].includes(value) ||
+    typeof source_id!=='string' || !(/^[A-Za-z][A-Za-z0-9_-]{0,127}$/).test(source_id) ||
+    !Array.isArray(retained_values) || retained_values.length>1 || !retained_values.every(x=>typeof x==='string') ||
+    !fence || fence.root!==roots[0] || fence.epoch!==epoch || fence.expected!==source_id || fence.unexpected!==false ||
+    fence.input!==0 || fence.change!==0 || fence.nativeRadioTarget!==null || fence.nativeRadioNext!==null)throw Error('native radio identity changed');
+ const root=roots[0];
+ if(root.getAttribute('data-printproducttype')!=='38' || root.getAttribute('data-currentstoretype')!=='broker' ||
+    e.tagName!=='INPUT' || e.type!=='radio' || e.id!==source_id || e.name!==name || e.value!==value ||
+    !root.contains(e) || e.closest('#order-form')!==root ||
+    root.querySelectorAll('input[id="'+source_id+'"]').length!==1 ||
+    e.checked || e.matches(':disabled') || !e.getClientRects().length ||
+    getComputedStyle(e).display==='none' || getComputedStyle(e).visibility==='hidden' ||
+    e.closest('[hidden],[aria-hidden="true"]') ||
+    [...document.querySelectorAll('#esCollapse')].some(x=>x.classList.contains('show')))
+   throw Error('native radio state changed');
+ const group=[...root.querySelectorAll('input[type="radio"][name="'+name+'"]')],
+  targets=group.filter(x=>x.value===value),retained=group.filter(x=>x.checked).map(x=>x.value);
+ if(targets.length!==1 || targets[0]!==e || JSON.stringify(retained)!==JSON.stringify(retained_values))
+   throw Error('native radio group changed');
+ // Browser-native click() produces trusted input/change default actions. Admit
+ // those only during this synchronous exact-node input -> change window.
+ fence.nativeRadioTarget=e;fence.nativeRadioNext='input';
+ try {
+   e.click();
+   if(fence.unexpected || fence.input!==1 || fence.change!==1 ||
+      fence.nativeRadioNext!=='done' || !e.checked)throw Error('native radio transition incomplete');
+ } finally {fence.nativeRadioTarget=null;fence.nativeRadioNext=null;}
+}"""
+STAGGERED_RADIO_ACTION_JS = _passive_script(STAGGERED_RADIO_ACTION_JS, STAGGERED_FAMILY)
+
+
+class _ManagedPassivePriceObserver(OwnedPageCDPObserver):
+    """Same owned target; unexpected later native price traffic invalidates reuse."""
+    async def _body(self,identifier):
+        initial=(isinstance(self.journal,InitialQuantityPriceJournal)
+                 and self.journal.is_initial_request(identifier))
+        if not initial:
+            return await super()._body(identifier)
+        return await read_initial_body(self,identifier,getattr(self,'_initial_context_provider',None))
+
+    def _request(self,event):
+        epoch=self.journal._epochs.get(self.journal._current)
+        request=event.get('request',{})
+        if (epoch is not None and epoch.finished and not self.journal._invalid
+                and event.get('frameId')==self.journal._frame and event.get('loaderId')==self.journal._loader
+                and request.get('method')=='GET' and event.get('type') in {'XHR','Fetch'}
+                and self.journal._candidate(request.get('url'))):
+            self.journal.invalidate('unattributed_control_change')
+        super()._request(event)
+
+
 def _public_url(url):
     """Queries/fragments may contain session artifacts; never persist them."""
     parts = urlsplit(url)
     return urlunsplit((parts.scheme, parts.netloc, parts.path or "/", "", ""))
+
+
+STAGGERED_GALLERY_PREFIX = 'https://static.printograph.com/tl/products/generic/images/staggered-cut-flyers/'
+STAGGERED_GALLERY_FILENAMES = frozenset(['staggered_cut_flyers.jpg', 'staggered_flyers_100lb_gloss_book.jpg', 'staggered_flyers_100lb_gloss_cover.jpg', 'staggered_flyers_100lb_recycled_matte.jpg', 'staggered_flyers_6x9x.jpg', 'staggered_flyers_70lb.jpg', 'staggered_flyers_8.5x11x.jpg', 'staggered_flyers_80lb_matte_book.jpg', 'staggered_flyers_full_color_both_sides.jpg', 'staggered_flyers_full_color_front_blank_back.jpg', 'staggered_flyers_half_inch_6x9_3pages.jpg', 'staggered_flyers_half_inch_6x9_4pages.jpg', 'staggered_flyers_half_inch_6x9_5pages.jpg', 'staggered_flyers_half_inch_6x9_6pages.jpg', 'staggered_flyers_half_inch_6x9_7pages.jpg', 'staggered_flyers_half_inch_6x9_8pages.jpg', 'staggered_flyers_half_inch_8_5x11_3pages.jpg', 'staggered_flyers_half_inch_8_5x11_4pages.jpg', 'staggered_flyers_half_inch_8_5x11_5pages.jpg', 'staggered_flyers_half_inch_8_5x11_6pages.jpg', 'staggered_flyers_half_inch_8_5x11_7pages.jpg', 'staggered_flyers_half_inch_8_5x11_8pages.jpg', 'staggered_flyers_main_view_1.jpg', 'staggered_flyers_main_view_2.jpg', 'staggered_flyers_main_view_3.png', 'staggered_flyers_main_view_4.png', 'staggered_flyers_quarter_inch_6x9_3pages.jpg', 'staggered_flyers_quarter_inch_6x9_4pages.jpg', 'staggered_flyers_quarter_inch_6x9_5pages.jpg', 'staggered_flyers_quarter_inch_6x9_6pages.jpg', 'staggered_flyers_quarter_inch_6x9_7pages.jpg', 'staggered_flyers_quarter_inch_6x9_8pages.jpg', 'staggered_flyers_quarter_inch_8_5x11_3pages.jpg', 'staggered_flyers_quarter_inch_8_5x11_4pages.jpg', 'staggered_flyers_quarter_inch_8_5x11_5pages.jpg', 'staggered_flyers_quarter_inch_8_5x11_6pages.jpg', 'staggered_flyers_quarter_inch_8_5x11_7pages.jpg', 'staggered_flyers_quarter_inch_8_5x11_8pages.jpg'])
+STAGGERED_GALLERY_PAPER_PREFIX = 'https://static.printograph.com/tl/products/generic/images/common/'
+STAGGERED_GALLERY_PAPER_FILENAMES = frozenset(['staggered_flyers_100lb_gloss_book.jpg', 'staggered_flyers_100lb_gloss_cover.jpg', 'staggered_flyers_100lb_recycled_matte.jpg', 'staggered_flyers_70lb.jpg', 'staggered_flyers_80lb_matte_book.jpg'])
+STAGGERED_GALLERY_JS = '() => {\n const source="https://www.printograph.com/products/staggered-cut-flyers/order",prefix="https://static.printograph.com/tl/products/generic/images/staggered-cut-flyers/",names=new Set(["staggered_cut_flyers.jpg", "staggered_flyers_100lb_gloss_book.jpg", "staggered_flyers_100lb_gloss_cover.jpg", "staggered_flyers_100lb_recycled_matte.jpg", "staggered_flyers_6x9x.jpg", "staggered_flyers_70lb.jpg", "staggered_flyers_8.5x11x.jpg", "staggered_flyers_80lb_matte_book.jpg", "staggered_flyers_full_color_both_sides.jpg", "staggered_flyers_full_color_front_blank_back.jpg", "staggered_flyers_half_inch_6x9_3pages.jpg", "staggered_flyers_half_inch_6x9_4pages.jpg", "staggered_flyers_half_inch_6x9_5pages.jpg", "staggered_flyers_half_inch_6x9_6pages.jpg", "staggered_flyers_half_inch_6x9_7pages.jpg", "staggered_flyers_half_inch_6x9_8pages.jpg", "staggered_flyers_half_inch_8_5x11_3pages.jpg", "staggered_flyers_half_inch_8_5x11_4pages.jpg", "staggered_flyers_half_inch_8_5x11_5pages.jpg", "staggered_flyers_half_inch_8_5x11_6pages.jpg", "staggered_flyers_half_inch_8_5x11_7pages.jpg", "staggered_flyers_half_inch_8_5x11_8pages.jpg", "staggered_flyers_main_view_1.jpg", "staggered_flyers_main_view_2.jpg", "staggered_flyers_main_view_3.png", "staggered_flyers_main_view_4.png", "staggered_flyers_quarter_inch_6x9_3pages.jpg", "staggered_flyers_quarter_inch_6x9_4pages.jpg", "staggered_flyers_quarter_inch_6x9_5pages.jpg", "staggered_flyers_quarter_inch_6x9_6pages.jpg", "staggered_flyers_quarter_inch_6x9_7pages.jpg", "staggered_flyers_quarter_inch_6x9_8pages.jpg", "staggered_flyers_quarter_inch_8_5x11_3pages.jpg", "staggered_flyers_quarter_inch_8_5x11_4pages.jpg", "staggered_flyers_quarter_inch_8_5x11_5pages.jpg", "staggered_flyers_quarter_inch_8_5x11_6pages.jpg", "staggered_flyers_quarter_inch_8_5x11_7pages.jpg", "staggered_flyers_quarter_inch_8_5x11_8pages.jpg"]),paperPrefix="https://static.printograph.com/tl/products/generic/images/common/",paperNames=new Set(["staggered_flyers_100lb_gloss_book.jpg", "staggered_flyers_100lb_gloss_cover.jpg", "staggered_flyers_100lb_recycled_matte.jpg", "staggered_flyers_70lb.jpg", "staggered_flyers_80lb_matte_book.jpg"]);\n const no=reason=>({observed:false,reason});\n if(location.href!==source)return no(\'gallery_source_changed\');\n const forms=[...document.querySelectorAll(\'#order-form\')];\n if(forms.length!==1||forms[0].getAttribute(\'data-printproducttype\')!==\'38\'||forms[0].getAttribute(\'data-currentstoretype\')!==\'broker\')return no(\'gallery_form_scope_changed\');\n if(forms[0].getAttribute(\'data-imagepath\')!==prefix.replace(\'https:\',\'\')||forms[0].getAttribute(\'data-paperpath\')!==paperPrefix.replace(\'https:\',\'\'))return no(\'gallery_asset_roots_changed\');\n const visible=e=>e.getClientRects().length>0&&getComputedStyle(e).visibility!==\'hidden\'&&getComputedStyle(e).display!==\'none\';\n const galleries=[...forms[0].querySelectorAll(\'.gallery-b\')].filter(visible);\n if(galleries.length!==1)return no(\'gallery_root_not_unique\');\n const elements=[...galleries[0].querySelectorAll(\'#main-gallery-b-img img,.center-b img\')];\n if(elements.length>100)return no(\'gallery_element_limit\');\n const seen=new Set(),images=[];let unmatched=0;\n for(const e of elements){\n   let matched=false;const candidates=[e.currentSrc,e.src,e.getAttribute(\'data-src\'),e.getAttribute(\'data-lazy\')];\n   for(const value of candidates){\n     if(typeof value!==\'string\'||!((value.startsWith(prefix)&&names.has(value.slice(prefix.length))&&!paperNames.has(value.slice(prefix.length)))||(value.startsWith(paperPrefix)&&paperNames.has(value.slice(paperPrefix.length)))))continue;\n     if(!seen.has(value)){seen.add(value);images.push({url:value,alt:\'Staggered Cut Flyers\'});}matched=true;break;\n   }\n   if(!matched)unmatched++;\n }\n if(images.length>30)return no(\'gallery_image_limit\');\n return {observed:true,source_url:source,images,image_element_count:elements.length,\n   gallery_count:1,unmatched_image_elements:unmatched,source_fetches_initiated:0,scope:\'current_rendered_product_gallery_only\'};\n}'
+
+
+def project_staggered_gallery(observed):
+    """Project only actual current-gallery URLs; never manufacture missing URLs."""
+    if (type(observed) is not dict or observed.get('observed') is not True
+            or observed.get('source_url')!=STAGGERED_FAMILY.source_url
+            or observed.get('scope')!='current_rendered_product_gallery_only'
+            or type(observed.get('source_fetches_initiated')) is not int or observed['source_fetches_initiated']!=0
+            or type(observed.get('gallery_count')) is not int or observed['gallery_count']!=1
+            or type(observed.get('image_element_count')) is not int or not 0<=observed['image_element_count']<=100
+            or type(observed.get('unmatched_image_elements')) is not int or not 0<=observed['unmatched_image_elements']<=observed['image_element_count']
+            or type(observed.get('images')) is not list or len(observed['images'])>30):
+        raise ValueError('staggered_gallery_scope_unproven')
+    images=[];seen=set()
+    for item in observed['images']:
+        if type(item) is not dict or set(item)!={'url','alt'} or type(item.get('url')) is not str:
+            raise ValueError('staggered_gallery_image_unproven')
+        url=item['url']
+        try:
+            parsed=urlsplit(url)
+            if (parsed.scheme!='https' or parsed.netloc!='static.printograph.com' or parsed.username or parsed.password
+                    or parsed.query or parsed.fragment or len(url)>512 or url!=_public_url(url)
+                    or not ((url.startswith(STAGGERED_GALLERY_PREFIX)
+                        and url[len(STAGGERED_GALLERY_PREFIX):] in STAGGERED_GALLERY_FILENAMES-STAGGERED_GALLERY_PAPER_FILENAMES)
+                        or (url.startswith(STAGGERED_GALLERY_PAPER_PREFIX)
+                        and url[len(STAGGERED_GALLERY_PAPER_PREFIX):] in STAGGERED_GALLERY_PAPER_FILENAMES))):
+                raise ValueError('staggered_gallery_image_unproven')
+        except ValueError:raise ValueError('staggered_gallery_image_unproven') from None
+        if url not in seen:
+            seen.add(url);images.append({'url':url,'alt':'Staggered Cut Flyers'})
+    return images
 
 
 def _supplier_for(url):
@@ -170,6 +540,24 @@ def _loaded_bundle_contract(observed):
     """Only one actually loaded hash per required public script can match."""
     return {key: next(iter(values)) for key, values in observed.items()
             if key in SOURCE_CONTRACT and len(values) == 1}
+
+
+def _safe_controller_diagnostics(value):
+    """Allow only bounded schema identifiers from an unsupported controller."""
+    if not isinstance(value, dict):
+        return None
+    def identifier(item, pattern):
+        return item if isinstance(item, str) and re.fullmatch(pattern, item) else None
+    names = value.get("option_names")
+    safe_names = []
+    for item in names[:64] if isinstance(names, list) else []:
+        name = identifier(item, r"[A-Za-z][A-Za-z0-9]{0,63}")
+        if name is not None and name not in safe_names:
+            safe_names.append(name)
+    return {"declared_type": identifier(value.get("declared_type"), r"[0-9]{1,16}"),
+            "controller_type": identifier(value.get("controller_type"), r"[0-9]{1,16}"),
+            "store_type": identifier(value.get("store_type"), r"[A-Za-z0-9]{1,32}"),
+            "option_names": safe_names}
 
 
 def _is_dps(url):
@@ -306,7 +694,7 @@ def normalize_snapshot(raw):
             "warnings": warnings}
 
 
-class ProductDiagnosisManager:
+class ProductDiagnosisManager(SupplierProfileExecutorMixin):
     def __init__(self, store, browser_pool):
         self.store, self.pool = store, browser_pool
         self.registry = SupplierRegistry(store.root, SUPPLIERS)
@@ -318,6 +706,9 @@ class ProductDiagnosisManager:
         self._supplier_sessions = {}
         self._page_hosts = {}
         self._bundle_hashes, self._bundle_tasks = {}, {}
+        self._passive_journals, self._passive_observers, self._passive_fences = {}, {}, {}
+        self._passive_scope_checks = {}
+        self._supplier_profile_owners, self._supplier_profile_locks = {}, {}
         self._locks = {}
         self._lock = asyncio.Lock()
         self._diagnosis_slots = asyncio.Semaphore(3)
@@ -433,13 +824,17 @@ class ProductDiagnosisManager:
             bundle_tasks = self._bundle_tasks[owner] = set()
 
             async def hash_loaded_bundle(response):
+                key = None
                 try:
                     key = _printograph_bundle_key(response.url)
                     if key and response.status == 200:
                         digest = hashlib.sha256(await response.body()).hexdigest()
                         bundle_hashes.setdefault(key, set()).add(digest)
+                    elif key and self._records.get(owner, {}).get('observe_printograph_prices') is True:
+                        bundle_hashes.setdefault(key, set()).add('unproven_loaded_bundle')
                 except Exception:
-                    pass
+                    if key and self._records.get(owner, {}).get('observe_printograph_prices') is True:
+                        bundle_hashes.setdefault(key, set()).add('unproven_loaded_bundle')
 
             def queue_bundle_hash(response):
                 if _printograph_bundle_key(response.url) is None:
@@ -472,8 +867,11 @@ class ProductDiagnosisManager:
         await page.route("**/*", guard)
         return page
 
-    async def open_supplier(self, key):
+    async def open_supplier(self, key, *, target_url=None):
         item = self.registry.get(key)
+        if target_url is not None:
+            validate_dps_target(key, item, target_url)
+        entry_url = target_url if target_url is not None else item['entry_url']
         async with self._locks.setdefault(f"supplier:{key}", asyncio.Lock()):
             if self._closed:
                 raise ValueError("diagnosis_manager_closed")
@@ -482,9 +880,12 @@ class ProductDiagnosisManager:
             try:
                 if page is None or page.is_closed():
                     await self._release(owner)
-                    origin, hosts, _ = await self._validated_target(item["entry_url"], login=True)
+                    origin, hosts, _ = await self._validated_target(entry_url, login=True)
                     page = await self._new_page(owner, origin, hosts)
-                    await page.goto(item["entry_url"], wait_until="domcontentloaded", timeout=45000)
+                    await page.goto(entry_url, wait_until="domcontentloaded", timeout=45000)
+                elif target_url is not None and page.url != target_url:
+                    await self._validated_target(target_url, login=True)
+                    await page.goto(target_url, wait_until="domcontentloaded", timeout=45000)
                 await page.bring_to_front()
                 return await self.check_supplier(key)
             except Exception as exc:
@@ -509,7 +910,49 @@ class ProductDiagnosisManager:
         self._supplier_sessions[key] = result
         return copy.deepcopy(result)
 
-    async def start(self, url):
+    async def read_supplier_workflow_references(self, key, expected_url):
+        """Read metadata from an existing owned DPS account page, never open it."""
+        item = self.registry.get(key)
+        validate_dps_target(key, item, expected_url)
+        owner = f'supplier:{key}'
+        async with self._locks.setdefault(owner, asyncio.Lock()):
+            if self._closed:
+                raise ValueError('diagnosis_manager_closed')
+            page = self._pages.get(owner)
+            if page is None or page.is_closed():
+                raise ValueError('supplier_workflow_owned_page_required')
+            if self._supplier_sessions.get(key, {}).get('session_status') != 'signed_in':
+                raise ValueError('supplier_workflow_signed_in_check_required')
+            if page.url != expected_url or self.registry.supplier_for(page.url) != key:
+                raise ValueError('supplier_workflow_url_changed')
+            try:
+                raw = await page.evaluate(WORKFLOW_REFERENCES_JS, {'expected_url': expected_url})
+            except Exception:
+                raise ValueError('supplier_workflow_projection_failed') from None
+            if page.is_closed() or page.url != expected_url or self._pages.get(owner) is not page:
+                raise ValueError('supplier_workflow_url_changed')
+            projected = project_workflow_references(raw)
+            return {'schema':'supplier-workflow-references/v1','supplier_id':key,'source_url':DPS_ACCOUNT_URL,
+                    'ownership':'existing_supplier_session_page','session_check':'previously_signed_in_not_rechecked',
+                    **projected,'cart_workflow_requires_isolation':True,'navigation_performed':False,
+                    'source_requests_initiated':0,'source_functions_invoked':False,'page_state_mutated':False,
+                    'price_or_shipping_quote_collected':False,'checkout_verified':False}
+
+
+    async def start_staggered_passive(self, *, check_scope, focus=False):
+        """Internal campaign-gated entry; the ordinary diagnosis API cannot opt in."""
+        if not callable(check_scope):
+            raise ValueError('passive_campaign_scope_required')
+        await check_scope()
+        return await self.start(STAGGERED_FAMILY.source_url, focus=focus,
+                                observe_printograph_prices=True, _scope_check=check_scope)
+
+    async def start(self, url, *, focus=False, observe_printograph_prices=False, _scope_check=None):
+        if type(focus) is not bool:
+            raise ValueError("invalid_diagnosis_focus")
+        if type(observe_printograph_prices) is not bool or (observe_printograph_prices and
+                url != SPECIAL_SHAPES_SOURCE_URL and not (url == STAGGERED_FAMILY.source_url and callable(_scope_check))):
+            raise ValueError("passive_price_source_unsupported")
         if self._closed:
             raise ValueError("diagnosis_manager_closed")
         origin, hosts, supplier = await self._validated_target(url)
@@ -518,26 +961,46 @@ class ProductDiagnosisManager:
                   "created_at": datetime.now(timezone.utc).isoformat(),
                   "fields": [], "content": {}, "warnings": [], "coverage": "current_page_only",
                   "supplier_id": supplier, "session_status": "unknown", "selection": None}
+        if observe_printograph_prices:
+            record["observe_printograph_prices"] = True
+            record["passive_price_observation"] = {"status":"requested", "source_data_finalized":False}
         async with self._lock:
             self._records[diagnosis_id] = record
+            if observe_printograph_prices and url == STAGGERED_FAMILY.source_url:
+                self._passive_scope_checks[diagnosis_id] = _scope_check
+                record['passive_campaign_product_id'] = '17792'
             self._persist(record)
-            self._tasks[diagnosis_id] = asyncio.create_task(self._open_diagnosis(diagnosis_id, url, origin, hosts))
+            self._tasks[diagnosis_id] = asyncio.create_task(self._open_diagnosis(diagnosis_id, url, origin, hosts, focus))
         return copy.deepcopy(record)
 
-    async def _open_diagnosis(self, diagnosis_id, url, origin, hosts):
+    async def _open_diagnosis(self, diagnosis_id, url, origin, hosts, focus):
         async with self._diagnosis_slots:
-            await self._open_diagnosis_in_slot(diagnosis_id, url, origin, hosts)
+            await self._open_diagnosis_in_slot(diagnosis_id, url, origin, hosts, focus)
 
-    async def _open_diagnosis_in_slot(self, diagnosis_id, url, origin, hosts):
+    async def _open_diagnosis_in_slot(self, diagnosis_id, url, origin, hosts, focus):
+        phase='creating_page'
         try:
             page = await self._new_page(diagnosis_id, origin, hosts)
+            phase='navigating'
             await page.goto(url, wait_until="domcontentloaded", timeout=45000)
-            await page.bring_to_front()
+            if focus:
+                await page.bring_to_front()
             async with self._lock:
                 self._records[diagnosis_id]["status"] = "analyzing"
                 self._persist(self._records[diagnosis_id])
+            phase='settling'
             settled = await self._settle_initial(page)
+            phase='refreshing'
             await self.refresh(diagnosis_id)
+            if self._records[diagnosis_id].get("observe_printograph_prices"):
+                async with self._locks.setdefault(diagnosis_id, asyncio.Lock()):
+                    phase='attaching_observer'
+                    try:
+                        await self._ensure_passive_observer_locked(diagnosis_id)
+                    except ValueError:
+                        record=self._records[diagnosis_id]
+                        record["passive_price_observation"]={"status":"held","reason":"passive_observer_not_ready","source_data_finalized":False}
+                        self._persist(record)
             if not settled:
                 async with self._lock:
                     record = self._records[diagnosis_id]
@@ -548,7 +1011,7 @@ class ProductDiagnosisManager:
         except Exception as exc:
             async with self._lock:
                 record = self._records[diagnosis_id]
-                record.update(status="attention", warnings=[_safe_error(exc)])
+                record.update(status="attention", warnings=[_safe_error(exc)],opening_failure_phase=phase)
                 self._persist(record)
 
     async def _settle_initial(self, page):
@@ -600,46 +1063,470 @@ class ProductDiagnosisManager:
     async def refresh(self, diagnosis_id):
         self.get(diagnosis_id)
         async with self._locks.setdefault(diagnosis_id, asyncio.Lock()):
-            page = self._pages.get(diagnosis_id)
-            record = self._records[diagnosis_id]
-            if page is None or page.is_closed():
-                async with self._lock:
-                    record.update(status="closed", session_status="closed")
-                    record["warnings"] = list(dict.fromkeys(record.get("warnings", []) + ["page_not_open"]))
-                    self._persist(record)
-                return self.get(diagnosis_id)
-            try:
-                hosts = self._page_hosts[diagnosis_id]
-                current = urlsplit(page.url)
-                if current.scheme != "https" or current.hostname not in hosts:
-                    raise ValueError("unexpected_source_origin")
-                raw = normalize_snapshot(await self._snapshot(page, expand=True))
-                raw["url"] = _public_url(page.url)
-                raw["status"] = "login_required" if raw["session_status"] == "login_required" else "ready"
-                if _blocked_product_path(current.path) and raw["session_status"] != "login_required":
-                    raw.update(status="attention", fields=[], content={}, warnings=["product_page_required"])
-                if not any(f["configurable"] for f in raw["fields"]) and raw["status"] != "login_required":
-                    raw["warnings"].append("no_visible_configurable_controls")
-                    if _supplier_for(page.url) == "b2sign" and raw["status"] != "login_required":
-                        raw["status"] = "attention"
-                if any(w.startswith('custom_dropdown_') or w == 'unsupported_visible_attribute' for w in raw["warnings"]):
-                    raw["status"] = "attention"
-                # A refreshed login page stays inspectable, but never claims a
-                # verified product, price, or complete option domain.
-                async with self._lock:
-                    changed = any(record.get(k) != raw[k] for k in ("url", "title", "fields", "content", "session_status"))
-                    if changed:
-                        record["revision"] += 1
-                        if record.get("selection") is not None:
-                            record["selection"] = None
-                            raw["warnings"].append("selection_cleared_after_page_change")
-                    record.update(raw)
-                    self._persist(record)
-            except Exception as exc:
-                async with self._lock:
-                    record.update(status="attention", warnings=[_safe_error(exc)])
-                    self._persist(record)
+            return await self._refresh_locked(diagnosis_id)
+
+    async def _refresh_locked(self, diagnosis_id):
+        page = self._pages.get(diagnosis_id)
+        record = self._records[diagnosis_id]
+        if page is None or page.is_closed():
+            async with self._lock:
+                record.update(status="closed", session_status="closed")
+                record["warnings"] = list(dict.fromkeys(record.get("warnings", []) + ["page_not_open"]))
+                self._persist(record)
             return self.get(diagnosis_id)
+        try:
+            hosts = self._page_hosts[diagnosis_id]
+            current = urlsplit(page.url)
+            if current.scheme != "https" or current.hostname not in hosts:
+                raise ValueError("unexpected_source_origin")
+            raw = normalize_snapshot(await self._snapshot(page, expand=True))
+            raw["url"] = _public_url(page.url)
+            raw["status"] = "login_required" if raw["session_status"] == "login_required" else "ready"
+            if _blocked_product_path(current.path) and raw["session_status"] != "login_required":
+                raw.update(status="attention", fields=[], content={}, warnings=["product_page_required"])
+            if not any(f["configurable"] for f in raw["fields"]) and raw["status"] != "login_required":
+                raw["warnings"].append("no_visible_configurable_controls")
+                if _supplier_for(page.url) == "b2sign" and raw["status"] != "login_required":
+                    raw["status"] = "attention"
+            if any(w.startswith('custom_dropdown_') or w == 'unsupported_visible_attribute' for w in raw["warnings"]):
+                raw["status"] = "attention"
+            # A refreshed login page stays inspectable, but never claims a
+            # verified product, price, or complete option domain.
+            async with self._lock:
+                changed = any(record.get(k) != raw[k] for k in ("url", "title", "fields", "content", "session_status"))
+                if changed:
+                    record["revision"] += 1
+                    if record.get("selection") is not None:
+                        record["selection"] = None
+                        raw["warnings"].append("selection_cleared_after_page_change")
+                record.update(raw)
+                self._persist(record)
+        except Exception as exc:
+            async with self._lock:
+                record.update(status="attention", warnings=[_safe_error(exc)])
+                self._persist(record)
+        return self.get(diagnosis_id)
+
+
+    async def _check_staggered_scope_locked(self, diagnosis_id):
+        check=self._passive_scope_checks.get(diagnosis_id)
+        if not callable(check):raise ValueError('passive_campaign_scope_required')
+        await check()
+        page=self._pages.get(diagnosis_id)
+        if page is None or page.is_closed() or page.url!=STAGGERED_FAMILY.source_url:
+            raise ValueError('passive_owned_page_unavailable')
+        snapshot=await page.evaluate(DIAGNOSIS_JS)
+        if snapshot.get('session_status')!='signed_in':raise ValueError('passive_signed_in_required')
+
+
+    async def _passive_capture_locked(self, diagnosis_id):
+        page=self._pages.get(diagnosis_id)
+        family=family_for_url(self._records[diagnosis_id]['url'])
+        if page is None or page.is_closed() or page.url!=family.source_url:
+            raise ValueError('passive_owned_page_unavailable')
+        if family is STAGGERED_FAMILY:
+            await self._check_staggered_scope_locked(diagnosis_id)
+        tasks=tuple(self._bundle_tasks.get(diagnosis_id,()))
+        if tasks:
+            _,pending=await asyncio.wait(tasks,timeout=5)
+            if pending:raise ValueError('passive_bundle_not_ready')
+        contract=_loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id,{}))
+        if contract!=SPECIAL_SHAPES_SOURCE_CONTRACT:
+            raise ValueError('passive_bundle_unverified')
+        return await page.evaluate(_passive_script(_PASSIVE_PRICE_CAPTURE_TEMPLATE,family),{'source_contract':contract,'settled':True})
+
+    async def _initial_quantity_capture_locked(self, diagnosis_id):
+        """Same bounded scalar projection, without reading shipping UI fields.
+
+        First quantity may automatically reveal estimated shipping. Its UI is
+        unrelated to the subtotal; this projection reads no address or shipping
+        controls. The ordinary/default capture's presentation guard is unchanged.
+        """
+        # Same campaign/account proof as the ordinary capture, without walking
+        # every product/estimated-shipping control around each response body.
+        check=self._passive_scope_checks.get(diagnosis_id)
+        record=self._records.get(diagnosis_id,{})
+        if (not callable(check) or record.get('passive_campaign_product_id')!='17792'
+                or record.get('observe_printograph_prices') is not True or record.get('status')!='ready'):
+            raise ValueError('passive_campaign_scope_required')
+        await check()
+        page=self._pages.get(diagnosis_id)
+        if page is None or page.is_closed() or page.url!=STAGGERED_FAMILY.source_url:
+            raise ValueError('passive_owned_page_unavailable')
+        signed_in=await page.evaluate(r'''()=>{
+          const visible=e=>!!e&&!e.closest('[hidden],[aria-hidden="true"]')&&e.getClientRects().length>0&&
+            getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden';
+          const text=e=>String(e.innerText||e.textContent||e.getAttribute('aria-label')||'').trim();
+          const login=[...document.querySelectorAll('input[type="password"]')].slice(0,20).some(e=>visible(e)&&!!e.closest('form,[role="dialog"],main'));
+          const logout=[...document.querySelectorAll('a,button,input[type="submit"]')].slice(0,500).some(e=>visible(e)&&/^(?:log\s*out|sign\s*out)$/i.test(text(e)||e.value||''));
+          const account=[...document.querySelectorAll('[data-authenticated="true"],[data-logged-in="true"]')].slice(0,200).some(e=>visible(e)&&/account|dashboard|signed in/i.test(text(e)));
+          return !login&&(logout||account);
+        }''')
+        if signed_in is not True:raise ValueError('passive_signed_in_required')
+        page=self._pages[diagnosis_id]
+        tasks=tuple(self._bundle_tasks.get(diagnosis_id,()))
+        if tasks:
+            _,pending=await asyncio.wait(tasks,timeout=5)
+            if pending:raise ValueError('passive_bundle_not_ready')
+        contract=_loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id,{}))
+        if contract!=SPECIAL_SHAPES_SOURCE_CONTRACT:raise ValueError('passive_bundle_unverified')
+        guard="""    if ([...document.querySelectorAll('#esCollapse')].some(e=>e.classList.contains('show')))
+      return {observed:false,reason:'estimated_shipping_panel_open'};
+"""
+        if _PASSIVE_PRICE_CAPTURE_TEMPLATE.count(guard)!=1:raise ValueError('initial_capture_template_unproven')
+        script=_PASSIVE_PRICE_CAPTURE_TEMPLATE.replace(guard,'')
+        return await page.evaluate(_passive_script(script,STAGGERED_FAMILY),
+                                   {'source_contract':contract,'settled':True})
+
+    async def _disclose_initial_quantity_locked(self, diagnosis_id, epoch):
+        journal=self._passive_journals[diagnosis_id]
+        if not isinstance(journal,InitialQuantityPriceJournal) or not journal.is_initial_epoch(epoch):
+            raise ValueError('initial_quantity_scope_unproven')
+        capture=await self._initial_quantity_capture_locked(diagnosis_id)
+        journal.start_initial_disclosure(capture)
+        page=self._pages[diagnosis_id]
+        fence_key=self._passive_fences[diagnosis_id]
+        async def state(target=None):
+            result=await page.evaluate(r'''({key,epoch,target})=>{
+              const root=document.querySelector('#order-form'),s=window[key];
+              if(location.href!=='https://www.printograph.com/products/staggered-cut-flyers/order'||
+                 !root||root.getAttribute('data-printproducttype')!=='38'||
+                 root.getAttribute('data-currentstoretype')!=='broker'||!s||s.root!==root||
+                 s.epoch!==epoch||s.input!==1||s.change!==1||s.unexpected!==false)return{ok:false};
+              const panels=root.querySelectorAll('#collapseOne'),buttons=root.querySelectorAll('button[aria-controls="collapseOne"]');
+              if(panels.length!==1||buttons.length!==1)return{ok:false};
+              const b=buttons[0],visible=e=>e.getClientRects().length>0&&getComputedStyle(e).display!=='none'&&
+                getComputedStyle(e).visibility!=='hidden'&&!e.closest('[hidden],[aria-hidden="true"]');
+              if(b.type!=='button'||b.disabled||!visible(b)||(target&&target!==b))return{ok:false};
+              return{ok:true,open:panels[0].classList.contains('show')};
+            }''',{'key':fence_key,'epoch':epoch,'target':target})
+            if result.get('ok') is not True:raise ValueError('initial_quantity_disclosure_unproven')
+            return result
+        try:
+            if (await state()).get('open') is not True:
+                # Ordinary actual header click only; never invoke a source callback.
+                button=await page.query_selector('#order-form button[aria-controls="collapseOne"]')
+                if button is None:raise ValueError('initial_quantity_header_changed')
+                # Final checks and native DOM click share one synchronous turn.
+                acted=await button.evaluate(r'''(e,{key,epoch})=>{
+                  const roots=[...document.querySelectorAll('#order-form')],root=roots.length===1?roots[0]:null,s=window[key];
+                  const panels=root?.querySelectorAll('#collapseOne'),buttons=root?.querySelectorAll('button[aria-controls="collapseOne"]');
+                  const visible=x=>x.getClientRects().length>0&&getComputedStyle(x).display!=='none'&&
+                    getComputedStyle(x).visibility!=='hidden'&&!x.closest('[hidden],[aria-hidden="true"]');
+                  if(location.href!=='https://www.printograph.com/products/staggered-cut-flyers/order'||!root||
+                     root.getAttribute('data-printproducttype')!=='38'||root.getAttribute('data-currentstoretype')!=='broker'||
+                     !s||s.root!==root||s.epoch!==epoch||s.input!==1||s.change!==1||s.unexpected!==false||
+                     !e.isConnected||e.tagName!=='BUTTON'||e.getAttribute('type')!=='button'||e.disabled||!visible(e)||
+                     !panels||panels.length!==1||panels[0].classList.contains('show')||!buttons||buttons.length!==1||buttons[0]!==e)
+                    throw Error('initial header state changed');
+                  HTMLElement.prototype.click.call(e);
+                  return true;
+                }''',{'key':fence_key,'epoch':epoch})
+                if acted is not True:raise ValueError('initial_quantity_header_changed')
+            if not await self._settle_initial(page) or (await state()).get('open') is not True:
+                raise ValueError('initial_quantity_disclosure_not_retained')
+            journal.validate_initial_progress(await self._initial_quantity_capture_locked(diagnosis_id))
+        except asyncio.CancelledError:
+            journal.invalidate('cancelled')
+            raise
+        except Exception:
+            journal._hold_initial('initial_quantity_disclosure_failed')
+            raise ValueError('initial_quantity_disclosure_failed') from None
+
+    async def _ensure_passive_observer_locked(self, diagnosis_id):
+        record=self._records[diagnosis_id]
+        family=family_for_url(record['url'])
+        if record.get('observe_printograph_prices') is not True:
+            raise ValueError('passive_price_source_unsupported')
+        if record['status']!='ready':raise ValueError('diagnosis_not_ready')
+        existing=self._passive_journals.get(diagnosis_id)
+        if existing is not None:
+            if existing._invalid:raise ValueError('passive_journal_not_live')
+            return existing
+        observer=None
+        try:
+            # Partial base/productId fields stay explicit; no prospective identity is invented.
+            capture=await self._passive_capture_locked(diagnosis_id)
+            project_context(capture,complete=False,family=family)
+            page=self._pages[diagnosis_id]
+            if family is STAGGERED_FAMILY:
+                # Recheck the existing authenticated active-17792 campaign guard
+                # immediately before enabling its literal-only observer variant.
+                await self._check_staggered_scope_locked(diagnosis_id)
+                if record.get('passive_campaign_product_id') != '17792':
+                    raise ValueError('passive_campaign_scope_required')
+                journal_class=(TableQuantityJournal if diagnosis_id in self._supplier_profile_owners else InitialQuantityPriceJournal)
+                journal=journal_class(diagnosis_id,family=family,allow_staggered_literal_base=True,
+                    enable_initial_quantity=True)
+            else:
+                journal=PriceJournal(diagnosis_id,family=family)
+            observer=_ManagedPassivePriceObserver(page,journal)
+            if isinstance(journal,InitialQuantityPriceJournal):
+                observer._initial_context_provider=lambda:self._initial_quantity_capture_locked(diagnosis_id)
+            await observer.attach(SPECIAL_SHAPES_SOURCE_CONTRACT)
+            fence='__hermesPassivePriceFence_'+diagnosis_id
+            def changed(source,reason):
+                if source.get('page') is page and source.get('frame') is page.main_frame and reason=='unattributed_control_change':
+                    journal.invalidate('unattributed_control_change')
+                    record['passive_price_observation']={'status':'held','reason':'unattributed_control_change','source_data_finalized':False}
+                    try:self._persist(record)
+                    except Exception:pass
+            await page.expose_binding(fence+'_notify',changed)
+            if (await page.evaluate(_passive_script(_PASSIVE_PRICE_FENCE_TEMPLATE,family),{'key':fence,'action':'install','notify_key':fence+'_notify'})).get('ok') is not True:
+                raise ValueError('passive_fence_unavailable')
+            self._passive_journals[diagnosis_id]=journal
+            self._passive_observers[diagnosis_id]=observer
+            self._passive_fences[diagnosis_id]=fence
+            record['passive_price_observation']={'status':'observing','epochs':0,'source_data_finalized':False}
+            self._persist(record)
+            return journal
+        except asyncio.CancelledError:
+            if observer is not None:await observer.close()
+            raise
+        except Exception:
+            if observer is not None:await observer.close()
+            raise ValueError('passive_observer_not_ready') from None
+
+    async def _begin_passive_choice_locked(self, diagnosis_id, revision, field, value):
+        journal=self._passive_journals[diagnosis_id]
+        capture=(await self._initial_quantity_capture_locked(diagnosis_id) if diagnosis_id in self._supplier_profile_owners
+                 else await self._passive_capture_locked(diagnosis_id))
+        family=journal.family
+        source_name=field.get('source_name')
+        if source_name == '' and field.get('kind') == 'select':
+            binding_script=_passive_script(_PASSIVE_UNNAMED_SELECT_BINDING_TEMPLATE,family)
+            if diagnosis_id in self._supplier_profile_owners:binding_script=executor_binding_script(binding_script)
+            binding=await self._pages[diagnosis_id].evaluate(binding_script,
+                {'source_contract':capture.get('source_contract'),'source_id':field.get('source_id'),
+                 'selected_values':field.get('selected_values'),'target_value':value})
+            if (not isinstance(binding,dict) or binding.get('observed') is not True or
+                binding.get('binding_kind') != 'pinned_vue_form_select_spec' or
+                str(capture.get('userSelectedOptions',{}).get(binding.get('field'))) != binding.get('retained_value')):
+                raise ValueError('passive_native_model_binding_unproven')
+            source_name=binding.get('field')
+        target_id=field['source_id']
+        if field.get('kind')=='radio':
+            if family is not STAGGERED_FAMILY:raise ValueError('passive_radio_not_supported')
+            binding=await self._pages[diagnosis_id].evaluate(
+                executor_action_script(STAGGERED_RADIO_BINDING_JS) if diagnosis_id in self._supplier_profile_owners else STAGGERED_RADIO_BINDING_JS,
+                {'source_contract':capture.get('source_contract'),'name':source_name,'value':value,
+                 'selected_values':field.get('selected_values')})
+            if (not isinstance(binding,dict) or binding.get('observed') is not True or
+                binding.get('binding_kind')!='pinned_type38_manual_radio'):
+                raise ValueError('passive_radio_binding_unproven')
+            source_name=binding['field'];target_id=binding['source_id']
+            field['_passive_target_id']=target_id
+        if source_name not in set(family.keys)-{'productId'}:
+            raise ValueError('passive_observed_field_unmapped')
+        epoch=journal.begin_epoch(capture,revision,source_name,value)
+        fence=self._passive_fences[diagnosis_id]
+        result=await self._pages[diagnosis_id].evaluate(_passive_script(_PASSIVE_PRICE_FENCE_TEMPLATE,family),
+                   {'key':fence,'action':'arm','source_id':target_id,'epoch':epoch})
+        if result.get('ok') is not True or result.get('unexpected') is not False:
+            await self._hold_passive_choice_locked(diagnosis_id,'unattributed_control_change')
+            raise ValueError('passive_control_change_unattributed')
+        return epoch
+
+    async def _hold_passive_choice_locked(self, diagnosis_id, reason):
+        journal=self._passive_journals.get(diagnosis_id)
+        if journal is not None:
+            if journal._invalid:
+                reason=journal._invalid
+            else:
+                journal.invalidate(reason)
+            try:journal.persist(Path(self.store.root))
+            except Exception:reason='passive_checkpoint_failed'
+        record=self._records[diagnosis_id]
+        record['passive_price_observation']={'status':'held','reason':reason,'source_data_finalized':False}
+        try:self._persist(record)
+        except Exception:pass
+
+    async def _finish_passive_choice_locked(self, diagnosis_id, revision, epoch, field_key, value):
+        journal=self._passive_journals[diagnosis_id]
+        observer=self._passive_observers[diagnosis_id]
+        try:
+            settled=await self._settle_initial(self._pages[diagnosis_id])
+            await observer.drain()
+            initial=isinstance(journal,InitialQuantityPriceJournal) and journal.is_initial_epoch(epoch)
+            if initial:
+                await self._disclose_initial_quantity_locked(diagnosis_id,epoch)
+            result=await self._refresh_locked(diagnosis_id)
+            field=next((f for f in result.get('fields',[]) if f.get('key')==field_key),{})
+            selected=field.get('selected_values',[])
+            if (selected!=[value] if field.get('kind')=='radio' else value not in selected):
+                raise ValueError('observed_choice_not_retained')
+            fence=await self._pages[diagnosis_id].evaluate(_passive_script(_PASSIVE_PRICE_FENCE_TEMPLATE,journal.family),
+                {'key':self._passive_fences[diagnosis_id],'action':'disarm'})
+            if (not settled or fence.get('ok') is not True or fence.get('unexpected') is not False
+                    or fence.get('epoch')!=epoch or fence.get('input')!=1 or fence.get('change')!=1):
+                journal.invalidate('unattributed_control_change')
+            after=(await self._initial_quantity_capture_locked(diagnosis_id) if initial or diagnosis_id in self._supplier_profile_owners else
+                   await self._passive_capture_locked(diagnosis_id))
+            observation=journal.finalize_epoch(epoch,after,result['revision'])
+            if set(observation['reasons']) & {'native_requests_inflight','request_budget_exceeded','fresh_tables_conflict','product_identity_conflict','option_identity_conflict','current_component_response_failed'}:
+                journal.invalidate('adapter_error')
+            journal.persist(Path(self.store.root))
+            record=self._records[diagnosis_id]
+            record['passive_price_observation']={'status':observation['status'],'epoch':epoch,
+                'reasons':observation['reasons'],'source_data_finalized':False}
+            self._persist(record)
+            return self.get(diagnosis_id)
+        except asyncio.CancelledError:
+            await self._hold_passive_choice_locked(diagnosis_id,'cancelled');raise
+        except Exception:
+            await self._hold_passive_choice_locked(diagnosis_id,'adapter_error')
+            raise ValueError('passive_observation_held') from None
+
+    async def _resolve_supplier_profile_field(self, diagnosis_id, expected_revision, semantic, value):
+        """Resolve native model identity; labels/generated ID prefixes grant none."""
+        async with self._locks.setdefault(diagnosis_id, asyncio.Lock()):
+            optional_coating=semantic=='coating_optional'
+            if optional_coating:semantic='coating'
+            owner=self._supplier_profile_owners.get(diagnosis_id)
+            record=self._records.get(diagnosis_id)
+            profile_require(owner is not None and record is not None and record.get('status')=='ready'
+                and record.get('revision')==expected_revision, 'supplier_profile_not_live')
+            await self._check_staggered_scope_locked(diagnosis_id)
+            capture=await self._initial_quantity_capture_locked(diagnosis_id)
+            fields=copy.deepcopy(record.get('fields',[]))
+            names={'proofType':'proofType','manualProofType':'proofTypeForManual',
+                   'fileDelivery':'fileDeliveryForManual','productionTime':'productionTime'}
+            matches=[]
+            if semantic in names:
+                matches=[field for field in fields if field.get('kind')=='radio'
+                         and field.get('source_name')==names[semantic]]
+            elif semantic in {'size','paper','color','quantity','coating'}:
+                script=read_binding_script(_passive_script(_PASSIVE_UNNAMED_SELECT_BINDING_TEMPLATE,STAGGERED_FAMILY))
+                for field in fields:
+                    if field.get('kind')!='select' or field.get('source_name')!='' or field.get('disabled'):
+                        continue
+                    targets=([value] if value is not None else
+                        [choice['value'] for choice in field.get('choices',[]) if not choice.get('disabled')
+                         and isinstance(choice.get('value'),str) and (re.fullmatch(r'[1-9][0-9]{0,11}',choice['value'])
+                             or semantic=='coating' and choice['value']=='')][:1])
+                    if not targets:continue
+                    if not any(choice.get('value')==targets[0] and not choice.get('disabled') for choice in field.get('choices',[])):
+                        continue
+                    binding=await self._pages[diagnosis_id].evaluate(script,{'source_contract':capture.get('source_contract'),
+                        'source_id':field.get('source_id'),'selected_values':field.get('selected_values'),'target_value':targets[0]})
+                    if (isinstance(binding,dict) and binding.get('observed') is True
+                            and binding.get('field')==semantic and binding.get('binding_kind')=='pinned_vue_form_select_spec'
+                            and str(capture.get('userSelectedOptions',{}).get(semantic))==binding.get('retained_value')):
+                        matches.append(field)
+            if not matches and optional_coating:
+                selected=capture.get('userSelectedOptions',{})
+                profile_require(type(selected) is dict and 'coating' in selected and selected['coating']=='',
+                    'source_coating_absence_unproven')
+                await self._check_staggered_scope_locked(diagnosis_id)
+                profile_require(self._records.get(diagnosis_id) is record and record.get('revision')==expected_revision
+                    and self._supplier_profile_owners.get(diagnosis_id) is owner, 'supplier_profile_not_live')
+                return None
+            profile_require(len(matches)==1, 'source_control_unproven')
+            field=matches[0]
+            profile_require(field.get('disabled') is False and (value is None or any(
+                choice.get('value')==value and not choice.get('disabled') for choice in field.get('choices',[]))),
+                'source_choice_unavailable')
+            await self._check_staggered_scope_locked(diagnosis_id)
+            profile_require(self._records.get(diagnosis_id) is record and record.get('revision')==expected_revision
+                and self._supplier_profile_owners.get(diagnosis_id) is owner, 'supplier_profile_not_live')
+            field['source_key']=semantic
+            owner['binding'][semantic]=field
+            return copy.deepcopy(field)
+
+    async def _profile_read_quote(self, diagnosis_id, configuration, check_scope):
+        """Read exact live tables/current production; never issue a request."""
+        async with self._locks.setdefault(diagnosis_id, asyncio.Lock()):
+            record=self._records.get(diagnosis_id);owner=self._supplier_profile_owners.get(diagnosis_id)
+            journal=self._passive_journals.get(diagnosis_id);page=self._pages.get(diagnosis_id)
+            profile_require(owner is not None and isinstance(journal,TableQuantityJournal)
+                and record is not None and record.get('status')=='ready', 'supplier_profile_not_live')
+            revision=record['revision'];generation=journal.page_generation
+            def guard():
+                profile_require(self._records.get(diagnosis_id) is record and record.get('revision')==revision
+                    and record.get('status')=='ready' and self._pages.get(diagnosis_id) is page
+                    and page is not None and not page.is_closed() and page.url==STAGGERED_FAMILY.source_url
+                    and self._supplier_profile_owners.get(diagnosis_id) is owner
+                    and self._passive_journals.get(diagnosis_id) is journal and not journal._invalid
+                    and journal.page_generation==generation and not self._bundle_tasks.get(diagnosis_id)
+                    and _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id,{}))==SPECIAL_SHAPES_SOURCE_CONTRACT,
+                    'supplier_profile_not_live')
+            guard();await check_scope();guard()
+            profile_require(await self._settle_initial(page), 'source_not_settled')
+            await self._passive_observers[diagnosis_id].drain();guard()
+            capture=await self._initial_quantity_capture_locked(diagnosis_id);guard()
+            context=project_context(capture,family=STAGGERED_FAMILY)
+            profile_require(all(context['selected'].get(k)==v for k,v in configuration.items())
+                and all(context['selected'].get(k)==v for k,v in {'proofType':'100','fileDelivery':'5','designServices':'42'}.items()),
+                'requested_configuration_not_retained')
+            anchor=owner.get('anchor')
+            if anchor is None or anchor.nonquantity!=context['nonquantity_hash']:
+                anchor=LiveTableAnchor.create(journal,capture,revision)
+                owner['anchor']=anchor
+            stamp=(journal._order,journal._current)
+            metadata=await self._read_staggered_turnaround_metadata_locked(diagnosis_id,revision);guard()
+            final_capture=await self._initial_quantity_capture_locked(diagnosis_id);guard()
+            profile_require(project_context(final_capture,family=STAGGERED_FAMILY)['context_hash']==context['context_hash']
+                and (journal._order,journal._current)==stamp, 'source_context_changed_during_quote')
+            await check_scope();guard()
+            quote=anchor.quote(final_capture,revision,metadata)
+            # Export field identities are the actual source-bound snapshot keys.
+            production=[field for field in record['fields'] if field.get('source_name')=='productionTime']
+            profile_require(len(production)==1, 'production_control_unproven')
+            owner['binding']['productionTime']={**copy.deepcopy(production[0]),'source_key':'productionTime'}
+            bindings={}
+            for semantic,bound in owner['binding'].items():
+                current=[field for field in record['fields'] if field.get('key')==bound.get('key')
+                         and field.get('source_id')==bound.get('source_id')]
+                profile_require(len(current)==1, 'export_control_binding_changed')
+                bindings[semantic]={**copy.deepcopy(current[0]),'source_key':semantic}
+            from .supplier_profile_executor import normal_export_bundle
+            quote['normal_export']=normal_export_bundle(quote,bindings,record)
+            return quote
+
+    async def read_passive_price_evidence(self, diagnosis_id, expected_revision):
+        self.get(diagnosis_id)
+        async with self._locks.setdefault(diagnosis_id,asyncio.Lock()):
+            record=self._records[diagnosis_id]
+            if type(expected_revision) is not int or record['revision']!=expected_revision:
+                raise ValueError('diagnosis_revision_conflict')
+            if record.get('observe_printograph_prices') is not True:
+                raise ValueError('passive_price_observation_not_enabled')
+            journal=self._passive_journals.get(diagnosis_id)
+            if journal is None:
+                return {'status':'unavailable','reason':'no_live_passive_journal','diagnosis_id':diagnosis_id,
+                        'revision':expected_revision,'source_data_finalized':False,'woocommerce_import_ready':False}
+            page=self._pages.get(diagnosis_id)
+            live=(page is not None and not page.is_closed()
+                  and page.url==journal.family.source_url and not journal._invalid
+                  and not self._bundle_tasks.get(diagnosis_id)
+                  and _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id,{}))==SPECIAL_SHAPES_SOURCE_CONTRACT)
+            if live and journal.family is STAGGERED_FAMILY:
+                try:await self._check_staggered_scope_locked(diagnosis_id)
+                except ValueError:live=False
+            evidence=copy.deepcopy(journal.snapshot())
+            # This reads cached evidence only. Do not extend TTL or imply a new DOM/source check.
+            for observation in evidence['epochs']:
+                expired=False
+                revision_matches=observation.get('revision_after')==expected_revision
+                for component in observation.get('components',[]):
+                    completed=component.get('response_completed_at_monotonic')
+                    if type(completed) not in (int,float):continue
+                    age=journal.clock()-completed
+                    component['ttl_remaining_seconds']=max(0,300-age) if age>=0 else 0
+                    if not live or not revision_matches or not 0<=age<=300:
+                        component['status']='historical_only';expired=True
+                if not live or not revision_matches or expired:
+                    observation['status']='held'
+                    reason=('observation_not_live' if not live else
+                            'observation_revision_not_current' if not revision_matches else 'table_ttl_expired')
+                    observation['reasons']=sorted(set(observation.get('reasons',[]))|{reason})
+            latest=evidence['epochs'][-1] if evidence['epochs'] else None
+            current=(live and latest is not None and latest.get('revision_after')==expected_revision
+                     and latest.get('status')=='matched_fresh_observed_components')
+            return {'status':'observed' if current else 'held','diagnosis_id':diagnosis_id,'revision':expected_revision,
+                    'evidence':evidence,'historical_only':not current,'current_selection_revalidated':False,
+                    'source_requests_initiated':0,'source_data_finalized':False,'woocommerce_import_ready':False,'checkout_verified':False}
+
 
     async def select_observed_choice(self, diagnosis_id, expected_revision, field_key, value):
         """Change one currently offered native dropdown choice in the open page.
@@ -667,6 +1554,8 @@ class ProductDiagnosisManager:
             if len(fields) != 1 or fields[0].get("kind") not in {"select", "radio"}:
                 raise ValueError("observed_choice_control_required")
             field = fields[0]
+            if record.get("observe_printograph_prices") is True and record["url"]==STAGGERED_FAMILY.source_url:
+                field=dict(field)
             if field.get("disabled"):
                 raise ValueError("observed_choice_control_disabled")
             source_id = field.get("source_id", "")
@@ -681,14 +1570,37 @@ class ProductDiagnosisManager:
                 if self._closed or page.is_closed():
                     raise ValueError("diagnosis_not_ready")
 
+            passive = record.get("observe_printograph_prices") is True
+            if passive and field['kind']!='select' and not (record['url']==STAGGERED_FAMILY.source_url and field['kind']=='radio'):
+                raise ValueError('passive_radio_not_supported')
+            if passive:
+                await self._ensure_passive_observer_locked(diagnosis_id)
             token = await self._choice_limiter.acquire(origin, 1, 1, check)
+            epoch = None
             started = time.monotonic()
             status = 500
             try:
+                if passive:
+                    epoch = await self._begin_passive_choice_locked(diagnosis_id, expected_revision, field, value)
+                if diagnosis_id in self._supplier_profile_owners:
+                    await self._supplier_profile_owners[diagnosis_id]['check_scope']()
+                    profile_require(self._records.get(diagnosis_id) is record and record.get('revision')==expected_revision
+                        and self._pages.get(diagnosis_id) is page and not page.is_closed(), 'supplier_profile_not_live')
                 # The ID is taken from the saved rendered control, not from
                 # caller input, and restricted above to a CSS-safe alphabet.
+                if passive and record['url']==STAGGERED_FAMILY.source_url:
+                    journal=self._passive_journals[diagnosis_id]
+                    if (journal._invalid or journal._current!=epoch or self._bundle_tasks.get(diagnosis_id) or
+                        _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id,{}))!=SPECIAL_SHAPES_SOURCE_CONTRACT):
+                        raise ValueError('passive_native_action_context_changed')
                 if field["kind"] == "select":
-                    await page.locator(f'select[id="{source_id}"]').select_option(value, timeout=10000)
+                    control=page.locator(f'select[id="{source_id}"]')
+                    if passive and record['url']==STAGGERED_FAMILY.source_url:
+                        await control.evaluate(executor_action_script(STAGGERED_SELECT_ACTION_JS) if diagnosis_id in self._supplier_profile_owners else STAGGERED_SELECT_ACTION_JS,
+                            {'value':value,'source_id':source_id,'retained_values':field.get('selected_values'),
+                             'fence_key':self._passive_fences[diagnosis_id],'epoch':epoch})
+                    else:
+                        await control.select_option(value, timeout=10000)
                 else:
                     name = field.get("source_name", "")
                     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,127}", name) or not re.fullmatch(r"[0-9]{1,12}", value):
@@ -696,17 +1608,39 @@ class ProductDiagnosisManager:
                     selector = (f'#order-form input[type="radio"][name^="raisedFoilColor"][value="{value}"]'
                                 if name == "raisedFoilColor" else
                                 f'#order-form input[type="radio"][name="{name}"][value="{value}"]')
+                    if passive:
+                        selector=f'#order-form input[type="radio"][id="{field["_passive_target_id"]}"]'
                     radio = page.locator(selector)
                     if await radio.count() != 1 or not await radio.is_enabled():
                         raise ValueError("observed_radio_unavailable")
-                    await radio.evaluate('(e) => e.click()')
+                    if passive:
+                        journal=self._passive_journals[diagnosis_id]
+                        if (journal._invalid or journal._current!=epoch or self._bundle_tasks.get(diagnosis_id) or
+                            _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id,{}))!=SPECIAL_SHAPES_SOURCE_CONTRACT):
+                            raise ValueError('passive_native_action_context_changed')
+                        await radio.evaluate(executor_action_script(STAGGERED_RADIO_ACTION_JS) if diagnosis_id in self._supplier_profile_owners else STAGGERED_RADIO_ACTION_JS,
+                            {'source_id':field['_passive_target_id'],'name':name,'value':value,
+                             'retained_values':field.get('selected_values'),
+                             'fence_key':self._passive_fences[diagnosis_id],'epoch':epoch})
+                    else:
+                        await radio.evaluate('(e) => e.click()')
                 # Printograph first displays the generic turnaround and then
                 # recalculates finish-dependent text. Wait for that update.
                 await asyncio.sleep(1.5)
                 status = 200
+            except BaseException as error:
+                if passive:
+                    await self._hold_passive_choice_locked(diagnosis_id, "cancelled" if isinstance(error,asyncio.CancelledError) else "adapter_error")
+                if isinstance(error,asyncio.CancelledError):
+                    raise
+                if passive:
+                    raise ValueError("passive_native_choice_failed") from None
+                raise
             finally:
                 await asyncio.to_thread(self._choice_limiter.release, origin, token,
                                         time.monotonic() - started, status, 30, 1)
+            if passive:
+                return await self._finish_passive_choice_locked(diagnosis_id, expected_revision, epoch, field_key, value)
         result = await self.refresh(diagnosis_id)
         selected = next((f.get("selected_values", []) for f in result.get("fields", [])
                          if f.get("key") == field_key), [])
@@ -732,11 +1666,26 @@ class ProductDiagnosisManager:
             if record["supplier_id"] != "printograph" or current.scheme != "https" or current.hostname not in self._page_hosts[diagnosis_id]:
                 raise ValueError("unexpected_source_origin")
             settled = await self._settle_initial(page)
+            # Finish hashing responses already observed by this diagnosis. This
+            # does not fetch scripts or initiate any additional source request.
+            pending = tuple(self._bundle_tasks.get(diagnosis_id, ()))
+            if pending:
+                await asyncio.gather(*pending, return_exceptions=True)
+            loaded_contract = _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id, {}))
+            bundle_metadata = {"source_bundle_verified": reviewed_source_scope(loaded_contract) is not None,
+                               "loaded_contract": loaded_contract}
             capture = await page.evaluate(CONTROLLER_PRICE_STATE_JS,
-                                          {"source_contract": SOURCE_CONTRACT, "settled": settled})
+                                          {"source_contract": loaded_contract, "settled": settled})
             if not capture.get("observed"):
-                return {"status": "unavailable", "reason": capture.get("reason", "controller_not_observed"),
-                        "diagnosis_id": diagnosis_id, "revision": expected_revision}
+                result = {"status": "unavailable", "reason": capture.get("reason", "controller_not_observed"),
+                          "diagnosis_id": diagnosis_id, "revision": expected_revision, **bundle_metadata}
+                if result["reason"] == "controller_product_mismatch":
+                    metadata = _safe_controller_diagnostics(capture.get("diagnostic_metadata"))
+                    if metadata is not None:
+                        result["diagnostic_metadata"] = metadata
+                if record["url"] == STAGGERED_FAMILY.source_url:
+                    result["turnaround_metadata"] = await self._read_staggered_turnaround_metadata_locked(diagnosis_id, expected_revision)
+                return result
             displayed = await page.evaluate("""() => {
               const root=document.querySelector('#order-form');
               const text=root?.innerText || '';
@@ -746,15 +1695,92 @@ class ProductDiagnosisManager:
             if displayed is not None:
                 capture["displayed_total"] = displayed
             reconciliation = calculate_source_total(capture)
+            result = {"status": "observed", "scope": "current_page_only", "diagnosis_id": diagnosis_id,
+                    "revision": expected_revision, **bundle_metadata,
+                    "capture": capture, "reconciliation": reconciliation}
+            if record["url"] == STAGGERED_FAMILY.source_url:
+                result["turnaround_metadata"] = await self._read_staggered_turnaround_metadata_locked(diagnosis_id, expected_revision)
+            return result
+
+    async def _read_staggered_turnaround_metadata_locked(self, diagnosis_id, expected_revision):
+        """Read source-owned current cache metadata; caller holds the diagnosis lock."""
+        record = self._records[diagnosis_id]
+        page = self._pages.get(diagnosis_id)
+
+        def guard():
+            if (type(expected_revision) is not int or self._closed
+                    or self._records.get(diagnosis_id) is not record or self._pages.get(diagnosis_id) is not page
+                    or record.get('revision') != expected_revision or record.get('status') != 'ready'
+                    or record.get('supplier_id') != 'printograph' or record.get('url') != STAGGERED_FAMILY.source_url
+                    or record.get('passive_campaign_product_id') != '17792' or record.get('observe_printograph_prices') is not True
+                    or page is None or page.is_closed() or page.url != STAGGERED_FAMILY.source_url
+                    or self._bundle_tasks.get(diagnosis_id)
+                    or _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id, {})) != SPECIAL_SHAPES_SOURCE_CONTRACT):
+                raise ValueError('staggered_turnaround_scope_unproven')
+
+        guard()
+        await self._check_staggered_scope_locked(diagnosis_id)
+        guard()
+        observed = await page.evaluate(TURNAROUND_METADATA_JS, {'source_contract': dict(SPECIAL_SHAPES_SOURCE_CONTRACT)})
+        guard()
+        await self._check_staggered_scope_locked(diagnosis_id)
+        guard()
+        metadata = project_turnaround_metadata(observed)
+        return {'diagnosis_id': diagnosis_id, 'revision': expected_revision, 'source_url': record['url'],
+                'product_id': '17792', 'scope': 'current_selected_turnaround_cache_metadata_only',
+                'source_bundle_verified': True, 'source_fetches_initiated': 0,
+                'diagnosis_or_selection_changed': False, **metadata}
+
+    async def read_source_references(self, diagnosis_id, expected_revision, source_url):
+        """Read only safe source reference attributes from the owned current page.
+
+        This does not fetch, refresh, select controls, read prices or change the
+        diagnosis. Exact mapped URL and revision bind both sides of evaluation.
+        """
+        if type(expected_revision) is not int:
+            raise ValueError("diagnosis_revision_conflict")
+        if not isinstance(source_url, str) or source_url not in SOURCE_URLS:
+            raise ValueError("diagnosis_source_url_unsupported")
+        self.get(diagnosis_id)
+        async with self._locks.setdefault(diagnosis_id, asyncio.Lock()):
+            record = self._records[diagnosis_id]
+            page = self._pages.get(diagnosis_id)
+
+            def check_current():
+                if record["revision"] != expected_revision:
+                    raise ValueError("diagnosis_revision_conflict")
+                if self._closed or record["status"] != "ready" or page is None or page.is_closed():
+                    raise ValueError("diagnosis_not_ready")
+                if (record["supplier_id"] != "printograph" or record["url"] != source_url
+                        or page.url != source_url):
+                    raise ValueError("diagnosis_source_url_mismatch")
+
+            check_current()
+            raw = await page.evaluate(SOURCE_REFERENCES_JS, {"source_url": source_url})
+            check_current()
+            result = project_references(raw)
+            # Finish only responses already observed by this page. Never fetch
+            # a static asset or cancel a shared source response on timeout.
             pending = tuple(self._bundle_tasks.get(diagnosis_id, ()))
             if pending:
-                await asyncio.gather(*pending, return_exceptions=True)
-            loaded_contract = _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id, {}))
-            return {"status": "observed", "scope": "current_page_only", "diagnosis_id": diagnosis_id,
-                    "revision": expected_revision,
-                    "source_bundle_verified": loaded_contract == SOURCE_CONTRACT,
-                    "loaded_contract": loaded_contract,
-                    "capture": capture, "reconciliation": reconciliation}
+                _, unfinished = await asyncio.wait(pending, timeout=2)
+                if unfinished:
+                    raise ValueError("source_reference_hashes_pending")
+            check_current()
+            observed = self._bundle_hashes.get(diagnosis_id, {})
+            if any(len(observed.get(key, ())) > 1 for key in SOURCE_CONTRACT):
+                raise ValueError("source_script_hash_ambiguous")
+            loaded = _loaded_bundle_contract(observed)
+            loaded = {key: value for key, value in loaded.items()
+                      if isinstance(value, str) and re.fullmatch(r"[a-f0-9]{64}", value)}
+            return {"schema": "printograph-current-source-references/v1", "status": "observed",
+                    "diagnosis_id": diagnosis_id, "revision": expected_revision, "source_url": source_url,
+                    **result, "loaded_contract": loaded, "source_bundle_verified": reviewed_source_scope(loaded) is not None,
+                    "static_asset_hash_comparison_ready": not result["script_roles_missing"] and set(loaded) == set(SOURCE_CONTRACT),
+                    "source_fetches_initiated": 0, "page_contents_emitted": False,
+                    "account_or_input_fields_emitted": False, "asset_bodies_returned": False,
+                    "static_asset_fetch_authorized": False, "price_verified": False,
+                    "diagnosis_or_selection_changed": False}
 
     async def read_observed_gallery(self, diagnosis_id, expected_revision):
         """Read source-gallery image URLs from the current product page only."""
@@ -767,6 +1793,8 @@ class ProductDiagnosisManager:
             if record["status"] != "ready" or page is None or page.is_closed():
                 raise ValueError("diagnosis_not_ready")
             current = urlsplit(page.url)
+            if record.get('supplier_id')=='printograph':
+                return await self._read_staggered_gallery_locked(diagnosis_id,expected_revision)
             if (record["supplier_id"] != "fourover" or current.scheme != "https"
                     or current.hostname not in self._page_hosts[diagnosis_id]):
                 raise ValueError("unexpected_source_origin")
@@ -791,6 +1819,28 @@ class ProductDiagnosisManager:
                     "source_url": record["url"], "images": images[:30],
                     "scope": "current_rendered_product_gallery_only"}
 
+    async def _read_staggered_gallery_locked(self, diagnosis_id, expected_revision):
+        """Source-readonly17792 gallery; caller already holds the diagnosis lock."""
+        record=self._records[diagnosis_id];page=self._pages.get(diagnosis_id)
+        def guard():
+            if (record.get('revision')!=expected_revision or record.get('status')!='ready'
+                    or record.get('supplier_id')!='printograph' or record.get('url')!=STAGGERED_FAMILY.source_url
+                    or record.get('passive_campaign_product_id')!='17792' or record.get('observe_printograph_prices') is not True
+                    or page is None or page.is_closed() or page.url!=STAGGERED_FAMILY.source_url
+                    or self._bundle_tasks.get(diagnosis_id)
+                    or _loaded_bundle_contract(self._bundle_hashes.get(diagnosis_id,{}))!=SPECIAL_SHAPES_SOURCE_CONTRACT):
+                raise ValueError('staggered_gallery_scope_unproven')
+        guard();await self._check_staggered_scope_locked(diagnosis_id);guard()
+        observed=await page.evaluate(STAGGERED_GALLERY_JS)
+        guard();await self._check_staggered_scope_locked(diagnosis_id);guard()
+        images=project_staggered_gallery(observed)
+        return {'diagnosis_id':diagnosis_id,'revision':expected_revision,'source_url':record['url'],
+                'product_id':'17792','images':images,'scope':'current_rendered_product_gallery_only',
+                'image_element_count':observed['image_element_count'],'unmatched_image_elements':observed['unmatched_image_elements'],
+                'source_gallery_complete':False,
+                'source_bundle_verified':True,'source_fetches_initiated':0,
+                'diagnosis_or_selection_changed':False,'price_verified':False,'source_data_finalized':False}
+
     async def save_selection(self, diagnosis_id, expected_revision, selection):
         self.get(diagnosis_id)
         # The API validates selection policy. This boundary still requires a
@@ -811,6 +1861,18 @@ class ProductDiagnosisManager:
             return copy.deepcopy(record)
 
     async def _release(self, owner):
+        self._supplier_profile_owners.pop(owner, None)
+        observer=self._passive_observers.pop(owner,None)
+        if observer is not None:
+            await observer.close()
+        page=self._pages.get(owner)
+        fence=self._passive_fences.pop(owner,None)
+        if fence and page is not None and not page.is_closed():
+            try:await page.evaluate(_passive_script(_PASSIVE_PRICE_FENCE_TEMPLATE,
+                self._passive_journals[owner].family),{"key":fence,"action":"remove"})
+            except Exception:pass
+        self._passive_journals.pop(owner,None)
+        self._passive_scope_checks.pop(owner,None)
         self._pages.pop(owner, None)
         self._page_hosts.pop(owner, None)
         tasks = self._bundle_tasks.pop(owner, set())

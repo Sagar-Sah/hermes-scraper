@@ -1,0 +1,68 @@
+{
+  "original_response_path": "native-specifications.json",
+  "original_response_sha256": "081359042b2039bc31c972a8547bcfcdb29dac49a5d979cd4d5c58a707937b2c",
+  "sizes": [
+    {
+      "id": 114,
+      "label": "5.5\" x 8.5\" Vertical",
+      "settings": {
+        "sizeId": null,
+        "iopSupported": false,
+        "idSupported": false,
+        "odSupported": true,
+        "mediaClipSupported": false,
+        "hasOverlay": false,
+        "zeroBleed": false,
+        "guidelines": true,
+        "guidelinesToggleDisplay": true,
+        "trimmedPreview": false,
+        "trimmedPreviewToggleDisplay": true,
+        "quickPreviewDisplay": true,
+        "locationId": null
+      },
+      "properties": {
+        "width": 5.5,
+        "height": 8.5,
+        "presentationWidth": 5.5,
+        "presentationHeight": 8.5,
+        "unit": "IN",
+        "dpi": 350.0
+      },
+      "orientation": {
+        "id": 2,
+        "label": "Portrait"
+      }
+    },
+    {
+      "id": 115,
+      "label": "5.5\" x 8.5\" Horizontal",
+      "settings": {
+        "sizeId": null,
+        "iopSupported": false,
+        "idSupported": false,
+        "odSupported": true,
+        "mediaClipSupported": false,
+        "hasOverlay": false,
+        "zeroBleed": false,
+        "guidelines": true,
+        "guidelinesToggleDisplay": true,
+        "trimmedPreview": false,
+        "trimmedPreviewToggleDisplay": true,
+        "quickPreviewDisplay": true,
+        "locationId": null
+      },
+      "properties": {
+        "width": 8.5,
+        "height": 5.5,
+        "presentationWidth": 8.5,
+        "presentationHeight": 5.5,
+        "unit": "IN",
+        "dpi": 350.0
+      },
+      "orientation": {
+        "id": 1,
+        "label": "Landscape"
+      }
+    }
+  ]
+}
