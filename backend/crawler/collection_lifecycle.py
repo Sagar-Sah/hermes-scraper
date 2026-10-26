@@ -20,7 +20,7 @@ from pathlib import Path, PurePosixPath
 
 from sqlalchemy import Column, Float, Integer, JSON, String, delete, inspect, select
 
-from .store import (Base, Batch, BrowserBranch, Event, Product, ProductRecordScope,
+from .store import (Base, Batch, BrowserBranch, Event, Product, ProductRecordScope, ProductTiming,
                     ResponseObservation, Run, TrafficWindow, canonical)
 
 _SCHEMA_LOCK = threading.Lock()
@@ -178,7 +178,7 @@ def _protected(store, session, product):
                 raise LifecycleError("Product is referenced by " + name + "; retire its association before cleanup")
     # Optional installed coordinators can add tables. Never guess how to remove
     # their state; any run/product reference outside the known cleanup set holds.
-    allowed = {"runs", "products", "batches", "browser_branches", "product_record_scopes",
+    allowed = {"runs", "products", "batches", "browser_branches", "product_record_scopes", "product_timing",
                "traffic_windows", "response_observations", "events", "collection_export_receipts",
                "collection_product_archives", "responses", "profiles", "origins", "permits", "request_leases"}
     connection = session.connection()
@@ -216,7 +216,7 @@ def _file_index(receipt):
     return index
 
 
-def _stage_archive(store, receipt, snapshot, bundle):
+def _stage_archive(store, receipt, snapshot, bundle, timing_summary=None):
     product_id = snapshot["product_id"]
     archive_id = hashlib.sha256((receipt.id + ":" + product_id).encode()).hexdigest()
     prefix = snapshot.get("archive_prefix")
@@ -261,6 +261,7 @@ def _stage_archive(store, receipt, snapshot, bundle):
             metadata = {"schema": "hermes-product-archive/v1", "receipt_id": receipt.id,
                         "source_bundle_sha256": receipt.bundle_sha256, "product": sanitize_public(snapshot),
                         "files": [members[name] for name in sorted(members)]}
+            if timing_summary is not None: metadata["timing"] = timing_summary
             info = zipfile.ZipInfo("archive.json", date_time=(1980, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100600 << 16
@@ -298,6 +299,7 @@ def _archive_public(record):
             "size": record.size, "sha256": record.bundle_sha256, "created_at": record.created_at,
             "product_status": product.get("status"), "coverage_status": product.get("coverage_status"),
             "complete": product.get("status") == "completed" and product.get("coverage_status") == "complete",
+            "timing": record.metadata_json.get("timing"),
             "download_url": "/api/v1/collection/archives/" + record.id + "/download"}
 
 
@@ -452,9 +454,12 @@ def finalize_export(store, receipt_id, archive_product_ids, *, saved=False):
                 private_files.extend(files)
                 private_directories.append(directory.relative_to(Path(store.root).resolve()).as_posix())
             archives = []
+            from .timing import stable_summary
+            saved_timings = {row.product_id: stable_summary(row.data) for row in session.scalars(
+                select(ProductTiming).where(ProductTiming.product_id.in_(archive_selection)))}
             for product_id in archive_selection:
                 try:
-                    record = _stage_archive(store, receipt, snapshots[product_id], bundle)
+                    record = _stage_archive(store, receipt, snapshots[product_id], bundle, saved_timings.get(product_id))
                 except OSError:
                     raise LifecycleError("Product archive storage failed; collection data was retained") from None
                 session.add(record)
@@ -468,7 +473,7 @@ def finalize_export(store, receipt_id, archive_product_ids, *, saved=False):
                 _protected(store, session, product)
             # All archives are on disk and hash-indexed before the first delete.
             for product in products:
-                for model in (Batch, BrowserBranch, ProductRecordScope, TrafficWindow, ResponseObservation):
+                for model in (Batch, BrowserBranch, ProductRecordScope, ProductTiming, TrafficWindow, ResponseObservation):
                     session.execute(delete(model).where(model.product_id == product.id))
                 session.execute(delete(Event).where(Event.run_id == product.run_id, Event.payload["product_id"].as_string() == product.id))
                 session.delete(product)

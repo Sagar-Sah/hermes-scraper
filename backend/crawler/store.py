@@ -28,6 +28,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Session
 
 from .config import Settings
+from . import timing
 
 
 def uid():
@@ -75,6 +76,25 @@ class Product(Base):
     epoch = Column(Integer, default=0)
     owner = Column(String, default="")
     export_manifest = Column(JSON, default=dict)
+
+
+class ProductTiming(Base):
+    __tablename__ = "product_timing"
+    product_id = Column(String, primary_key=True)
+    run_id = Column(String, index=True, nullable=False)
+    data = Column(JSON, nullable=False)
+
+
+@event.listens_for(Product, "after_insert")
+def initialize_product_timing(mapper, connection, product):
+    # New products have an observed birth. Existing rows are not backfilled
+    # from a Run creation date that may predate their own lifecycle.
+    wall, mono = time.time(), time.monotonic()
+    state = "queued" if product.status == "queued" else "paused" if product.status == "paused" else "unknown"
+    timing_session = connection.info.get("hermes_timing_session", "created")
+    connection.execute(ProductTiming.__table__.insert().values(product_id=product.id, run_id=product.run_id,
+        data=timing.new_record(state, wall, mono, timing_session, created_at=wall,
+            complete=timing_session != "created" and state in {"queued", "paused"} and not product.row_count and not product.request_count and not product.epoch)))
 
 
 class Response(Base):
@@ -230,6 +250,7 @@ class Store:
     def __init__(self, config: Settings):
         self.config = config
         self.root = config.data_dir
+        self.timing_session = uid()
         self.engine = create_engine(
             config.database_url,
             pool_pre_ping=True,
@@ -240,6 +261,9 @@ class Store:
             ),
         )
         self.sqlite = self.engine.dialect.name == "sqlite"
+        @event.listens_for(self.engine, "connect")
+        def timing_connection(dbapi, connection_record):
+            connection_record.info["hermes_timing_session"] = self.timing_session
         if self.sqlite:
 
             @event.listens_for(self.engine, "connect")
@@ -336,6 +360,7 @@ class Store:
                 if r.status in {"paused", "needs_attention", "completed_with_gaps"}:
                     r.status = "queued"
             r.updated_at = self.now(s)
+            self.sync_product_timing(s, p, r, wall=r.updated_at)
             s.add(Event(run_id=run_id, type="product_" + action, payload={
                 "product_id": product_id, "status": p.status, "preserved_rows": p.row_count,
             }))
@@ -353,6 +378,7 @@ class Store:
             if product_ids:
                 s.execute(delete(Batch).where(Batch.product_id.in_(product_ids)))
                 s.execute(delete(ProductRecordScope).where(ProductRecordScope.product_id.in_(product_ids)))
+                s.execute(delete(ProductTiming).where(ProductTiming.product_id.in_(product_ids)))
             if job_ids:
                 s.execute(delete(ProbeAttempt).where(ProbeAttempt.job_id.in_(job_ids)))
             s.execute(delete(ProbeJob).where(ProbeJob.run_id == run_id))
@@ -416,6 +442,7 @@ class Store:
             p.error = None  # The previous attempt remains in durable events.
             r = s.get(Run, p.run_id)
             r.status, r.updated_at = "running", now
+            self.sync_product_timing(s, p, r, wall=now, claimed=True)
             return {
                 "id": p.id,
                 "run_id": p.run_id,
@@ -426,7 +453,7 @@ class Store:
 
     def heartbeat(self, product_id, epoch):
         with self.session() as s:
-            return (
+            updated = (
                 s.execute(
                     update(Product)
                     .where(
@@ -438,6 +465,10 @@ class Store:
                 ).rowcount
                 == 1
             )
+            if updated:
+                p = s.get(Product, product_id)
+                self.sync_product_timing(s, p, s.get(Run, p.run_id))
+            return updated
 
     def retry_product(self, run_id, product_id, epoch, code, message):
         """Durably delay a transient failure; never retry integrity/auth failures.
@@ -494,8 +525,53 @@ class Store:
             p.epoch += 1
             p.error = message[:1200]
             r.updated_at = now
+            self.sync_product_timing(s, p, r, wall=now)
             s.add(Event(run_id=run_id, type="product_retry_scheduled", payload=payload))
             return payload
+
+    def sync_product_timing(self, session, product, run, *, wall=None, claimed=False, state=None):
+        wall = self.now(session) if wall is None else wall
+        state = state or timing.product_state(product, run, wall)
+        saved = session.get(ProductTiming, product.id)
+        data = saved.data if saved else None
+        if isinstance(data, dict) and data.get("state") == "active" and claimed and data.get("epoch") != product.epoch:
+            data = dict(data, session="unconfirmed_prior_owner")
+        record = timing.advance(data, state, wall, time.monotonic(), self.timing_session,
+            waiting_until=product.lease_until if state == "waiting" else None)
+        record["epoch"] = product.epoch
+        if saved: saved.data = record
+        else: session.add(ProductTiming(product_id=product.id, run_id=product.run_id, data=record))
+
+    def close_product_timing(self, product_id, epoch):
+        with self.session(immediate=True) as session:
+            product = session.get(Product, product_id)
+            if product is not None and product.epoch == epoch:
+                self.sync_product_timing(session, product, session.get(Run, product.run_id),
+                    state="unknown" if product.status == "running" else None)
+
+    def product_timings(self, session, products, runs=None):
+        if not products: return {}
+        wall, mono = self.now(session), time.monotonic()
+        ids = [p.id for p in products]
+        saved = {}
+        for offset in range(0, len(ids), 500):
+            saved.update({row.product_id: row.data for row in session.scalars(select(ProductTiming).where(
+                ProductTiming.product_id.in_(ids[offset:offset + 500])))})
+        if runs is None:
+            run_ids, runs = list({p.run_id for p in products}), {}
+            for offset in range(0, len(run_ids), 500):
+                runs.update({r.id: r for r in session.scalars(select(Run).where(Run.id.in_(run_ids[offset:offset + 500])))})
+        result = {}
+        for product in products:
+            state = timing.product_state(product, runs.get(product.run_id), wall)
+            record = saved.get(product.id)
+            live = (state == "active" and product.lease_until > wall and timing.valid(record)
+                and type(record.get("epoch")) is int and record.get("epoch") == product.epoch
+                and record.get("session") == self.timing_session)
+            if state == "active" and not live: state = "unknown"
+            result[product.id] = timing.snapshot(record, state, wall, mono, self.timing_session,
+                live=live, live_until=product.lease_until)
+        return result
 
     def existing_keys(self, product_id):
         with self.session() as s:

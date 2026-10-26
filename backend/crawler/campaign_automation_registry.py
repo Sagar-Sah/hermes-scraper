@@ -55,9 +55,9 @@ def build_campaign_automation(store, campaigns, diagnoses, browser_pool, *, brow
         from .printograph_browser_profile import BrowserRunProfile, PDF_PROFILE_ID, PDF_MODE, PDF_SERVICE_POLICY
         if set(browser_run_callbacks) != {'create', 'read', 'control', 'find_owned'} or not all(callable(value) for value in browser_run_callbacks.values()):
             raise ValueError('Native browser Run callbacks are incomplete')
-        browser_driver = BrowserRunProfile(store.root / 'printograph-owned-browser-runs', **browser_run_callbacks)
+        browser_driver = BrowserRunProfile(store.root / 'printograph-owned-browser-runs', **browser_run_callbacks, chunk_seconds=300)
         profiles.append(browser_driver.profile())
-        pdf_driver = BrowserRunProfile(store.root / 'printograph-owned-browser-runs', **browser_run_callbacks,
+        pdf_driver = BrowserRunProfile(store.root / 'printograph-owned-browser-runs', **browser_run_callbacks, chunk_seconds=300,
                                        profile_id=PDF_PROFILE_ID, mode=PDF_MODE, service_policy=PDF_SERVICE_POLICY)
         profiles.append(pdf_driver.profile())
     return CampaignAutomation(

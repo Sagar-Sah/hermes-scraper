@@ -380,7 +380,10 @@ async def test_campaign_fence_finishes_current_chunk_and_preserves_job_history(t
         jobs = deepcopy(queue._records["campaign"]["jobs"])
         assert any(job["progress_count"] == 1 and job["attempts"] == 1 for job in jobs.values())
         await queue.pause_drained_for_update(); await queue.end_maintenance(); await queue.tick()
-        assert queue._records["campaign"]["jobs"] == jobs
+        after = queue._records["campaign"]["jobs"]
+        assert {key: {k:v for k,v in value.items() if k != "timing"} for key,value in after.items()} == {
+            key: {k:v for k,v in value.items() if k != "timing"} for key,value in jobs.items()}
+        assert all(value["timing"]["state"] == "paused" for value in after.values())
         assert queue._records["campaign"]["enabled"] is False
         assert len(calls) == 1  # explicit user resume needed
     finally: await queue.close()

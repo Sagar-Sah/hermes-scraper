@@ -211,13 +211,18 @@ def list_collection_products(store):
     """Global saved products; counts alone never imply complete coverage."""
     with store.session() as session:
         rows = list(session.execute(select(Product, Run).join(Run, Run.id == Product.run_id).order_by(Run.created_at.desc(), Product.id)))
+        timings = store.product_timings(session, [p for p, _ in rows], {r.id: r for _, r in rows})
+        ids, scopes = [p.id for p, _ in rows], {}
+        for offset in range(0, len(ids), 500):
+            scopes.update({scope.product_id: scope for scope in session.scalars(select(ProductRecordScope).where(
+                ProductRecordScope.product_id.in_(ids[offset:offset + 500])))})
         items = []
         for p, r in rows:
-            scope = session.get(ProductRecordScope, p.id)
+            scope = scopes.get(p.id)
             snap = {"product_id": p.id, "run_id": r.id,
                     "product": _record(p), "run": _record(r), "record_scope": _record(scope) if scope else None,
                     "fingerprint": None}
-            items.append(_summary(snap))
+            items.append({**_summary(snap), "timing": timings.get(p.id)})
     return {"items": items}
 
 

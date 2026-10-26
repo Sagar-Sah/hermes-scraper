@@ -200,8 +200,9 @@ def spent_selections(root):
 
 
 def selection_spent(spent, branch, quantity, proof='36'):
-    return any(tuple(row[:3])==tuple(branch[:3]) and row[3] in {'*',branch[3]}
-               and row[4]==quantity and row[5] in {'*',proof} for row in spent)
+    base = tuple(branch[:3])
+    return any((*base, coating, quantity, manual_proof) in spent
+               for coating in (branch[3], '*') for manual_proof in (proof, '*'))
 
 
 def prefix_key(prefix):

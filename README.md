@@ -51,6 +51,14 @@ warning override. After confirming the ZIP was saved, choose which products to
 retain as compact archives and which exported working copies to remove. Active,
 changed or campaign-protected work remains protected from cleanup.
 
+### See time spent on each product
+
+Open a harvest's **Products** list, the upper-left **Your collection** package, or a campaign's **Automatic supplier collection** table. Each timed product or task shows cumulative active collection time, for example **1h 00m active**, with elapsed wall time and its current state. Open the clock breakdown for queued, waiting, paused and attention time.
+
+Active time includes worker-owned source requests, supplier pacing and network waits. It excludes time merely queued, paused, or waiting between tasks. The shared on-screen clock stops advancing when its worker observation expires or the dashboard disconnects. Confirmed intervals survive pauses and restarts; unconfirmed downtime is not added to active time. Existing products with no timing history show **Active time not measured**, and partial histories show a measured lower bound. Per-run products and campaign tasks have separate scopes and may overlap; their times are not summed. Standalone diagnostic and pilot jobs that do not create Product rows remain unmeasured. Retained product archives keep a compact summary from the last durable timing checkpoint.
+
+The registered modern Printograph worker now collects in bounded five-minute batches to reduce repeated browser startup and rediscovery. Other profiles retain their existing limits, supplier pacing and validation. Historical selection checks also use exact indexed lookups. Offline callback benchmarks confirm equivalent selection order with fewer activations; a live supplier-wide speedup is not established by those benchmarks.
+
 For frontend development, run `npm run dev` from `frontend/` in a second terminal. It serves [the development dashboard](http://127.0.0.1:18878) and proxies API calls to port 18877. Set `ATLAS_API_URL` to use another API origin. Vite uses a strict port so it will not silently switch to an unexpected address.
 
 In the dashboard:

@@ -20,7 +20,7 @@ from urllib.request import ProxyHandler, build_opener
 
 SCHEMA_VERSION = 1
 FEATURE_VERSION = "local-build-v1"
-FEATURES = ["selective_collection_export", "saved_export_cleanup", "build_identity", "managed_updates"]
+FEATURES = ["selective_collection_export", "saved_export_cleanup", "build_identity", "managed_updates", "product_timing", "bounded_modern_collection_chunks"]
 ROOT = Path(__file__).resolve().parents[2]
 _CACHE: dict = {}
 

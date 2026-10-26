@@ -1,6 +1,8 @@
+import type { ProductTimingData } from './productTimingState';
 export interface CollectionProduct {
   id: string; product_id?: string; run_id: string; run_name?: string; title?: string; url?: string;
   status: string; coverage_status?: string; row_count: number; complete: boolean;
+  timing?: ProductTimingData;
   progress?: number | null; progress_percent?: number | null; active?: boolean; exportable?: boolean;
 }
 export interface CollectionArchive {

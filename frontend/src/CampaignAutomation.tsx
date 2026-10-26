@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LoaderCircle, Pause, Play, RefreshCw, TriangleAlert } from 'lucide-react';
 import './CampaignAutomation.css';
+import ProductTiming from './ProductTiming';
+import type { ProductTimingData } from './productTimingState';
 import { api, count, dateTime, errorMessage, humanize, post } from './api';
 
-type Job = { id: string; product_id: string; profile_id: string; supplier: string; status: string; attempts: number; progress_count?: number; continuations?: number; polls?: number; reason?: string; result_reference?: string; created_at?: number; updated_at?: string };
+type Job = { timing?: ProductTimingData; id: string; product_id: string; profile_id: string; supplier: string; status: string; attempts: number; progress_count?: number; continuations?: number; polls?: number; reason?: string; result_reference?: string; created_at?: number; updated_at?: string };
 type Automation = { campaign_id: string; enabled: boolean; capabilities: { profile_id: string; supplier: string; product_ids: string[]; can_discover: boolean }[]; jobs: Job[]; summary: Record<string, number>; worker_faults?: { reason?: string }[]; supplier_blocks?: Record<string, string> };
 type Plan = { plan_id: string; jobs: Pick<Job, 'product_id' | 'profile_id' | 'supplier'>[]; blockers: { product_id: string; reason: string }[]; expires_at?: string };
 
@@ -81,7 +83,7 @@ export default function CampaignAutomation({ campaignId, titles }: { campaignId:
   const retainedPlanItems = plan?.blockers.filter(item => isRetainedPlanItem(item.reason)) || [];
   const planBlockers = plan?.blockers.filter(item => !isRetainedPlanItem(item.reason)) || [];
   const resumable = !!state && !state.enabled && currentJobs.some(job => ['queued', 'waiting'].includes(job.status));
-  const jobTable = (jobs: Job[]) => <div className="table-scroll"><table className="data-table"><thead><tr><th>Product</th><th>Supplier task</th><th>Status</th><th>Details</th></tr></thead><tbody>{jobs.map(job => <tr key={job.id}><td>{name(job.product_id)}</td><td>{humanize(job.supplier)}<br /><small>Source options and costs</small></td><td>{humanize(job.status)}</td><td>{job.reason ? reasonText(job.reason) : (job.status === 'running' ? 'Collecting and checking supplier data' : job.result_reference ? 'Source result saved' : 'Waiting for worker')}{(job.progress_count || 0) > 0 && <><br /><small>{count(job.progress_count || 0)} saved collection steps</small></>}<br /><small>{count(job.attempts)} {job.attempts === 1 ? 'attempt' : 'attempts'}</small></td></tr>)}</tbody></table></div>;
+  const jobTable = (jobs: Job[]) => <div className="table-scroll"><table className="data-table"><thead><tr><th>Product</th><th>Supplier task</th><th>Status</th><th>Time</th><th>Details</th></tr></thead><tbody>{jobs.map(job => <tr key={job.id}><td>{name(job.product_id)}</td><td>{humanize(job.supplier)}<br /><small>Source options and costs</small></td><td>{humanize(job.status)}</td><td><ProductTiming timing={job.timing} live={!error} label={`${name(job.product_id)} task time`} /></td><td>{job.reason ? reasonText(job.reason) : (job.status === 'running' ? 'Collecting and checking supplier data' : job.result_reference ? 'Source result saved' : 'Waiting for worker')}{(job.progress_count || 0) > 0 && <><br /><small>{count(job.progress_count || 0)} saved collection steps</small></>}<br /><small>{count(job.attempts)} {job.attempts === 1 ? 'attempt' : 'attempts'}</small></td></tr>)}</tbody></table></div>;
   return <section className="panel campaign-automation" aria-label="Automatic supplier collection">
     <div className="automation-heading"><div><h2>Automatic supplier collection</h2><p>Hermes collects supported source options and costs, saves results, and moves past products that need attention. No AI provider is used.</p></div><button className="button button-secondary" aria-label="Refresh automatic collection" disabled={!!busy} onClick={() => setRefreshKey(value => value + 1)}><RefreshCw size={15} /></button></div>
     {error && <div className="error-box" role="alert"><TriangleAlert size={16} /><span>{state ? 'Showing last-known worker status. ' : ''}{error}</span></div>}

@@ -166,6 +166,8 @@ class Engine:
                 .where(Product.owner == self.owner, Product.status == "running")
                 .values(status="queued", lease_until=0)
             )
+            for product in s.scalars(select(Product).where(Product.owner == self.owner)):
+                self.store.sync_product_timing(s, product, s.get(Run, product.run_id))
         await self.client.aclose()
 
     async def dispatch(self):
@@ -453,6 +455,7 @@ class Engine:
                     p.coverage_status = state["coverage"]
                     p.lease_until = 0
                     p.error = None
+                    self.store.sync_product_timing(s, p, s.get(Run, rid))
             await asyncio.to_thread(
                 self.store.event,
                 rid,
@@ -473,7 +476,9 @@ class Engine:
                         else "queued"
                     )
                     p.lease_until = 0
+                    self.store.sync_product_timing(s, p, s.get(Run, rid))
         except asyncio.CancelledError:
+            await asyncio.to_thread(self.store.close_product_timing, pid, epoch)
             raise
         except Exception as exc:
             code = getattr(exc, "code", "extraction_error")
@@ -493,6 +498,7 @@ class Engine:
                     p.error = str(exc)[:1200]
                     p.coverage_status = "partial" if p.row_count else "unknown"
                     p.lease_until = 0
+                    self.store.sync_product_timing(s, p, s.get(Run, rid))
             await asyncio.to_thread(
                 self.store.event,
                 rid,

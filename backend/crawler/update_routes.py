@@ -55,11 +55,13 @@ def update_router(get_updater, authenticated):
 
 def pause_runs_for_update(store):
     from sqlalchemy import select
-    from .store import Run
+    from .store import Run, Product
     with store.session(immediate=True) as session:
         for run in session.scalars(select(Run).where(Run.status.in_(
                 ["queued", "running", "discovering", "harvesting", "verifying", "exporting"]))):
             run.status = "paused"
+            for product in session.scalars(select(Product).where(Product.run_id == run.id)):
+                store.sync_product_timing(session, product, run)
 
 
 async def reconcile_interrupted_update(app, store):

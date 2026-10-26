@@ -21,6 +21,7 @@ import stat
 import time
 import uuid
 from urllib.parse import urlsplit
+from crawler import timing
 
 
 SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
@@ -87,7 +88,7 @@ class Profile:
 
 class CampaignAutomation:
     def __init__(self, root, profiles, resolve_associations, *, capacity=8,
-                 max_polls=60, max_wait_seconds=900, call_timeout=120, clock=time.time):
+                 max_polls=60, max_wait_seconds=900, call_timeout=120, clock=time.time, monotonic=time.monotonic):
         for value, ceiling in ((capacity, 99), (max_polls, 600)):
             if type(value) is not int or not 1 <= value <= ceiling:
                 raise ValueError("Invalid finite worker bound")
@@ -117,6 +118,7 @@ class CampaignAutomation:
         self.resolve = resolve_associations
         self.capacity, self.max_polls = capacity, max_polls
         self.max_wait, self.call_timeout, self.clock = max_wait_seconds, call_timeout, clock
+        self.monotonic, self._timing_session = monotonic, uuid.uuid4().hex
         self._records, self._active, self._supplier_active = {}, {}, set()
         self._lock, self._loop, self._closing = asyncio.Lock(), None, False
         self._maintenance = False
@@ -131,6 +133,7 @@ class CampaignAutomation:
             for job in record["jobs"].values():
                 if job["status"] == "running":
                     job.update(status="held", reason="worker_interrupted", updated_at=self.clock())
+                    self._sync_job_timing(record, job)
                     changed = True
             self._records[path.stem] = record
             if changed:
@@ -202,6 +205,12 @@ class CampaignAutomation:
             for key, maximum in (("progress_count", 10_000_000), ("continuations", MAX_CONTINUATIONS)):
                 value = saved.get(key, 0)
                 public[key] = value if type(value) is int and 0 <= value <= maximum else 0
+            wall = self.clock()
+            owned = saved["id"] in self._active and not self._active[saved["id"]][1].done()
+            public["timing"] = timing.snapshot(saved.get("timing"),
+                timing.job_state(saved, r["enabled"], wall, owned=owned), wall, self.monotonic(),
+                self._timing_session, live=owned, created_at=saved["created_at"],
+                ended_at=saved["updated_at"] if saved["status"] == "completed" else None, scope="campaign_job")
         counts = {state: sum(j["status"] == state for j in jobs)
                   for state in ("queued", "running", "waiting", "completed", "held", "access_required")}
         return {"campaign_id": campaign_id, "enabled": r["enabled"], "jobs": jobs,
@@ -289,7 +298,11 @@ class CampaignAutomation:
                         "polls": 0, "reason": None, "result_reference": None, "pending_token": None,
                         "created_at": now, "updated_at": now, "next_at": now, "wait_started_at": None,
                         "continuations": 0, "progress_count": 0, "progress_token": None}
+                    r["jobs"][job["id"]]["timing"] = timing.new_record("queued", now, self.monotonic(),
+                        self._timing_session, created_at=now, complete=True)
             r["enabled"] = True
+            for saved in r["jobs"].values():
+                if saved["id"] not in self._active: self._sync_job_timing(r, saved)
             self._save(r)
             return self.snapshot(campaign_id)
 
@@ -306,6 +319,8 @@ class CampaignAutomation:
                 r["generation"] += 1
                 for key, (_, task) in list(self._active.items()):
                     if key in r["jobs"]: task.cancel()
+            for job in r["jobs"].values():
+                if job["id"] not in self._active: self._sync_job_timing(r, job)
             self._save(r)
         return self.snapshot(campaign_id)
 
@@ -327,6 +342,7 @@ class CampaignAutomation:
             job["last_dispatch_sequence"] = sequence
             job["status"] = "running"; job["updated_at"] = self.clock()
             job["polls" if polling else "attempts"] += 1
+            self._sync_job_timing(r, job, owned=True)
             self._save(r)  # persist intent before handing control to a source driver
             callback = profile.poll if polling else profile.execute
             result = await asyncio.wait_for(callback(deepcopy(job), check_scope), self.call_timeout)
@@ -382,7 +398,20 @@ class CampaignAutomation:
             job.update(status="held", reason="profile_failed")
         finally:
             job["updated_at"] = self.clock()
+            self._sync_job_timing(r, job)
             self._save(r)
+
+    def _sync_job_timing(self, record, job, *, owned=False):
+        # Administrative pause/start is not a newly observed completion.
+        # Preserve a legacy terminal job's known updated_at end (or unknown
+        # end) rather than manufacturing a timer that finishes today.
+        if job["status"] == "completed" and not owned and not timing.valid(job.get("timing")):
+            return
+        wall = self.clock()
+        state = timing.job_state(job, record["enabled"], wall, owned=owned)
+        job["timing"] = timing.advance(job.get("timing"), state, wall, self.monotonic(),
+            self._timing_session, created_at=job.get("created_at"),
+            waiting_until=job.get("next_at") if state == "waiting" and job["status"] == "queued" else None)
 
     async def tick(self):
         async with self._lock:
@@ -412,10 +441,10 @@ class CampaignAutomation:
                 if job["id"] in self._active or job["supplier"] in self._supplier_active: continue
                 if job["status"] not in {"queued", "waiting"}: continue
                 if job["continuations"] >= MAX_CONTINUATIONS:
-                    job.update(status="held", reason="continuation_limit_reached", updated_at=self.clock()); self._save(r); continue
+                    job.update(status="held", reason="continuation_limit_reached", updated_at=self.clock()); self._sync_job_timing(r, job); self._save(r); continue
                 if job["status"] == "waiting" and (self.clock() < job["wait_started_at"] or
                     self.clock() - job["wait_started_at"] >= self.max_wait or job["polls"] >= self.max_polls):
-                    job.update(status="held", reason="pending_limit_reached", updated_at=self.clock()); self._save(r); continue
+                    job.update(status="held", reason="pending_limit_reached", updated_at=self.clock()); self._sync_job_timing(r, job); self._save(r); continue
                 if job["next_at"] > self.clock(): continue
                 task = asyncio.create_task(self._execute(cid, job["id"], r["generation"]))
                 self._active[job["id"]] = (job["supplier"], task)
@@ -435,6 +464,7 @@ class CampaignAutomation:
                 if record["enabled"]:
                     record["enabled"] = False
                     record["generation"] += 1
+                    for job in record["jobs"].values(): self._sync_job_timing(record, job)
                     self._save(record)
                     paused.append(campaign_id)
             return paused
@@ -452,6 +482,8 @@ class CampaignAutomation:
             if key in r["jobs"] and not task.done(): task.cancel()
         if job_id in r["jobs"]:
             r["jobs"][job_id].update(status="held", reason="automation_storage_or_worker_failure")
+        for job in r["jobs"].values():
+            if job["id"] not in self._active: self._sync_job_timing(r, job)
         try: self._save(r)
         except Exception: pass  # Memory status still exposes failure; restart holds persisted running intent.
 

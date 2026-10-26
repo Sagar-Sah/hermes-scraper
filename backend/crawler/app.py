@@ -3086,7 +3086,7 @@ def scope_counts(product, scope):
     }
 
 
-def product_dict(p, counts=None, retry=None):
+def product_dict(p, counts=None, retry=None, timing_info=None):
     return {
         "id": p.id,
         "url": p.url,
@@ -3097,6 +3097,7 @@ def product_dict(p, counts=None, retry=None):
         "cache_hits": p.cache_hits,
         "coverage_status": p.coverage_status,
         "error": p.error,
+        "timing": timing_info,
         **(counts or {}),
         "retry": retry,
         "retry_at": (
@@ -3119,6 +3120,7 @@ def run_dict(r, details=False):
             )
         }
         counts = {p.id: scope_counts(p, scopes.get(p.id)) for p in products}
+        timings = store.product_timings(s, products, {r.id: r}) if details else {}
         retries = {}
         waiting = {
             p.id: p
@@ -3193,7 +3195,7 @@ def run_dict(r, details=False):
     if details:
         data.update(
             products=[
-                product_dict(p, counts[p.id], retries.get(p.id)) for p in products
+                product_dict(p, counts[p.id], retries.get(p.id), timings.get(p.id)) for p in products
             ],
             spec=r.spec,
         )
@@ -3558,6 +3560,8 @@ def control(run_id: str, action: str):
                 )
                 r.status = "paused" if individually_paused else "exporting"
         r.updated_at = time.time()
+        for product in s.scalars(select(Product).where(Product.run_id == run_id)):
+            store.sync_product_timing(s, product, r, wall=r.updated_at)
     store.event(run_id, "run_" + action, {})
     return get_run(run_id)
 

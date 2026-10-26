@@ -1,3 +1,4 @@
+import type { ProductTimingData } from './productTimingState';
 export interface ExecutionCapacity {
   product_task_limit: number; browser_page_limit: number; effective_browser_page_limit: number;
   active_browser_workers?: number; waiting_for_browser_workers?: number;
@@ -7,6 +8,7 @@ export type RunStatus = 'queued' | 'discovering' | 'running' | 'harvesting' | 'v
 export interface Product {
   id: string; url: string; title: string; status: RunStatus; row_count: number;
   coverage_status: string; error?: string; request_count: number; retry_at?: string | null;
+  timing?: ProductTimingData;
   retry?: { attempt?: number; message?: string; code?: string } | null;
   record_scope?: string; legacy_row_count?: number | null; scoped_row_count?: number | null;
 }

@@ -4,6 +4,7 @@ import { api, count, errorMessage, humanize } from './api';
 import { cancelledFileChoice, folderPicker, saveCollectionDownload, type ExportDirectory } from './collectionDownloads';
 import { collectionProductId, collectionProgress, completedProductIds, reconcileCollectionSelection, type CollectionArchive, type CollectionExport, type CollectionProduct, type CollectionSnapshot } from './collectionTrayState';
 import './CollectionTray.css';
+import ProductTiming from './ProductTiming';
 
 function TrayDialog({ title, children, onClose, wide = false }: { title: string; children: ReactNode; onClose: () => void; wide?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null); const titleId = useId();
@@ -163,6 +164,7 @@ export default function CollectionTray({ onOpenRun, onChanged }: { onOpenRun?: (
         <input type="checkbox" aria-label={`Select ${title(product)}`} checked={selected.has(id)} disabled={!!busy || product.exportable === false} onChange={() => toggleProduct(product)} />
         <div className="collection-product-main"><strong>{title(product)}</strong><small>{product.run_name || 'Harvest'} · {count(product.row_count)} captured rows</small>
           {product.complete === true ? <span className="collection-complete-label"><CheckCircle2 size={13} />Complete</span> : <><span className="collection-product-status">{humanize(product.status === 'completed' ? 'incomplete' : product.status)} · Coverage {humanize(product.coverage_status || 'unknown')}</span><div className={`collection-progress ${progress === null ? 'collection-progress-indeterminate' : ''}`} role="progressbar" aria-label={`${title(product)} collection progress`} {...(progress === null ? {} : { 'aria-valuenow': Math.round(progress), 'aria-valuemin': 0, 'aria-valuemax': 100 })}><span style={progress === null ? undefined : { width: `${progress}%` }} /></div></>}
+          <ProductTiming timing={product.timing} live={open && !pollError} label={`${title(product)} collection time`} />
           {product.exportable === false && <small>Not available for export yet.</small>}
         </div>{product.complete === true ? <Check className="collection-complete-check" size={20} /> : <Package className="collection-pending-icon" size={19} />}
         {onOpenRun && <button className="icon-button" aria-label={`Open harvest for ${title(product)}`} onClick={() => { close(); onOpenRun(product.run_id); }}><ExternalLink size={14} /></button>}

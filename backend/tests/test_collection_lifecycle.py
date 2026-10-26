@@ -93,9 +93,13 @@ def test_saved_export_archives_checked_deletes_unchecked_and_preserves_others(co
         assert all(ids[1] not in name and ids[2] not in name for name in names)
         metadata = json.loads(archive.read("archive.json"))
         assert metadata["product"]["product_id"] == ids[0]
+        assert metadata["timing"]["recorded_at"] > 0
+        assert "server_now" not in metadata["timing"] and "session" not in metadata["timing"]
     with store.session() as session:
         assert session.get(Run, rid) is not None
         assert list(session.scalars(select(Batch.product_id))) == [ids[2]]
+        from crawler.store import ProductTiming
+        assert {row.product_id for row in session.scalars(select(ProductTiming))} == {ids[2]}
 
 
 @pytest.mark.parametrize("saved", [False, None, 1, "true"])
