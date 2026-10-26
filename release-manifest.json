@@ -1,9 +1,9 @@
 {
   "schema": "hermes-software-release/v2",
-  "release": "automatic-collection-dependency-reuse-2026-10-25",
-  "source_base_commit": "7d82ed51ca3f8c5ff651d0a7d29ed121ffb2834a",
-  "commit_identity": "Use the Git commit containing this manifest; the manifest does not hash itself.",
-  "runtime_modules": 98,
+  "release": "collection-delivery-2026-10-26",
+  "source_base_commit": "3fc84c7e7385d6165f7d23d243ace0646f25e35f",
+  "commit_identity": "Use the Git commit containing this manifest, or the source hashes for an uncommitted package; the manifest does not hash itself.",
+  "runtime_modules": 101,
   "source_cost_only": true,
   "AI_provider_required": false,
   "frontend_build_included": false,
@@ -13,40 +13,98 @@
   "product_finalization_claimed": false,
   "woocommerce_deployment_claimed": false,
   "validation": {
-    "composed_source_regressions": {
-      "modules": 15,
-      "tests_passed": 385,
+    "backend_delivery_and_related_regressions": {
+      "tests_passed": 99,
       "failures": 0,
       "errors": 0,
-      "installed_runtime_bytes_identical": true
+      "temporary_data_only": true
     },
-    "installed_portable_tests": {
-      "tests_passed": 63,
-      "failures": 0,
-      "errors": 0,
-      "normal_imports_without_overlay": true
+    "frontend": {
+      "typescript_vite_build": "passed",
+      "intercepted_chromium_tests_passed": 26,
+      "supplier_requests": 0
     },
-    "count_note": "These suites overlap. Do not add their totals.",
-    "frontend": "Unchanged from prior passing TypeScript/Vite build.",
-    "fixture_provenance": "Seven additional public JavaScript excerpts retain original hashes; browser and price fixtures are synthetic."
+    "count_note": "Independent replay suites overlap; do not add their totals."
   },
   "live_validation": {
-    "printograph": "Worker resumed after clean batch139 and advanced. Price-dependency reuse itself is source-fixture tested; no new live speed benchmark or retry of held board selections is claimed.",
-    "fourover": "Latest package trials remain held on turnaround/quantity readiness or unproved rendered totals; no verified quote from these trials.",
-    "whole_products_finalized": 0
+    "collection_delivery_installed_in_running_worker": false,
+    "live_cleanup_performed": false,
+    "supplier_requests_for_delivery_tests": 0
   },
-  "release_notes": "UPDATE-2026-10-25.md",
-  "usage_guide": "docs/AUTOMATIC-COLLECTION.md",
+  "release_notes": "UPDATE-2026-10-26.md",
+  "usage_guide": "docs/COLLECTION-DELIVERY.md",
+  "collection_delivery_scope": {
+    "completion": "Product.status completed and coverage complete; row counts do not establish completion.",
+    "partial_exports": "Exact per-product warning acknowledgements; all saved rows at immutable batch boundaries.",
+    "images": "Saved local downloaded images only, with explicit missing-image/source URL manifests.",
+    "save_confirmation": "Successful file write and close, or an explicit browser-download acknowledgement.",
+    "cleanup": "Only exported stopped/unchanged/unprotected products; compact selected archives before working-row removal; shared objects retained.",
+    "recovery": "Durable pending receipts, fixed-selection cleanup retries, and explicit pending ZIP discard."
+  },
+  "prior_release_validation": {
+    "release": "automatic-collection-dependency-reuse-2026-10-25",
+    "validation": {
+      "composed_source_regressions": {
+        "modules": 15,
+        "tests_passed": 385,
+        "failures": 0,
+        "errors": 0,
+        "installed_runtime_bytes_identical": true
+      },
+      "installed_portable_tests": {
+        "tests_passed": 63,
+        "failures": 0,
+        "errors": 0,
+        "normal_imports_without_overlay": true
+      },
+      "count_note": "These suites overlap. Do not add their totals.",
+      "frontend": "Unchanged from prior passing TypeScript/Vite build.",
+      "fixture_provenance": "Seven additional public JavaScript excerpts retain original hashes; browser and price fixtures are synthetic."
+    },
+    "live_validation": {
+      "printograph": "Worker resumed after clean batch139 and advanced. Price-dependency reuse itself is source-fixture tested; no new live speed benchmark or retry of held board selections is claimed.",
+      "fourover": "Latest package trials remain held on turnaround/quantity readiness or unproved rendered totals; no verified quote from these trials.",
+      "whole_products_finalized": 0
+    },
+    "optimization_scope": {
+      "base_price_reuse": "Exact Cardboards10016 and Acrylic10019 native price-request properties plus observed process type, source URL/type and explicit service policy; current availability, production and displayed totals remain checked.",
+      "retained_service_inspections": "One atomic read instead of six when all requested service choices are already correctly retained.",
+      "full_cartesian_traversal_removed": false,
+      "live_end_to_end_speed_multiplier_claimed": false,
+      "cross_page_price_reuse": false,
+      "completion": "Unique valid configuration identities and complete required evidence; raw row count alone is insufficient."
+    },
+    "earlier_validation": {
+      "core_regression": {
+        "modules": 25,
+        "tests_passed": 691,
+        "subtests_passed": 38,
+        "failures": 0,
+        "errors": 0
+      },
+      "supplemental_regression": {
+        "tests_verified": 676,
+        "initial_passes": 601,
+        "loopback_replays_passed": 75,
+        "failures_remaining": 0,
+        "errors_remaining": 0,
+        "note": "The first run overblocked75 local Chromium fixtures. All passed with exact loopback-only isolation; one cache test required preserving the fixture HTTP cache."
+      },
+      "frontend": "TypeScript and Vite build passed",
+      "fixture_provenance": "Public source excerpt hashes retained; price tables are explicitly synthetic."
+    }
+  },
   "files_sha256": {
     ".dockerignore": "68ae2c1b65099ec548ebe4d6b58e08a3a16a498022faef3c5b6e7bd6d195b78d",
     ".env.example": "73e03cbcaaf4d76257218df6c63484667c8282bc541fc20bc251159420303cc7",
     ".gitattributes": "2c2776a19287bc4ed2e2432be0e46cf71f3e6ef7f3b8b92613740cc07fee929e",
     ".gitignore": "002c91d698fd6a5bcabd27001a9d237861562af375438f44584b246446c896a4",
     "Dockerfile": "83e64f66be8c822c4551c21f469bffd608371326100d2258f96f6d983a68f5b3",
-    "README.md": "51b3f8144300966d768c3cee2ab18776790f3f3765db036069631623c50b928a",
+    "README.md": "be0faac495549d08b0d9370718e9913dd30441f263ada31c2377cb704a163051",
     "UPDATE-2026-10-13.md": "8fd808c24b7f9b4c16ec50aad5e2374f259ad9df52171d529b6915379884967c",
     "UPDATE-2026-10-14.md": "c2392b983c5f74d9d56bb7885d56aa40892299bb19a80a7f1b2bfbc4ee6f1fd4",
     "UPDATE-2026-10-25.md": "3a1979f129b94dfe5ab57747d2918e19e938b26bcb82d6abd3748152ba73523b",
+    "UPDATE-2026-10-26.md": "1468fe5940786493d08c91665bdc8f2235e5728de65f379af01ce8bdad4cb9a0",
     "backend/benchmarks/browser_snapshot.py": "af1f20a9bba3754f9676d8d7ea6b9506048f2edd4c0baaa42e32db323c5f2335",
     "backend/benchmarks/export_rows.py": "52c368a0a5ebdd5cdc0735c8b925e38f1c956ae967100486af05e1195baf7b28",
     "backend/crawler/__init__.py": "8af81ab3aee7d261110919e5f1938598da9ab57fe6cbef9ac6171fec6f687b74",
@@ -55,7 +113,7 @@
     "backend/crawler/adapters/printitprints.py": "f0f5c2acca1f77d5825f0df5e06ad20643508c355a7c00ee3656bf6291e18d64",
     "backend/crawler/adapters/printograph.py": "fee43bd7910851e108c1213cfea32ab588be906ab5d3e86325a9345294c1d56f",
     "backend/crawler/adapters/woocommerce.py": "f0a802e6dbc1ac9db4abc1b48ff4385faebeeca6d99be242eef9f0e56bcfcd24",
-    "backend/crawler/app.py": "46b4b31c084f227d9e344c07201a9b1d4aaced7db5161a0861bc7496ad9a544a",
+    "backend/crawler/app.py": "e0c84b076353f9e4047365cae3b2fb2c076ed39ede314020508488807e357a63",
     "backend/crawler/assets.py": "50b9a61de0ce72b5a0acb1ff7e386993cd4326e9c2eb8aa838e7571bdea8a4ed",
     "backend/crawler/b2sign_canary.py": "d52b2b5fbb45a24fe504da8fc0a54688dd828d2b62fbdf625ee1e84af6c14f94",
     "backend/crawler/b2sign_catalog.py": "628ec5833d5556d91828eec3ea71fc9679bc547b8f982a36dd3cb46c08a0d603",
@@ -78,6 +136,9 @@
     "backend/crawler/campaign_progress.py": "aed0d8f349e074af64697a5bf2fd0f9337dacb7beba1437ec799a62b5ef8733f",
     "backend/crawler/campaign_sources.py": "570807f7c5164f3ae982d682965de5d90f127ee6654fa2c793b8a0393c25a1f4",
     "backend/crawler/catalog_export.py": "3a2e907d94fc94257f8b552fe3d074adfd48db0bb281896967d7367fcb005f45",
+    "backend/crawler/collection_exports.py": "4259f5fceffdc90950c6ad8a44d7650171c38aa4f364fb8576faebf77aa14fff",
+    "backend/crawler/collection_lifecycle.py": "f898979e125e30c42bcb2aa0127cdd34d6b6941d38b9c7ad3d35f150932b0916",
+    "backend/crawler/collection_routes.py": "8113e62392eeed056e91bf6d1ef6bbf6261ad750864a8a9e0c6099abf79e553a",
     "backend/crawler/commerce.py": "9f1ceee3794ee1b72cb9cedd31ec52c2109a819c1ac16c71a68031ffddc15c9e",
     "backend/crawler/config.py": "6a4813ea695f695449d8c65b53ac98cd28c4ff8193a91235abbc1c571dcd6796",
     "backend/crawler/contracts/b2sign-pole-banner.json": "37d71179150fd9596b565a81a0d5d95e0d0e522763996dcb502e9e1870b9de38",
@@ -347,6 +408,9 @@
     "backend/tests/test_campaign_sources.py": "6e89e83adf15972e9fe1ef84e49b33bd9fa945605c1e310343812673f62f6929",
     "backend/tests/test_campaign_ui.py": "db252cb00060df41c24d69daea07fdc5f3497e8dcc04cb52854bafe6f69f54f7",
     "backend/tests/test_catalog_export.py": "565c48b878e12d75b75e14a9dc7de389b68057d15fdee51b7b0108a8c3ac5d7d",
+    "backend/tests/test_collection_exports.py": "97d65d7e012e6bb9052efeee6e84fc7fd15707f4ed2f1b176b9738e2b21c7ffe",
+    "backend/tests/test_collection_lifecycle.py": "eca5c693b9a8a33d1c5b24a980f9576c30b44e4f1d110fc935a53f1054051b20",
+    "backend/tests/test_collection_routes.py": "08b4e9fd23981879c2d682a41d8fc02e11d89a7f6d3d064f2ca51293fb38df00",
     "backend/tests/test_commerce.py": "63a97a1bfa377f20505d476f5b50803764fe3d563f4d9ee0d95ed78109a9021d",
     "backend/tests/test_customer_csv.py": "823072d4555e7b2c5c5e676a81318b296b78954b8c36492e22565a1e68fbd856",
     "backend/tests/test_dashboard_api.py": "13edc03c6eb589abc722a63049a7f641ff5837af8cf0f9bdbd7dd058d627c6e4",
@@ -469,6 +533,7 @@
     "backend/tests/test_worker_capacity_ui.py": "232c7e7cb14a3f059b6c1580a5f8ae9e2955feb6b37f5f576ccef58a5299c6b1",
     "docker-compose.yml": "aab9ce215f3c66d4dbb36398b8120a6199d41df418763d2b547b74d4697dfd1b",
     "docs/AUTOMATIC-COLLECTION.md": "c9baf969aabc220afef3c92113409e825ac724c83a2678ef12b6c77638d93e0f",
+    "docs/COLLECTION-DELIVERY.md": "a451162ab1532209c46554494d66b6226a6f431dcdbd38ed1d73f910ce34a2f4",
     "docs/architecture.md": "5af043e488048b71d5d9395e924c1ae7a048c2befeec84106371d95c0c4711c0",
     "docs/audit-dashboard.md": "8815ea70ecf5b766849ab2f1043e35197914412975761f712345e88835ac7dd8",
     "docs/audit-pricing.md": "f066b0d5f1bb7cf084eac251ff07190cac7fe886f18134be991a6ea3fc77edd5",
@@ -536,12 +601,14 @@
     "frontend/package.json": "632ea846463765d1eafcc6df7ebb2e58a87282b694bd7b328294d29e9502ed14",
     "frontend/public/hermes-icon.svg": "de4937053dd246a82cc5b3ae550140086f9315b3a3bc5deab5a1dafcdbc69e36",
     "frontend/public/hermes-star.svg": "bbf11b435ab585a8a069e83fcbe7b6cbe42bf2dce5d0e74c14055a4cbc156e9f",
-    "frontend/src/App.tsx": "b34644b0d400cf860db32a31a2a560ea4bb3ed23cbd18e69f6f0bb5504ae224d",
+    "frontend/src/App.tsx": "3ef184ed42a2fcbcc3aef18ba63a945cad7fbd2592b21fe8b8ac1726b56a88ad",
     "frontend/src/B2HarvestProgress.tsx": "7c665312dd3ed3b204c97aa453552c96e54ea5af4483719f8d99fb18e199bcf9",
     "frontend/src/CampaignAutomation.css": "c8182cd6011a00f765624a8403eb27112670dd6f5c6b37a8dc1cb29cbb678fa8",
     "frontend/src/CampaignAutomation.tsx": "faa30ed5c604310250b8651e96969969d0bf4cd72d80e4755c3d4e548e6c8231",
     "frontend/src/CampaignProgress.css": "2630c78043fff6c2c26c7f04a112671efc16bec1bfa76689c27479e40ef545b4",
     "frontend/src/CampaignProgress.tsx": "c3d422d682c5ddaca2df6840e7cb2fbde1420bf5b5f660a240df384262564f3b",
+    "frontend/src/CollectionTray.css": "344d8bf7f73c9953c1c5a6da427793049473097cf1c48caf419b027c625c2868",
+    "frontend/src/CollectionTray.tsx": "ca020042f2a749d23b0552e1abc612c730c28544ccae06c61b4e5d8caea4a7f1",
     "frontend/src/CommerceTools.tsx": "0b5cbbe199c8e9c280fd26b2aeb5d0849887569dfdfca4fe397db165b09efa3f",
     "frontend/src/DPSPilotProgress.tsx": "bc28911f21dff54e4146abcd6c83ec677f2a51e3e289d7b12501a900ff82c915",
     "frontend/src/DiagnosisLaunch.tsx": "9039a9b052d124e46e807a449a29ad254b4c22defb771b9b94a92b5656a3aca0",
@@ -556,9 +623,12 @@
     "frontend/src/VariationPlan.tsx": "707a7ae8131e9a9ab6b62303ca62eb12cccc6ea803ea7b45ae77b18a7518559e",
     "frontend/src/WorkerCapacity.tsx": "070ace398a434a66488f2aec859542ab97cec08ef88c0db04971aafff52ca1f8",
     "frontend/src/api.ts": "de893e4e230c498603162ab1c8d75d6ff9e1dc1e05299b5f11115f20d2168305",
+    "frontend/src/collectionDownloads.ts": "296a95730cb375075903d740b7577c537e1d6653dc754414c8d91616fd111866",
+    "frontend/src/collectionTrayState.ts": "e1fa7666f62d939c139e5e7bd9856a8c0c2353125868a17f369403871a4bc057",
     "frontend/src/customerValues.ts": "719c83e72577a64b5d803f479e8ad781ceb363fe8812021c20ff56ee1c15dbb9",
     "frontend/src/main.tsx": "a920ec27028d3f1997c93d79da61fa77c0ff613085a6fb2a8ea2dea92cab28a9",
     "frontend/src/styles.css": "0247eaad94c5cc50c875f7a410df32279edba4ca8536c5995002a41061655d38",
+    "frontend/tests/test_collection_tray.py": "d492c27346c832467c42f54f41118c3bbc025d647c2a94a3402ae00d7e9ab517",
     "frontend/tests/test_source_domain_progress.py": "72d0f5a6ac6b49958d93276ce00af55bf43d9850b53dac8f19aab0927f52848a",
     "frontend/tsconfig.json": "592d67539dcf5a1b7fa909b8739964cc07653bf0231a186049e381144417c3cd",
     "frontend/vite.config.ts": "d4894b1ca269a671c5249174431b058bc5afc00acbc34b25074f550954375c68",
@@ -567,32 +637,5 @@
     "scripts/plan_printograph_discovery.py": "6e4c59d4c4fe7bb1405ac535cf44ad74e68d0c152be281e75dc8c08a1746ebf5",
     "scripts/probe_printograph.py": "6dc33b61973816f099da1a9427ed5856b3a8bb381e92dfeabca1b82ce0db4bbb",
     "scripts/start-local.sh": "736a02f6c56b3d4426ce7144eea92d1eaf18f6f2e6fa6a00e90eb9024a008baf"
-  },
-  "prior_release_validation": {
-    "core_regression": {
-      "modules": 25,
-      "tests_passed": 691,
-      "subtests_passed": 38,
-      "failures": 0,
-      "errors": 0
-    },
-    "supplemental_regression": {
-      "tests_verified": 676,
-      "initial_passes": 601,
-      "loopback_replays_passed": 75,
-      "failures_remaining": 0,
-      "errors_remaining": 0,
-      "note": "The first run overblocked75 local Chromium fixtures. All passed with exact loopback-only isolation; one cache test required preserving the fixture HTTP cache."
-    },
-    "frontend": "TypeScript and Vite build passed",
-    "fixture_provenance": "Public source excerpt hashes retained; price tables are explicitly synthetic."
-  },
-  "optimization_scope": {
-    "base_price_reuse": "Exact Cardboards10016 and Acrylic10019 native price-request properties plus observed process type, source URL/type and explicit service policy; current availability, production and displayed totals remain checked.",
-    "retained_service_inspections": "One atomic read instead of six when all requested service choices are already correctly retained.",
-    "full_cartesian_traversal_removed": false,
-    "live_end_to_end_speed_multiplier_claimed": false,
-    "cross_page_price_reuse": false,
-    "completion": "Unique valid configuration identities and complete required evidence; raw row count alone is insufficient."
   }
 }

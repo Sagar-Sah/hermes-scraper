@@ -42,6 +42,12 @@ You can also run `./scripts/start-local.sh` to perform this local setup and star
 
 Open [Hermes](http://127.0.0.1:18877). The API starts its background extraction engine in the same process and serves the built dashboard. SQLite is the default local database. Its database, response objects, row artifacts, exports, and automatically generated encryption key live in `data/`.
 
+The [collection tray](docs/COLLECTION-DELIVERY.md) packages selected products into
+one ZIP with a folder per product. Unfinished products require an explicit export
+warning override. After confirming the ZIP was saved, choose which products to
+retain as compact archives and which exported working copies to remove. Active,
+changed or campaign-protected work remains protected from cleanup.
+
 For frontend development, run `npm run dev` from `frontend/` in a second terminal. It serves [the development dashboard](http://127.0.0.1:18878) and proxies API calls to port 18877. Set `ATLAS_API_URL` to use another API origin. Vite uses a strict port so it will not silently switch to an unexpected address.
 
 In the dashboard:

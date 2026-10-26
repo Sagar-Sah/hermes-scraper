@@ -142,6 +142,9 @@ async def authenticated(request: Request):
 
 from .campaign_automation_routes import automation_router
 app.include_router(automation_router(lambda: app.state.campaign_automation, authenticated))
+from .collection_routes import collection_router
+app.include_router(collection_router(lambda: store, authenticated,
+    cleanup_guard=lambda: app.state.campaigns.mutation_lock))
 
 
 def active_campaign_product(campaign_id:str,product_id:str):
