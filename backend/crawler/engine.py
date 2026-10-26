@@ -134,6 +134,8 @@ class Engine:
         self.owner = uid()
         self.tasks = set()
         self.stopping = False
+        self.maintenance = False
+        self.admission_lock = asyncio.Lock()
         self.client = httpx.AsyncClient(
             verify=tls_context(),
             timeout=30,
@@ -168,25 +170,44 @@ class Engine:
 
     async def dispatch(self):
         while not self.stopping:
-            self.tasks = {t for t in self.tasks if not t.done()}
-            claimed = False
-            while len(self.tasks) < self.store.config.product_concurrency:
-                job = await asyncio.to_thread(self.store.claim, self.owner)
-                if not job:
-                    break
-                task = asyncio.create_task(self.process(job))
-                self.tasks.add(task)
-                claimed = True
-            with self.store.session() as session:
-                export_ids = list(
-                    session.scalars(select(Run.id).where(Run.status == "exporting"))
-                )
-            for rid in export_ids:
-                if rid not in self.finalizing:
-                    self.finalizing.add(rid)
-                    task = asyncio.create_task(self.finalize(rid))
-                    self.tasks.add(task)
+            if self.maintenance:
+                await asyncio.sleep(0.1)
+                continue
+            async with self.admission_lock:
+                if self.maintenance:
+                    continue
+                claimed = await self.dispatch_once()
             await asyncio.sleep(0.1 if claimed else 0.5)
+
+    async def begin_maintenance(self):
+        async with self.admission_lock:
+            self.maintenance = True
+
+    async def end_maintenance(self):
+        async with self.admission_lock:
+            self.maintenance = False
+
+    async def dispatch_once(self):
+        """One existing admission pass, under the update/dispatch fence."""
+        self.tasks = {t for t in self.tasks if not t.done()}
+        claimed = False
+        while len(self.tasks) < self.store.config.product_concurrency:
+            job = await asyncio.to_thread(self.store.claim, self.owner)
+            if not job:
+                break
+            task = asyncio.create_task(self.process(job))
+            self.tasks.add(task)
+            claimed = True
+        with self.store.session() as session:
+            export_ids = list(
+                session.scalars(select(Run.id).where(Run.status == "exporting"))
+            )
+        for rid in export_ids:
+            if rid not in self.finalizing:
+                self.finalizing.add(rid)
+                task = asyncio.create_task(self.finalize(rid))
+                self.tasks.add(task)
+        return claimed
 
     async def process(self, job):
         pid, rid, epoch = job["id"], job["run_id"], job["epoch"]

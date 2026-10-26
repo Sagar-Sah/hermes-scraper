@@ -1,4 +1,7 @@
 FROM node:22-bookworm-slim AS dashboard
+RUN apt-get update && apt-get install -y --no-install-recommends python3 \
+    && rm -rf /var/lib/apt/lists/*
+COPY backend/crawler/build_info.py /build/backend/crawler/build_info.py
 WORKDIR /build/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci

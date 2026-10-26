@@ -23,22 +23,25 @@ independent cart verification remain pending.
 
 ## Start locally
 
-Requirements: Python 3.11+, Node.js 20+, and Playwright Chromium. Run from this project directory:
+Requirements: Python 3.11+, Node.js 20+, and Git. From the Hermes project directory, run:
 
 ```sh
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r backend/requirements.lock
-python -m pip install --no-deps -e backend
-python -m playwright install chromium
-cd frontend
-npm ci
-npm run build
-cd ..
-ATLAS_DATA_DIR="$PWD/data" python -m uvicorn crawler.app:app --host 127.0.0.1 --port 18877
+./scripts/start-local.sh
 ```
 
-You can also run `./scripts/start-local.sh` to perform this local setup and start the service. It uses the locked dependency versions and opens a normal browser on desktop systems so you can complete supplier sign-in. `ATLAS_BROWSER_HEADLESS=true` overrides that desktop default. By default the app keeps a dedicated browser profile and opens each product in another tab of that same session. The supplier can still expire or revoke its login.
+The launcher installs locked dependencies, prepares Playwright Chromium, builds the dashboard when needed, and starts Hermes with its update supervisor. It checks an occupied port before changing files and starts no second backend. A failed dependency install or build stops startup. Keep the existing project folder, `.env`, data directory and supplier profiles when updating an existing installation.
+
+### Update from the dashboard
+
+Choose **Update Hermes** in the main header, then **Check for updates**. If a checked release is available, choose **Install tested release**. Hermes waits for finite collection work to finish safely, pauses collection, saves a private database/configuration backup, updates the checked commit from this repository's `main`, rebuilds changed assets and reconnects. Collection stays paused; review queued and held tasks before resuming. The panel retains progress when closed and shows an interrupted or failed update on reopening.
+
+Updates require a clean `main` checkout and a service started with `scripts/start-local.sh`. Local code changes, unowned source work, unknown Git history and an expired update check produce a visible hold. Your collections, supplier sessions and settings remain in the existing data directory. The footer and health endpoint identify the loaded UI and backend builds; **Reload dashboard** loads a newer browser bundle after restart.
+
+An older installation started directly with Uvicorn needs one initial transition: pause collection, wait for active work to finish, stop that Hermes process, update the software, and run `./scripts/start-local.sh` with its existing configuration. Subsequent updates use the dashboard. Advanced direct-Uvicorn development runs remain unmanaged and cannot install updates through the button.
+
+The launcher uses the locked dependency versions and opens a normal browser on desktop systems so you can complete supplier sign-in. `ATLAS_BROWSER_HEADLESS=true` overrides that desktop default. By default the app keeps a dedicated browser profile and opens each product in another tab of that same session. The supplier can still expire or revoke its login.
+
+Existing `ATLAS_DATA_DIR` in `.env` is preserved; an explicitly exported shell value takes precedence. Without either setting, the data directory is `./data` in this project. Set the local port in the shell, for example `ATLAS_PORT=18879 ./scripts/start-local.sh`; the launcher uses that same port for its existing-service check and Uvicorn. A port value in `.env` alone does not change the local launcher's CLI port.
 
 Open [Hermes](http://127.0.0.1:18877). The API starts its background extraction engine in the same process and serves the built dashboard. SQLite is the default local database. Its database, response objects, row artifacts, exports, and automatically generated encryption key live in `data/`.
 

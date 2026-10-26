@@ -63,11 +63,19 @@ For a new installation, follow the main README's setup instructions. Keep existi
 data and browser profiles when updating. The software release archive deliberately
 does not include accounts, passwords, browser sessions or the local campaign database.
 
-When updating from GitHub, pause collection and stop the service first. Pull the
-tested commit, rebuild the dashboard with `(cd frontend && npm ci && npm run build)`,
-then start the service using the same data directory as before. The current local
-launcher reuses an existing dashboard build, so pulling source files alone does
-not replace an older dashboard. Review queued and held tasks before resuming.
+Use **Update Hermes** in the main header to check and install the tested `main`
+release. The managed launcher waits for finite work, pauses collection, saves a
+private database/configuration backup and restarts its own backend after a
+successful update/build. Review queued and held tasks before resuming; an update
+never retries a saved uncertain supplier selection. The panel shows retained
+progress and failures if a restart interrupts the connection.
+
+An older service started directly with Uvicorn needs a one-time pause, safe stop
+and transition to `./scripts/start-local.sh` using the same configuration and data
+directory. The launcher preserves `.env` settings and exported overrides, installs
+changed locked dependencies and rebuilds changed assets. See the README for update
+requirements and holds. The dashboard build stamp and health response identify
+which code is loaded and when a page reload is needed.
 
 ## Current verification limits
 

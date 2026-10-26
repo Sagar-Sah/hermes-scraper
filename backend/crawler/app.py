@@ -22,6 +22,7 @@ from sqlalchemy import select, update, func
 
 from .config import settings
 from .browser_capacity import browser_workload
+from .build_info import RuntimeBuild
 from .store import (
     Store,
     Run,
@@ -47,11 +48,14 @@ from .product_finalization import saved_products, review_product, review_file
 from .transport import validate_url, ExtractionError
 from .campaign_progress import CampaignManager, required_fixed_options
 
+runtime_build = RuntimeBuild()
 store = Store(settings)
 
 
 @asynccontextmanager
 async def lifespan(app):
+    print(runtime_build.diagnostic(), flush=True)
+    app.state.update_mutations = set()
     engine = Engine(store)
     app.state.engine = engine
     app.state.probes = ProbeRunner(store, engine.browser_pool, on_stage_finished=engine.finish_run)
@@ -102,6 +106,15 @@ async def lifespan(app):
         store, app.state.campaigns, app.state.product_diagnoses, engine.browser_pool,
         browser_run_callbacks={'create': create_owned_browser_run, 'read': read_owned_browser_run,
             'control': control_owned_browser_run, 'find_owned': find_owned_browser_runs})
+    from .managed_update import ManagedUpdater
+    from .update_routes import drain_for_update, reconcile_interrupted_update
+    async def release_update_fences():
+        await app.state.campaign_automation.end_maintenance()
+        await engine.end_maintenance()
+    app.state.updater = ManagedUpdater(Path(__file__).resolve().parents[2], store.root,
+        lambda: drain_for_update(app, store), build_snapshot=runtime_build.snapshot,
+        release=release_update_fences)
+    await reconcile_interrupted_update(app, store)
     await app.state.campaign_automation.open()
     await engine.start()
     yield
@@ -145,6 +158,25 @@ app.include_router(automation_router(lambda: app.state.campaign_automation, auth
 from .collection_routes import collection_router
 app.include_router(collection_router(lambda: store, authenticated,
     cleanup_guard=lambda: app.state.campaigns.mutation_lock))
+from .update_routes import update_router
+app.include_router(update_router(lambda: app.state.updater, authenticated))
+
+
+@app.middleware("http")
+async def update_admission_fence(request, call_next):
+    updater = getattr(app.state, "updater", None)
+    if updater is not None:
+        await updater.reconcile_failure()
+        if updater.fenced and request.method not in {"GET", "HEAD", "OPTIONS"} and not request.url.path.startswith("/api/v1/updates/"):
+            return RawResponse(content='{"detail":"Update in progress; collections are paused"}', status_code=503, media_type="application/json")
+    mutation = request.method not in {"GET", "HEAD", "OPTIONS"} and not request.url.path.startswith("/api/v1/updates/")
+    marker = object()
+    active = getattr(app.state, "update_mutations", None)
+    if mutation and active is not None: active.add(marker)
+    try:
+        return await call_next(request)
+    finally:
+        if mutation and active is not None: active.discard(marker)
 
 
 def active_campaign_product(campaign_id:str,product_id:str):
@@ -3196,6 +3228,7 @@ def health():
         "status": "ok",
         "database": "sqlite-local" if store.sqlite else "postgresql",
         "version": "0.1.0",
+        "build": runtime_build.snapshot(),
         "authentication_required": bool(settings.api_token),
         "browser_session_persistence": settings.persist_browser_sessions,
         "execution_capacity": {**settings.execution_capacity(), **browser_workload.snapshot()},

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  define: { __HERMES_UI_BUILD__: JSON.stringify(loadEnv(mode, '.', '').HERMES_UI_BUILD_SHA || 'development') },
   server: {
     port: 18878,
     strictPort: true,

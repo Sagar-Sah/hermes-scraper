@@ -119,6 +119,7 @@ class CampaignAutomation:
         self.max_wait, self.call_timeout, self.clock = max_wait_seconds, call_timeout, clock
         self._records, self._active, self._supplier_active = {}, {}, set()
         self._lock, self._loop, self._closing = asyncio.Lock(), None, False
+        self._maintenance = False
         for path in sorted(self.root.glob("*.json")):
             self._private_file(path)
             record = json.loads(path.read_text(), parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Nonfinite record")))
@@ -392,7 +393,7 @@ class CampaignAutomation:
                         cid = next(cid for cid, record in self._records.items() if key in record["jobs"])
                         self._worker_fault(cid, key)
                     self._active.pop(key); self._supplier_active.discard(supplier)
-            if self._closing: return
+            if self._closing or self._maintenance: return
             blocked = {supplier for r in self._records.values() for supplier in r["supplier_blocks"]}
             not_before = {}
             for r in self._records.values():
@@ -419,6 +420,28 @@ class CampaignAutomation:
                 task = asyncio.create_task(self._execute(cid, job["id"], r["generation"]))
                 self._active[job["id"]] = (job["supplier"], task)
                 self._supplier_active.add(job["supplier"])
+
+    async def begin_maintenance(self):
+        """Stop new admissions; let already owned finite chunks finish normally."""
+        async with self._lock:
+            self._maintenance = True
+
+    async def pause_drained_for_update(self):
+        async with self._lock:
+            if any(not task.done() for _, task in self._active.values()):
+                raise ValueError("workers_busy")
+            paused = []
+            for campaign_id, record in self._records.items():
+                if record["enabled"]:
+                    record["enabled"] = False
+                    record["generation"] += 1
+                    self._save(record)
+                    paused.append(campaign_id)
+            return paused
+
+    async def end_maintenance(self):
+        async with self._lock:
+            self._maintenance = False
 
     def _worker_fault(self, campaign_id, job_id=None):
         r = self._records[campaign_id]
