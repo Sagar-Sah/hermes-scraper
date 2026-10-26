@@ -1,0 +1,35 @@
+{
+  "schema": "native-generic-base-price-dependency-proof/v1",
+  "source_files": {
+    "generic-api-post.js": "369d4db05b2b6d183027426007d3a53983d1fec1e8f5c5274ce4970bb316e274",
+    "generic-parameters.js": "03c3b858d5019da999827a9d9d06c70d982cc6b667e8a1d5b56e3e889448e1e3",
+    "generic-price-applier.js": "17bf71c0b6f06d57d2ff7c296657c400b8fd037be05d6e7c93f0f19eb8f3e245",
+    "generic-price-builder.js": "22c76e15cab2f7d5777d674aa6ceaca8181a4650239804d1cb7888af80239066",
+    "native-options.js": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776",
+    "native-turnaround-builder.js": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
+    "type10019-fields.js.txt": "2439766da75d8db525988b5e8161cfff436f81d84d10eafb5e1a3243f46848c8"
+  },
+  "source_bundle_sha256": {
+    "common": "22fd26adacdf0e55142139c0eff52ffc227b8028cb3121662d8678b1d9e337a7",
+    "order_form": "0aef40e4995a0ecfbcae99f8ad4dd900fdc2201147a37e0b5bbbf0a7fa5525f6"
+  },
+  "native_proof": [
+    "getGenericProductsPriceFromApi serializes properties then stores every quantity response row under that native dependency key plus observed proofType appended as processType. Native matching selections call setGenericProductsPrice without another API request.",
+    "getGenericProductsPrice sends only the generated properties as JSON POST. Modern request admission retains exact normal itemId=null/cid= query and validates the full request/current context before every captured response.",
+    "getParametersForGenericProducts explicitly maps native color2/3 to equal canonical price dependencies; original native method tests prove the cache hit rather than infer from equal prices. Number/string native IDs retain the existing _scalar_tree value normalization; raw request hashes are never rewritten.",
+    "The native generic table consumer applies productPrice and separate option prices. This candidate reuses the base table only; it does not sum fees or infer availability/production."
+  ],
+  "runtime_projection": [
+    "Only two exact URL/type pairs get the dependency key; all other generic keys remain the full previous context.",
+    "The observed native proofType comes from full current binding.services, not an assumed constant. Source URL/type, explicit service policy and canonical validated properties remain in the key.",
+    "Captured scoped entries retain detached full generic context and selection_context including quantity. Returned freshness exposes only two hashes and a reuse boolean, after all existing native/display/production checks.",
+    "Existing BrowserAdapter.navigated recreates FreshQuoteGate on every main-frame navigation, so no new cross-page/TTL sharing occurs."
+  ],
+  "limits": [
+    "No full Cartesian elimination or automatic nonprice classification is claimed. Full native options/availability/production/service scope still checked per current leaf.",
+    "Native source-method fixtures use synthetic data and do not prove currently offered live color choices or new supplier quotes.",
+    "No price equality sampling inference, endpoint/request addition, response replay, fee formula, source finalization, or checkpoint bypass."
+  ],
+  "source_requests": 0,
+  "runtime_operations": 0
+}

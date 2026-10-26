@@ -364,6 +364,37 @@ def policy_available(raw):
     return True
 
 
+def _retained_service_policy(raw):
+    """One atomic read can certify an already retained policy; never price it.
+
+    Any uncertainty uses the original sequential preparation path. No control,
+    observation or certification is retained for a later source action or quote.
+    """
+    if not isinstance(raw, dict) or raw.get("open") is not True or not modern_bound(service_signature(raw)):
+        return None
+    model_keys = {"proofType": "proofType", "proofTypeForManual": "manualProofType",
+                  "fileDeliveryForManual": "fileDelivery", "designServices": "designServices"}
+    groups = {group["key"]: group for group in raw["groups"]}
+    policy = {}
+    for name, pattern in _intents(raw):
+        choices = groups[name]["choices"]
+        if not choices and name == "designServices":
+            continue
+        candidates = [choice for choice in choices if choice.get("disabled") is False
+                      and choice.get("visible") is True and re.fullmatch(pattern, _policy_label(choice), re.I)]
+        if len(candidates) != 1:
+            return None
+        target = candidates[0]
+        checked = [choice for choice in choices if choice.get("checked") is True]
+        if (len(checked) != 1 or checked[0] is not target
+                or raw["model_services"].get(model_keys[name]) != target["value"]
+                or raw.get("service_policy") == PDF_SERVICE_POLICY
+                and name == "proofTypeForManual" and target["value"] != "1"):
+            return None
+        policy[name] = target["value"]
+    return policy
+
+
 async def prepare_services(page, source_url, check, mark_action, settle, *, service_policy=None):
     """Choose only source-offered safe labels; values are learned, never constants."""
     validate_service_policy(service_policy, source_url)
@@ -373,6 +404,9 @@ async def prepare_services(page, source_url, check, mark_action, settle, *, serv
         if raw.get("observed") is not True: raise ModernHeld(raw.get("reason", "modern_service_unavailable"))
         return bind_service_policy(raw, service_policy, source_url)
     raw = await read()
+    retained_policy = _retained_service_policy(raw)
+    if retained_policy is not None:
+        return raw, retained_policy
     if not raw["open"]:
         await mark_action()
         await page.evaluate(SERVICE_ACTION_JS, {"source_url": source_url, "action": "open", "target": None})
@@ -485,6 +519,29 @@ def _scalar_tree(value, depth=0):
     if type(value) not in (str,int,float) or len(str(value))>500 or any(ord(c)<32 or ord(c)==127 for c in str(value)): raise ValueError()
     if type(value) in (int,float) and not Decimal(str(value)).is_finite(): raise ValueError()
     return str(value)
+
+
+# Base-price reuse is deliberately independent of row/service/production scope.
+# These are the two source-verified native scalar rigid-product request builders.
+GENERIC_PRICE_DEPENDENCY_SCOPES = {
+    "https://www.printograph.com/products/cardboards/order": "10016",
+    "https://www.printograph.com/products/acrylic-boards/order": "10019",
+}
+
+
+def _generic_price_cache_identity(raw, service_policy=None):
+    context = _generic_context(raw)  # retain every current full-context guard
+    if GENERIC_PRICE_DEPENDENCY_SCOPES.get(raw.get("source_url")) != raw.get("product_type"):
+        return _key(context)  # every other family preserves its exact old key
+    # The native storedGenericPrice key appends the *observed* proofType as
+    # processType; it is a separate dependency even when POST properties match.
+    process_type = context["binding"]["services"].get("proofType")
+    if type(process_type) is not str or not re.fullmatch(r"[0-9]{1,12}", process_type):
+        raise ModernHeld("modern_generic_context_unproven")
+    return _key({"schema": "native-generic-price-dependencies/v1",
+                 "source_url": raw["source_url"], "product_type": raw["product_type"],
+                 "service_policy": service_policy, "process_type": process_type,
+                 "properties": context["properties"]})
 
 
 def _generic_price_request(body, raw):
@@ -612,9 +669,14 @@ class FreshQuoteGate:
         try:
             if generic_price:
                 if method != "POST" or urlsplit(url).query != "itemId=null&cid=" or urlsplit(url).fragment: raise ModernHeld("modern_generic_price_request_unproven")
-                request_hash, identity = _generic_price_request(request_body, after)
+                request_hash, _ = _generic_price_request(request_body, after)
+                identity = _generic_price_cache_identity(after, self.service_policy)
                 maximum = int(after["generic_price_context"]["quantity_choices"][-1])
-                self.generic_prices[identity] = {"rows": _generic_prices(data, maximum), "evidence_id": evidence_id, "order": self.order, "request_sha256": request_hash}
+                captured = {"rows": _generic_prices(data, maximum), "evidence_id": evidence_id, "order": self.order, "request_sha256": request_hash}
+                if GENERIC_PRICE_DEPENDENCY_SCOPES.get(after.get("source_url")) == after.get("product_type"):
+                    captured["origin_context"] = {"generic_context": deepcopy(_generic_context(after)),
+                                                  "selection_context": deepcopy(after["selection_context"])}
+                self.generic_prices[identity] = captured
             elif price:
                 if method != "GET" or urlsplit(url).query not in {"", "itemId=null&cid="}:raise ModernHeld("modern_price_request_unproven")
                 if price.group(1) != after["base_context"]["product_id"]: raise ModernHeld("modern_foreign_product_price")
@@ -639,7 +701,7 @@ class FreshQuoteGate:
             if any(key(c.get("key")) not in normalized or str(c.get("value")) != normalized[key(c.get("key"))] for c in controls):
                 raise ModernHeld("modern_model_dom_product_mismatch")
         generic = raw.get("generic_price_context",{}).get("observed") is True
-        base = self.generic_prices.get(_key(_generic_context(raw))) if generic else self.prices.get(_key(raw["base_context"]))
+        base = self.generic_prices.get(_generic_price_cache_identity(raw, self.service_policy)) if generic else self.prices.get(_key(raw["base_context"]))
         current = self.production.get(_key(_production_identity(raw)))
         q = raw["selection_context"]["quantity"]
         if not base or q not in base["rows"]: raise ModernHeld("modern_current_price_evidence_missing")
@@ -686,7 +748,19 @@ class FreshQuoteGate:
             presentation == {"observed": True, "store": "101", "rush": "2 Business Days"})
         if not source_range or not (numeric_label_matches or nextday_alias_matches):
             raise ModernHeld("modern_rendered_production_stale")
+        dependency_audit = {}
+        if generic and GENERIC_PRICE_DEPENDENCY_SCOPES.get(raw.get("source_url")) == raw.get("product_type"):
+            origin = base.get("origin_context")
+            if type(origin) is not dict or set(origin) != {"generic_context", "selection_context"}:
+                raise ModernHeld("modern_current_price_evidence_missing")
+            current_context = {"generic_context": _generic_context(raw),
+                               "selection_context": raw["selection_context"]}
+            dependency_audit = {
+                "base_price_dependency_sha256": hashlib.sha256(_generic_price_cache_identity(raw, self.service_policy).encode()).hexdigest(),
+                "price_table_reused_across_selection": origin != current_context,
+                "origin_context_sha256": hashlib.sha256(_key(origin).encode()).hexdigest()}
         return {"schema": "printograph-native-dom-quote-freshness/v1", "price_evidence_id": base["evidence_id"],
+                **dependency_audit,
                 **({"service_policy": self.service_policy} if self.service_policy is not None else {}),
                 **({"price_request_sha256": base["request_sha256"], "native_price_schema": "generic-product-price/v1", "source_api_available_flag": base["rows"][q]["available"], "stock_availability_verified": False, "native_enabled_quantity_observed": native_quantity_enabled, "api_subtotal_reference_only": True} if generic else {}),
                 "production_evidence_id": current["evidence_id"], "production_request_sha256": current["request_sha256"], "price_basis": "source_displayed_total",

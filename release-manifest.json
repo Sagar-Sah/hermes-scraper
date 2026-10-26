@@ -1,7 +1,7 @@
 {
   "schema": "hermes-software-release/v2",
-  "release": "automatic-collection-2026-10-25",
-  "source_base_commit": "9b8a19eeaf66135114346e486bba54a6ff77f83b",
+  "release": "automatic-collection-dependency-reuse-2026-10-25",
+  "source_base_commit": "7d82ed51ca3f8c5ff651d0a7d29ed121ffb2834a",
   "commit_identity": "Use the Git commit containing this manifest; the manifest does not hash itself.",
   "runtime_modules": 98,
   "source_cost_only": true,
@@ -13,26 +13,25 @@
   "product_finalization_claimed": false,
   "woocommerce_deployment_claimed": false,
   "validation": {
-    "core_regression": {
-      "modules": 25,
-      "tests_passed": 691,
-      "subtests_passed": 38,
+    "composed_source_regressions": {
+      "modules": 15,
+      "tests_passed": 385,
       "failures": 0,
-      "errors": 0
+      "errors": 0,
+      "installed_runtime_bytes_identical": true
     },
-    "supplemental_regression": {
-      "tests_verified": 676,
-      "initial_passes": 601,
-      "loopback_replays_passed": 75,
-      "failures_remaining": 0,
-      "errors_remaining": 0,
-      "note": "The first run overblocked75 local Chromium fixtures. All passed with exact loopback-only isolation; one cache test required preserving the fixture HTTP cache."
+    "installed_portable_tests": {
+      "tests_passed": 63,
+      "failures": 0,
+      "errors": 0,
+      "normal_imports_without_overlay": true
     },
-    "frontend": "TypeScript and Vite build passed",
-    "fixture_provenance": "Public source excerpt hashes retained; price tables are explicitly synthetic."
+    "count_note": "These suites overlap. Do not add their totals.",
+    "frontend": "Unchanged from prior passing TypeScript/Vite build.",
+    "fixture_provenance": "Seven additional public JavaScript excerpts retain original hashes; browser and price fixtures are synthetic."
   },
   "live_validation": {
-    "printograph": "Automatic durable continuation observed for Staggered Cut Flyers, Acrylic Boards and Cardboards; partial coverage.",
+    "printograph": "Worker resumed after clean batch139 and advanced. Price-dependency reuse itself is source-fixture tested; no new live speed benchmark or retry of held board selections is claimed.",
     "fourover": "Latest package trials remain held on turnaround/quantity readiness or unproved rendered totals; no verified quote from these trials.",
     "whole_products_finalized": 0
   },
@@ -47,7 +46,7 @@
     "README.md": "51b3f8144300966d768c3cee2ab18776790f3f3765db036069631623c50b928a",
     "UPDATE-2026-10-13.md": "8fd808c24b7f9b4c16ec50aad5e2374f259ad9df52171d529b6915379884967c",
     "UPDATE-2026-10-14.md": "c2392b983c5f74d9d56bb7885d56aa40892299bb19a80a7f1b2bfbc4ee6f1fd4",
-    "UPDATE-2026-10-25.md": "e1f0a1501e8d9bf2c522424d0798d067083ac1c41ae6bce79ef0eee85f27ae82",
+    "UPDATE-2026-10-25.md": "3a1979f129b94dfe5ab57747d2918e19e938b26bcb82d6abd3748152ba73523b",
     "backend/benchmarks/browser_snapshot.py": "af1f20a9bba3754f9676d8d7ea6b9506048f2edd4c0baaa42e32db323c5f2335",
     "backend/benchmarks/export_rows.py": "52c368a0a5ebdd5cdc0735c8b925e38f1c956ae967100486af05e1195baf7b28",
     "backend/crawler/__init__.py": "8af81ab3aee7d261110919e5f1938598da9ab57fe6cbef9ac6171fec6f687b74",
@@ -122,7 +121,7 @@
     "backend/crawler/printograph_constraints.py": "e0ba3e33420093cca09a7ad2cfe4c83e6d942983540fdd0cb030cff00b2e1604",
     "backend/crawler/printograph_discovery.py": "82c42cbd65efe9b302290a06b33658888ceed445cc957d94eb077d56e19fd8e5",
     "backend/crawler/printograph_initial_quantity.py": "e11e3176ef56f2188df364f31a26da2e6726441b2ceebbf266c4c9f8491fff70",
-    "backend/crawler/printograph_modern_browser.py": "eb59012c3d9bc629d2b6dd494d05cc23273452347273299fed7d74bb76cc4ced",
+    "backend/crawler/printograph_modern_browser.py": "6f647fde939b8e1e80daf0d7a0dcac441f711a9d1341dc117da12a41d903cd1a",
     "backend/crawler/printograph_price_journal.py": "ac822095a8a1b85b89d029afc2226ef9e759e9ecc8964710f0fef26514758343",
     "backend/crawler/printograph_raised_quote.py": "7d4e8ec0fb78b95b24aefba0fc801ddf980162df8f80159e45fafe2548123193",
     "backend/crawler/printograph_rows.py": "0657a9957d2ab8ac97859aa18524302d0259153cc3182204f28fc8d10fd64979",
@@ -269,6 +268,15 @@
     "backend/tests/fixtures/printograph_native_proof_badge/proof-badge-class.js.txt": "2cdec19b9c685ce92a00f73f22509f91384b98de7c699a58cf731526fd669cf4",
     "backend/tests/fixtures/printograph_native_proof_badge/proof-label-render.js.txt": "272ba65e3980daaf5c8a7717a573f51a439b2f405157734a41ca934de228ab5d",
     "backend/tests/fixtures/printograph_native_proof_badge/proof-schema.js.txt": "8ef67e3d0bb63721809faa8beb855192e787fe8f78170a1d4960431fd09e7bbb",
+    "backend/tests/fixtures/printograph_price_dependencies/source-proof.json": "7e3812359c6b25b6037391e7b65c7bd1b7e61e9cbf0b37598127c39881185269",
+    "backend/tests/fixtures/printograph_price_dependencies/source/generic-api-post.js": "369d4db05b2b6d183027426007d3a53983d1fec1e8f5c5274ce4970bb316e274",
+    "backend/tests/fixtures/printograph_price_dependencies/source/generic-parameters.js": "03c3b858d5019da999827a9d9d06c70d982cc6b667e8a1d5b56e3e889448e1e3",
+    "backend/tests/fixtures/printograph_price_dependencies/source/generic-price-applier.js": "17bf71c0b6f06d57d2ff7c296657c400b8fd037be05d6e7c93f0f19eb8f3e245",
+    "backend/tests/fixtures/printograph_price_dependencies/source/generic-price-builder.js": "22c76e15cab2f7d5777d674aa6ceaca8181a4650239804d1cb7888af80239066",
+    "backend/tests/fixtures/printograph_price_dependencies/source/manifest.json": "af3b601a9c31a929bf741a54a9e045e5ed0d81f0c430a7d1ce0080a60f27b3a9",
+    "backend/tests/fixtures/printograph_price_dependencies/source/native-options.js": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776",
+    "backend/tests/fixtures/printograph_price_dependencies/source/native-turnaround-builder.js": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
+    "backend/tests/fixtures/printograph_price_dependencies/source/type10019-fields.js.txt": "2439766da75d8db525988b5e8161cfff436f81d84d10eafb5e1a3243f46848c8",
     "backend/tests/fixtures/printograph_production_cache/manifest.json": "2f9a2ad00a88fb143ec46210901ddadf92a54c6b21dc7a6c56d4cb517fc42636",
     "backend/tests/fixtures/printograph_production_cache/native-component-data.js": "0f5db396a11d70e9a694d70fc448d0ad431c7ec36189b33b5aab525bcf02479c",
     "backend/tests/fixtures/printograph_production_cache/native-get-turnaround.js": "94442ac9877d74372ae69251751e111e0bc29a657442c0c3c5782708d4b67d45",
@@ -277,6 +285,7 @@
     "backend/tests/fixtures/printograph_production_cache/native-process-turnaround.js": "030dab64e16d5fec7caccfe6348592ffb75a1b4d37efb8f7a0917150614cb5d0",
     "backend/tests/fixtures/printograph_production_cache/native-turnaround-builder.js": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
     "backend/tests/fixtures/printograph_production_cache/saved-projections.json": "4abe4395d8e17b9e8ddebd00551e1e500590b0f075c378fe952d1514b06c19c6",
+    "backend/tests/fixtures/printograph_retained_services/native.html": "dd6d3f83e0ce61bcc2e3a5263697c1a7d90ef1016bef519a0fa4079dd972efe6",
     "backend/tests/fixtures/printograph_standard_tables.json": "45591d77971bc34587f6ae7117b44236a38b82afd582d09bd0a20b5e7e26330c",
     "backend/tests/fixtures/printograph_turnaround_options/get-stateless.js.txt": "bca7f98e8e29c48d74f9dad960723a5e4202a9c6a02d25db87195e2a79c3f53c",
     "backend/tests/fixtures/printograph_turnaround_options/manifest.json": "da268e2a69c7ca9a30a88cde57fca1e7e0402c53830c7d499350c7fd3b0c7bfa",
@@ -289,6 +298,7 @@
     "backend/tests/fixtures/printograph_turnaround_options/update-options.js.txt": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776",
     "backend/tests/fixtures/printograph_type39_computed.json": "bdc742243b428a7207632c7e5e90b76b840dac1924adf880b60ed454d55df5a7",
     "backend/tests/fourover_observer_fixture.py": "9161e94fa86cca0ff0b33c2a2df2a6ba3531ec0b025a363523603a75fc3eaf71",
+    "backend/tests/printograph_price_dependency_support.py": "bd88db0e9184fe85deb801b5a8491653758b0c721b2e35326eeb9cc6d7f6dc33",
     "backend/tests/test_alternate_supplier_completion.py": "3c2ba8a748ff746ba932fafb66516c00d270b0ecc7e603ae3b48d27827e458e9",
     "backend/tests/test_api.py": "1dc03785f92e40d6d82046451629542a29367c861e188dcbf364459bbbd3a3bd",
     "backend/tests/test_audit_recovery.py": "271eb5ee6e3bce3043dbd307e483c0bca09bf03d945ccccbd182e6c2f1e492f5",
@@ -405,14 +415,18 @@
     "backend/tests/test_printograph_modern_layout.py": "2e44866069c8d632891fd7509a068a9da9e6d1f4f0671c91df5544d21a80d412",
     "backend/tests/test_printograph_modern_post_prices.py": "bbc3c2d3fbfbb8b438763cd527e24e1cfa85131de6aa06eb4a2a48297e47edae",
     "backend/tests/test_printograph_native_availability_reference.py": "79a2465191809c64b0a598058f021bbb7960bf57acd93ca9a807dc7ee69f6224",
+    "backend/tests/test_printograph_native_cache_source.py": "c842b082b83b176d738fa0eb3349197822859302f69dd70886298006d5b8856c",
     "backend/tests/test_printograph_native_core_color_mapping.py": "4ae599a91ce60d0e9653513b648b52ebbdc33295f95d3e70b672099a5ea4deb9",
     "backend/tests/test_printograph_native_proof_badge.py": "8d6cea862d9f98a393474e423a8e45fc6332d2fcb9097ce0c97c4894883d07f6",
     "backend/tests/test_printograph_numeric_service_ids.py": "1f9f218155d5f979f8282c30b2c70d07810899687101b586c5d2942b591ef04e",
     "backend/tests/test_printograph_passive_manager.py": "83a87709566f4853da6d653270d54eb5c105acb2e3fddd3d98c6919e2a66183e",
     "backend/tests/test_printograph_passive_price_api.py": "d71f198de0ca808ab318aaf86e0b28c5bcf8d8c2af11e8fe62443a624c58a81e",
+    "backend/tests/test_printograph_price_dependencies.py": "f71b29b1225a88571c0a53671560a233375ae4f071a2d9906e4fa17ab11c728d",
     "backend/tests/test_printograph_price_journal.py": "bbc69b27769f1237d3a4a63e006687cfd051a2cc4be15f8f93f4a3c5db024ec7",
     "backend/tests/test_printograph_production_cache.py": "0b09aa0cd996a9f224704910b89593fd662638b891bfcbe490d0a53fcda6b387",
     "backend/tests/test_printograph_raised_quote.py": "fd8e61f114d5796f09c9de425a180926f64d412444d14a09c1171a3e821d8b7b",
+    "backend/tests/test_printograph_retained_services.py": "bd58c343cca13a283f1da4b07600bb8eb838041c0dcad6992c36756f83065e2a",
+    "backend/tests/test_printograph_retained_services_native.py": "af08813e19fe6b99055b23ca1c9afcafba7fef50cae1ac33db9857da36553a8e",
     "backend/tests/test_printograph_rows.py": "6e77cf1b81748b8f9250a9ad69b8765742d8e9de149186841c7c25b794ac50c2",
     "backend/tests/test_printograph_source_references.py": "5849dfceb3a353f1baf39b989bdfc2bb7300476af5579f094008c8ea0daa9d97",
     "backend/tests/test_printograph_source_references_api.py": "50ed882d9cde6417cfeaeee253e46afa15fb23855559a46a61506fbc1a03f194",
@@ -454,7 +468,7 @@
     "backend/tests/test_worker_capacity.py": "7b26d8e3dc9b4e7f52c31ad8a822c84b21e26a0205ce38e6b305ce9446330d46",
     "backend/tests/test_worker_capacity_ui.py": "232c7e7cb14a3f059b6c1580a5f8ae9e2955feb6b37f5f576ccef58a5299c6b1",
     "docker-compose.yml": "aab9ce215f3c66d4dbb36398b8120a6199d41df418763d2b547b74d4697dfd1b",
-    "docs/AUTOMATIC-COLLECTION.md": "edff84b437affd0c3847ac9b734ff5a4cdd32d936597174e531b48d9da41dd94",
+    "docs/AUTOMATIC-COLLECTION.md": "c9baf969aabc220afef3c92113409e825ac724c83a2678ef12b6c77638d93e0f",
     "docs/architecture.md": "5af043e488048b71d5d9395e924c1ae7a048c2befeec84106371d95c0c4711c0",
     "docs/audit-dashboard.md": "8815ea70ecf5b766849ab2f1043e35197914412975761f712345e88835ac7dd8",
     "docs/audit-pricing.md": "f066b0d5f1bb7cf084eac251ff07190cac7fe886f18134be991a6ea3fc77edd5",
@@ -553,5 +567,32 @@
     "scripts/plan_printograph_discovery.py": "6e4c59d4c4fe7bb1405ac535cf44ad74e68d0c152be281e75dc8c08a1746ebf5",
     "scripts/probe_printograph.py": "6dc33b61973816f099da1a9427ed5856b3a8bb381e92dfeabca1b82ce0db4bbb",
     "scripts/start-local.sh": "736a02f6c56b3d4426ce7144eea92d1eaf18f6f2e6fa6a00e90eb9024a008baf"
+  },
+  "prior_release_validation": {
+    "core_regression": {
+      "modules": 25,
+      "tests_passed": 691,
+      "subtests_passed": 38,
+      "failures": 0,
+      "errors": 0
+    },
+    "supplemental_regression": {
+      "tests_verified": 676,
+      "initial_passes": 601,
+      "loopback_replays_passed": 75,
+      "failures_remaining": 0,
+      "errors_remaining": 0,
+      "note": "The first run overblocked75 local Chromium fixtures. All passed with exact loopback-only isolation; one cache test required preserving the fixture HTTP cache."
+    },
+    "frontend": "TypeScript and Vite build passed",
+    "fixture_provenance": "Public source excerpt hashes retained; price tables are explicitly synthetic."
+  },
+  "optimization_scope": {
+    "base_price_reuse": "Exact Cardboards10016 and Acrylic10019 native price-request properties plus observed process type, source URL/type and explicit service policy; current availability, production and displayed totals remain checked.",
+    "retained_service_inspections": "One atomic read instead of six when all requested service choices are already correctly retained.",
+    "full_cartesian_traversal_removed": false,
+    "live_end_to_end_speed_multiplier_claimed": false,
+    "cross_page_price_reuse": false,
+    "completion": "Unique valid configuration identities and complete required evidence; raw row count alone is insufficient."
   }
 }

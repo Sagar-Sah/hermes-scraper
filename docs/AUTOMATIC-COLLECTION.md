@@ -33,6 +33,32 @@ shipping. Quote samples and partial exports are not WooCommerce imports. Product
 finalization and deployment remain separate from automatic collection; preserve
 the coverage and source evidence supplied with each result.
 
+## Reusing data and checking completion
+
+Hermes inspects native form data and captured network responses programmatically.
+It uses ordinary form controls when a retained selection still needs validation.
+Staggered Cut Flyers already reuses full quantity price tables within a branch.
+For Cardboards and Acrylic Boards, base-price tables are now grouped by the
+supplier's exact price-request inputs and process type, with source and service
+scope retained. A price table can cover multiple option IDs without merging their
+separate configurations. Availability and production keep their own checks.
+
+When the required service choices are already selected, one atomic inspection
+replaces six repeated service inspections. This is a reduction in inspection
+roundtrips, not a measured sixfold improvement in total collection time. Neither
+optimization removes the entire visible-control traversal.
+
+An expected row count is exact only after the valid option domain is known.
+Multiplying dropdown lengths works for independent finite choices; conditional
+choices require their dependency rules. Custom dimensions may have no finite
+row count. Equal sampled totals do not prove that a field never affects price.
+
+Track unique configuration identities as well as counts. A matching count can
+still contain a duplicate and omit another configuration. Completion requires
+every expected valid identity to have the required evidence, with no unexplored
+branches or unresolved blockers. Reused pricing evidence keeps its origin and
+dependency hashes; it does not turn partial coverage into a finalized product.
+
 For a new installation, follow the main README's setup instructions. Keep existing
 data and browser profiles when updating. The software release archive deliberately
 does not include accounts, passwords, browser sessions or the local campaign database.

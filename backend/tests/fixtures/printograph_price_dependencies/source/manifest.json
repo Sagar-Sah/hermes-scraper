@@ -1,0 +1,12 @@
+{
+  "schema": "exact-public-native-generic-price-dependency-source/v1",
+  "files": {
+    "generic-api-post.js": "369d4db05b2b6d183027426007d3a53983d1fec1e8f5c5274ce4970bb316e274",
+    "generic-parameters.js": "03c3b858d5019da999827a9d9d06c70d982cc6b667e8a1d5b56e3e889448e1e3",
+    "generic-price-applier.js": "17bf71c0b6f06d57d2ff7c296657c400b8fd037be05d6e7c93f0f19eb8f3e245",
+    "generic-price-builder.js": "22c76e15cab2f7d5777d674aa6ceaca8181a4650239804d1cb7888af80239066",
+    "native-options.js": "6cc21724b9e0aa57f83cfc9251d3b3684ad21ac89ead16e33b06bee27d83a776",
+    "native-turnaround-builder.js": "ce2acb9371acca39db072fef52fb91717828f0a179368d7f589a95808f0bf738",
+    "type10019-fields.js.txt": "2439766da75d8db525988b5e8161cfff436f81d84d10eafb5e1a3243f46848c8"
+  }
+}
