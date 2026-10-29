@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Hermes Product Companion Connector
  * Description: Scoped previews, audited source-cost CSV writes and rollback for the Print It custom calculator.
- * Version: 0.2.1
+ * Version: 0.2.2
  * Requires PHP: 8.1
  * Requires Plugins: woocommerce
  */
 defined('ABSPATH') || exit;
 
 final class Hermes_Product_Companion {
-    const VERSION = '0.2.1';
+    const VERSION = '0.2.2';
     const DOC_META = '_hermes_companion_documents';
     const CONFIG = 'hermes_companion_connection';
     const MAX_BYTES = 8388608;

@@ -1,4 +1,4 @@
-# Hermes Product Companion Connector 0.2.1
+# Hermes Product Companion Connector 0.2.2
 
 This WordPress plugin connects the Print It custom CSV calculator to Hermes.
 It updates source-cost data in `wp-content/uploads/wcdcp/{product_id}-printit.csv`.
@@ -62,7 +62,12 @@ namespaces. Invalid tokens and production connections keep normal WordPress
 authentication behavior.
 
 - `GET /catalog?page=1&per_page=100` returns only published products through a
-  bounded ID query, without loading calculator profiles or prices. It requires
+  bounded, prepared, read-only query of WordPress's core posts table, without
+  loading calculator profiles or prices. The ID query fixes `post_type=product`,
+  `post_status=publish` and `ORDER BY ID ASC`; WooCommerce product-query filters
+  cannot silently change that inventory order. The core table identifier is
+  validated, and count, identity and page-cardinality checks remain strict.
+  It requires
   a read-all environment token or the existing WooCommerce admin permission.
   The response is `{schema: "hermes-companion-catalog/v1", site_origin,
   environment, items: [{id, name, permalink, categories: [{id, name}]}], page,

@@ -8,7 +8,17 @@ function get_option($key,$default=false){return $GLOBALS['options'][$key]??$defa
 function current_user_can(...$args){return $GLOBALS['admin'];}
 function add_action(...$args){}
 function add_filter(...$args){}
-function wc_get_products($query){$GLOBALS['calls'][]=$query;return $GLOBALS['query'];}
+function wc_get_products($query){throw new RuntimeException('Filtered Woo product inventory must not be used by published catalog');}
+class CatalogDatabaseFixture {
+ public $prefix='wp_';public $posts='wp_posts';public $last_error='';
+ function prepare($sql,...$args){
+  $GLOBALS['calls'][]=['prepare',$sql,$args];$index=0;
+  return preg_replace_callback('/%[sd]/',function($match)use($args,&$index){$value=$args[$index++];return $match[0]==='%d'?(string)(int)$value:"'".str_replace("'","''",$value)."'";},$sql);
+ }
+ function get_var($sql){$GLOBALS['calls'][]=['get_var',$sql];return $GLOBALS['query']->total;}
+ function get_col($sql){$GLOBALS['calls'][]=['get_col',$sql];return $GLOBALS['query']->products;}
+}
+$GLOBALS['wpdb']=new CatalogDatabaseFixture();
 function get_permalink($id){return $GLOBALS['bad_url']?'https://unrelated.example.org/shop/item/':$GLOBALS['origin'].'/shop/item-'.$id.'/';}
 function wc_get_product($id){
  if($GLOBALS['missing']===$id)return false;
@@ -44,18 +54,25 @@ token();query(range(101,200),201,3);
 $first=E::catalog();
 ok($first['schema']==='hermes-companion-catalog/v1'&&$first['site_origin']===$GLOBALS['origin']&&$first['environment']==='production','catalog identifies exact published-site contract');
 ok(count($first['items'])===100&&$first['page']===1&&$first['total']===201&&$first['pages']===3&&$first['next_cursor']===2,'full published page preserves total and next cursor');
-ok($GLOBALS['calls'][0]===['limit'=>100,'page'=>1,'paginate'=>true,'return'=>'ids','orderby'=>'ID','order'=>'ASC','status'=>'publish'],'query fetches published IDs only in stable ascending order');
+ok($GLOBALS['calls'][0]===['prepare','SELECT COUNT(*) FROM `wp_posts` WHERE post_type = %s AND post_status = %s',['product','publish']],'count is a prepared readonly core-posts query restricted to published products');
+ok($GLOBALS['calls'][2]===['prepare','SELECT ID FROM `wp_posts` WHERE post_type = %s AND post_status = %s ORDER BY ID ASC LIMIT %d OFFSET %d',['product','publish',100,0]],'core ID query fixes ascending order and prepared100-row limit independently of Woo filters');
+ok($GLOBALS['calls'][3]===['get_col',"SELECT ID FROM `wp_posts` WHERE post_type = 'product' AND post_status = 'publish' ORDER BY ID ASC LIMIT 100 OFFSET 0"],'only readonly published product IDs are executed');
 ok(array_keys($first['items'][0])===['id','name','permalink','categories']&&$first['items'][0]['id']===101,'catalog does not load or return calculator data or prices');
 ok($first['items'][0]['categories']===[['id'=>9,'name'=>'Standard Print'],['id'=>15,'name'=>'Postcards']],'public product categories use stable safe IDs and names');
-ok(E::capabilities()['published_catalog']===true&&C::VERSION==='0.2.1','capability and connector build advertise published catalog');
+ok(E::capabilities()['published_catalog']===true&&C::VERSION==='0.2.2','capability and connector build advertise published catalog');
 query(range(201,300),201,3);$second=E::catalog('2','100');ok(count($second['items'])===100&&$second['next_cursor']===3,'query-string integer pagination remains supported');
+ok(end($GLOBALS['calls'])[1]==="SELECT ID FROM `wp_posts` WHERE post_type = 'product' AND post_status = 'publish' ORDER BY ID ASC LIMIT 100 OFFSET 100",'second page uses a prepared100-row offset');
 query([301],201,3);$last=E::catalog(3);ok(count($last['items'])===1&&$last['next_cursor']===null,'final partial page has exact cardinality and no next cursor');
+ok(str_ends_with(end($GLOBALS['calls'])[1],'LIMIT 100 OFFSET 200'),'final page uses its exact prepared offset');
 query([],0,0);$empty=E::catalog();ok($empty['items']===[]&&$empty['pages']===1&&$empty['next_cursor']===null,'empty published catalog has one terminal empty page');
 foreach([0,-1,1.5,true,'01','1.5','1e2','2suffix',[]]as$page)rejects(fn()=>E::catalog($page),'noncanonical page value is rejected');
 foreach([99,101,100.0,true,'0100','100suffix',[]]as$limit)rejects(fn()=>E::catalog(1,$limit),'per-page limit cannot change from100');
 query([],0,0);rejects(fn()=>E::catalog(2),'out-of-range empty page cannot fabricate a later cursor');
 query(range(101,199),201,3);rejects(fn()=>E::catalog(),'short nonterminal query page is not silently treated as complete');
-query(range(101,200),201,2);rejects(fn()=>E::catalog(),'inconsistent page-count metadata is rejected');
+foreach([null,false,-1,1.5,'01','1e3','201suffix']as$total){query([], $total,0);rejects(fn()=>E::catalog(),'invalid authoritative count is rejected');}
+query([101],'1',1);ok(E::catalog()['total']===1,'native WordPress numeric-string count is supported');
+foreach(['wp_posts; DROP TABLE customers','wp.posts','`wp_posts`','wp_posts--','wp_users',[]]as$table){$before=count($GLOBALS['calls']);$GLOBALS['wpdb']->posts=$table;rejects(fn()=>E::catalog(),'unsafe or noncore posts table identifier is rejected');ok(count($GLOBALS['calls'])===$before,'invalid table identifier sends no SQL');}
+$GLOBALS['wpdb']->posts='wp_posts';$GLOBALS['wpdb']->last_error='synthetic database failure';rejects(fn()=>E::catalog(),'database failures cannot certify an empty inventory');$GLOBALS['wpdb']->last_error='';
 query([101,101],2,1);rejects(fn()=>E::catalog(),'duplicate product IDs cannot appear as distinct inventory');
 query([102,101],2,1);rejects(fn()=>E::catalog(),'out-of-order product IDs require review');
 query([101],1,1);$GLOBALS['missing']=101;rejects(fn()=>E::catalog(),'missing product is not skipped');$GLOBALS['missing']=null;

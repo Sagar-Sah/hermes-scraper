@@ -172,16 +172,30 @@ final class Hermes_Companion_Environment_API {
             ||(!is_int($per_page)&&!is_string($per_page))||(string)$per_page!=='100')throw new InvalidArgumentException('Invalid published catalog pagination.');
         $cfg=self::credential();
         if(!current_user_can('manage_woocommerce')&&($cfg===false||empty($cfg['all_products_read'])))throw new RuntimeException('Full catalog read permission is required.');
-        if(!function_exists('wc_get_products')||!function_exists('wc_get_product'))throw new RuntimeException('Published catalog is unavailable.');
+        global $wpdb;
+        if(!function_exists('wc_get_product')||!is_object($wpdb)||!is_callable([$wpdb,'prepare'])
+            ||!is_callable([$wpdb,'get_var'])||!is_callable([$wpdb,'get_col'])||!is_string($wpdb->posts??null)
+            ||!is_string($wpdb->prefix??null)||!preg_match('/^[A-Za-z0-9_]{0,187}$/D',$wpdb->prefix)
+            ||$wpdb->posts!==$wpdb->prefix.'posts'||!preg_match('/^[A-Za-z0-9_]{1,192}$/D',$wpdb->posts))throw new RuntimeException('Published catalog authority is unavailable.');
         $page=(int)$page;
-        $query=wc_get_products(['limit'=>100,'page'=>$page,'paginate'=>true,'return'=>'ids','orderby'=>'ID','order'=>'ASC','status'=>'publish']);
-        if(!is_object($query)||!is_array($query->products??null)||!is_int($query->total??null)||$query->total<0
-            ||!is_int($query->max_num_pages??null))throw new RuntimeException('Published catalog schema changed.');
-        $total=$query->total;$pages=max(1,(int)ceil($total/100));
-        if($page>$pages||!in_array($query->max_num_pages,[$pages,$total===0?0:$pages],true)
-            ||count($query->products)!==max(0,min(100,$total-($page-1)*100)))throw new RuntimeException('Published catalog page coverage is incomplete.');
+        // Core posts authority avoids Woo product-query ordering/visibility
+        // filters. The sole table identifier is the validated core posts table;
+        // every value (including the bounded limit/offset) is prepared. These
+        // two SELECTs cannot enumerate orders, customers or other post types.
+        $table='`'.$wpdb->posts.'`';
+        $count_sql=$wpdb->prepare("SELECT COUNT(*) FROM $table WHERE post_type = %s AND post_status = %s",'product','publish');
+        if(!is_string($count_sql))throw new RuntimeException('Published catalog query could not be prepared.');
+        $count=$wpdb->get_var($count_sql);
+        if(!empty($wpdb->last_error)||(!is_int($count)&&!is_string($count))||!preg_match('/^(?:0|[1-9][0-9]{0,11})$/D',(string)$count)
+            ||filter_var($count,FILTER_VALIDATE_INT,['options'=>['min_range'=>0]])===false)throw new RuntimeException('Published catalog count is unavailable.');
+        $total=(int)$count;$pages=max(1,(int)ceil($total/100));
+        if($page>$pages)throw new RuntimeException('Published catalog page coverage is incomplete.');
+        $ids_sql=$wpdb->prepare("SELECT ID FROM $table WHERE post_type = %s AND post_status = %s ORDER BY ID ASC LIMIT %d OFFSET %d",'product','publish',100,($page-1)*100);
+        if(!is_string($ids_sql))throw new RuntimeException('Published catalog query could not be prepared.');
+        $ids=$wpdb->get_col($ids_sql);
+        if(!empty($wpdb->last_error)||!is_array($ids)||count($ids)!==max(0,min(100,$total-($page-1)*100)))throw new RuntimeException('Published catalog page coverage is incomplete.');
         $items=[];$previous=0;
-        foreach($query->products as$id){
+        foreach($ids as$id){
             if((!is_int($id)&&!is_string($id))||!preg_match('/^[1-9][0-9]{0,11}$/D',(string)$id)||(int)$id<=$previous)throw new RuntimeException('Published catalog IDs are invalid or duplicated.');
             $id=(int)$id;$previous=$id;$product=wc_get_product($id);
             if(!$product||!is_callable([$product,'get_status'])||$product->get_status()!=='publish'
