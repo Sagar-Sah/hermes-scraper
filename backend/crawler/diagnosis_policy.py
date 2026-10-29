@@ -135,7 +135,7 @@ def normalize_selection(diagnosis, submitted_revision, submitted_fields):
                  "disabled": raw.get("disabled", False), "multiple": raw.get("multiple", False),
                  "choices": [], "selected_values": None,
                  **{bound: raw.get(bound) for bound in ("min", "max", "step")}}
-        for source_key in ("source_name", "source_id", "source_key", "binding_kind", "value_origin"):
+        for source_key in ("source_name", "source_id", "source_data_id", "source_key", "binding_kind", "value_origin"):
             if source_key in raw:
                 if raw[source_key] is not None and not isinstance(raw[source_key], str):
                     raise SelectionPolicyError(f"Invalid source binding: {label}")

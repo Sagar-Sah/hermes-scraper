@@ -179,6 +179,28 @@ async def test_discovery_only_uses_one_document_and_never_prices(collector):
 
 
 @pytest.mark.asyncio
+async def test_hidden_tiers_are_not_limited_to_seven_and_domains_remain_per_child(collector):
+    service, state = collector
+    state["children"] = ("101", "102")
+    quantities = [100, 250, 500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 100000]
+    state["bodies"] = {
+        "101": json.dumps([{"packagePrices": [{"qty": q, "price": 10 + i}
+                         for i, q in enumerate(quantities)], "tierPrices": []}]).encode(),
+        "102": b'[{"packagePrices":[{"qty":250,"price":12}],"tierPrices":[]}]',
+    }
+    result = await service.collect(SNAPSHOT, URL, ["101", "102"], request_budget=3, scope=SCOPE)
+    coverage = result["quantity_coverage"]
+    assert coverage["quantities_by_child"]["101"]["package_quantities"] == quantities
+    assert coverage["quantities_by_child"]["102"]["package_quantities"] == [250]
+    assert coverage["table_children_complete"] is True
+    assert coverage["presentation_limit_applied"] is False
+    assert coverage["expanded_rendered_domain"] == "unknown"
+    assert coverage["source_domain_complete"] is False
+    assert result["catalog_complete"] is result["final_eligible"] is False
+    assert state["children_sent"] == ["101", "102"]
+
+
+@pytest.mark.asyncio
 async def test_success_is_durable_and_resume_does_not_repeat_children(collector):
     service, state = collector
     state["cancel_child"] = "102"

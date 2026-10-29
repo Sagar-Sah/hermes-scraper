@@ -1,5 +1,11 @@
 # Hermes · Product intelligence
 
+The [Autonomous Product Companion guide](docs/AUTONOMOUS-COMPANION.md) explains
+the monthly coordinator, 99-product queues, constrained Muse director, protected
+staging connections and human-approved releases. Scheduling and AI reviews start
+disabled; environment alignment and complete evidence are required before
+supported staging repairs can run.
+
 The [October 25 automatic collection update](UPDATE-2026-10-25.md) adds a resumable,
 AI-free supplier worker and source-specific browser repairs. Its release notes
 describe the verified progress and remaining live integration holds.
@@ -36,6 +42,13 @@ The launcher installs locked dependencies, prepares Playwright Chromium, builds 
 Choose **Update Hermes** in the main header, then **Check for updates**. If a checked release is available, choose **Install tested release**. Hermes waits for finite collection work to finish safely, pauses collection, saves a private database/configuration backup, updates the checked commit from this repository's `main`, rebuilds changed assets and reconnects. Collection stays paused; review queued and held tasks before resuming. The panel retains progress when closed and shows an interrupted or failed update on reopening.
 
 Updates require a clean `main` checkout and a service started with `scripts/start-local.sh`. Local code changes, unowned source work, unknown Git history and an expired update check produce a visible hold. Your collections, supplier sessions and settings remain in the existing data directory. The footer and health endpoint identify the loaded UI and backend builds; **Reload dashboard** loads a newer browser bundle after restart.
+
+For staging preview sign-in, open **Product Companion → Environment baseline and
+release readiness → Staging preview protection**. Enter **Preview username** and
+**Preview password**, then select **Verify staging write connection**. Saved
+fields clear intentionally; check the connection status to confirm verification.
+These are the staging preview credentials, separate from the connector token and
+WordPress login. Leave blank fields unchanged to reuse saved credentials.
 
 An older installation started directly with Uvicorn needs one initial transition: pause collection, wait for active work to finish, stop that Hermes process, update the software, and run `./scripts/start-local.sh` with its existing configuration. Subsequent updates use the dashboard. Advanced direct-Uvicorn development runs remain unmanaged and cannot install updates through the button.
 

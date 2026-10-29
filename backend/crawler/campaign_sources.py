@@ -24,6 +24,7 @@ from urllib.parse import parse_qsl, unquote, urljoin, urlsplit
 import httpx
 from bs4 import BeautifulSoup
 
+from .source_collection_scope import resume_scope, scoped_pages, record_resume_scope
 from .pacing import retry_after_seconds
 from .store import canonical, uid
 from .tls import tls_context
@@ -610,19 +611,23 @@ class SourceCollector:
         self._schedule(job["id"])
         return self.get(job["id"])
 
-    def _schedule(self, job_id):
+    def _schedule(self, job_id, *, urls=None):
         if self._closed:
             raise ValueError("Source collector is stopped")
         if job_id in self._tasks and not self._tasks[job_id].done():
             return
-        task = asyncio.create_task(self._run(job_id))
+        task = asyncio.create_task(self._run(job_id, urls=urls))
         self._tasks[job_id] = task
         task.add_done_callback(lambda done: self._tasks.pop(job_id, None) if self._tasks.get(job_id) is done else None)
 
-    async def resume(self, job_id):
+    async def resume(self, job_id, *, urls=None, max_nodes_per_product=None):
         job = self._load(job_id)
-        if job["status"] != "completed":
-            self._schedule(job_id)
+        selected = resume_scope(job, urls, max_nodes_per_product=max_nodes_per_product)
+        if selected is not None and ((job_id in self._tasks and not self._tasks[job_id].done())
+                                     or self._owner_active(job_id)):
+            raise ValueError("Pause the source collection before a selected-page resume")
+        if job["status"] != "completed" and (selected is None or any(page["status"] != "completed" for page in scoped_pages(job, selected))):
+            self._schedule(job_id, urls=selected)
         return self.get(job_id)
 
     async def pause(self, job_id):
@@ -646,7 +651,7 @@ class SourceCollector:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def _run(self, job_id):
+    async def _run(self, job_id, *, urls=None):
         lock = os.open(self.root / f"{job_id}.lock", os.O_CREAT | os.O_RDWR, 0o600)
         try:
             try:
@@ -654,8 +659,13 @@ class SourceCollector:
             except BlockingIOError:
                 return  # Another collector owns this durable job.
             job = self._load(job_id)
+            selected = resume_scope(job, urls)
+            pages = scoped_pages(job, selected)
+            if selected is not None and all(page["status"] == "completed" for page in pages):
+                return
+            record_resume_scope(job, selected, None, _now())
             job["status"], job["error"] = "running", None
-            for page in job["pages"]:
+            for page in pages:
                 if page["status"] != "completed":
                     page["status"] = "pending"
             self._save(job)
@@ -663,7 +673,7 @@ class SourceCollector:
                 async with httpx.AsyncClient(verify=tls_context(), transport=self.http_transport,
                                              follow_redirects=False, timeout=httpx.Timeout(30),
                                              limits=httpx.Limits(max_connections=1, max_keepalive_connections=1)) as client:
-                    for page in job["pages"]:
+                    for page in pages:
                         if page["status"] == "completed":
                             continue
                         page["status"] = "fetching"
@@ -679,7 +689,7 @@ class SourceCollector:
                         page["status"], page["evidence"] = "completed", evidence
                         page.pop("error", None)
                         self._save(job)  # Durable response before advancing to next URL.
-                job["status"] = "completed"
+                job["status"] = "completed" if all(page["status"] == "completed" for page in job["pages"]) else "attention"
                 self._save(job)
             except asyncio.CancelledError:
                 job["status"] = "paused"

@@ -220,6 +220,24 @@ class FourOverChildPriceCollector:
                 "supplier_total_verified": False, "services_verified": False,
                 "catalog_complete": False, "final_eligible": False,
                 "use": "historical_source_evidence_only_require_fresh_snapshot_for_refresh"}
+        # The source response contains every returned tier, including those
+        # hidden by the page's seven-row Show More presentation. Preserve each
+        # child's own domain; a product-wide union invents invalid combinations.
+        declared = {str(child["child_id"]) for child in job["declared_children"]}
+        observed = {record["child_id"]: record for record in records}
+        result["quantity_coverage"] = {
+            "method": "all_returned_child_price_rows",
+            "presentation_limit_applied": False,
+            "table_children_complete": bool(declared) and set(observed) == declared,
+            "quantities_by_child": {
+                child: {
+                    "package_quantities": [row["quantity"] for row in record["package_prices"]],
+                    "tier_quantities": [row["quantity"] for row in record["tier_prices"]],
+                } for child, record in observed.items()
+            },
+            "expanded_rendered_domain": "unknown",
+            "source_domain_complete": False,
+        }
         if (requested and len(records) == len(requested)) or (not requested and job["declared_children"]):
             result["status"] = "completed_requested_subset" if requested else "discovered_source_children"
             result.pop("error", None)

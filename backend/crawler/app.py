@@ -70,6 +70,9 @@ async def lifespan(app):
     app.state.dps_pilots = None
     app.state.dps_exact_quotes = None
     app.state.campaigns = CampaignManager(store)
+    from .product_companion_service import ProductCompanionService
+    app.state.product_companion = ProductCompanionService(store, app.state.campaigns,
+                                                        browser_pool=engine.browser_pool)
     app.state.fourover_child_prices = None
     app.state.fourover_native_observer = None
     app.state.source_collections = None
@@ -106,42 +109,71 @@ async def lifespan(app):
         store, app.state.campaigns, app.state.product_diagnoses, engine.browser_pool,
         browser_run_callbacks={'create': create_owned_browser_run, 'read': read_owned_browser_run,
             'control': control_owned_browser_run, 'find_owned': find_owned_browser_runs})
+    from .companion_autonomy_integration import IntegratedAutonomousCompanion
+    app.state.autonomous_companion = IntegratedAutonomousCompanion(
+        store, app.state.product_companion, app.state.product_diagnoses)
+    app.state.autonomous_companion.software_identity = runtime_build.snapshot
     from .managed_update import ManagedUpdater
     from .update_routes import drain_for_update, reconcile_interrupted_update
     async def release_update_fences():
         await app.state.campaign_automation.end_maintenance()
         await engine.end_maintenance()
+        await app.state.autonomous_companion.end_maintenance()
+    async def drain_all_for_update():
+        try:
+            await app.state.autonomous_companion.begin_maintenance()
+            return await drain_for_update(app, store)
+        except BaseException:
+            await app.state.autonomous_companion.end_maintenance()
+            raise
     app.state.updater = ManagedUpdater(Path(__file__).resolve().parents[2], store.root,
-        lambda: drain_for_update(app, store), build_snapshot=runtime_build.snapshot,
+        drain_all_for_update, build_snapshot=runtime_build.snapshot,
         release=release_update_fences)
+    pause_after_update = app.state.updater.startup_pause_required()
     await reconcile_interrupted_update(app, store)
     await app.state.campaign_automation.open()
     await engine.start()
-    yield
-    await app.state.campaign_automation.close()
-    await app.state.campaigns.close()
-    if app.state.source_collections is not None:
-        await app.state.source_collections.close()
-    if app.state.b2sign_harvests is not None:
-        await app.state.b2sign_harvests.close()
-    if app.state.b2sign_canaries is not None:
-        await app.state.b2sign_canaries.close()
-    if app.state.pricing_pilots is not None:
-        await app.state.pricing_pilots.close()
-    if app.state.dps_pilots is not None:
-        await app.state.dps_pilots.close()
-    await app.state.product_diagnoses.close()
-    await app.state.source_domains.close()
-    await app.state.domain_sessions.close()
-    await app.state.probes.close()
-    await engine.stop()
+    await app.state.product_companion.start()
+    if pause_after_update:
+        await app.state.autonomous_companion.begin_maintenance()
+    await app.state.autonomous_companion.open()
+    try:
+        yield
+    finally:
+        # One failed close must not strand the new durable coordinator lock or
+        # another supplier's browser. Keep shutdown diagnostics credential-free.
+        failed, cancelled = [], None
+        resources = [(name, getattr(app.state, name, None)) for name in (
+            "autonomous_companion", "product_companion", "campaign_automation", "campaigns",
+            "source_collections", "b2sign_harvests", "b2sign_canaries", "pricing_pilots", "dps_pilots",
+            "product_diagnoses", "source_domains", "domain_sessions", "probes")]
+        for name, resource in resources:
+            if resource is None:
+                continue
+            try:
+                await resource.close()
+            except asyncio.CancelledError as exc:
+                cancelled = exc
+                failed.append(name)
+            except Exception:
+                failed.append(name)
+        try:
+            await engine.stop()
+        except asyncio.CancelledError as exc:
+            cancelled = exc
+            failed.append("engine")
+        except Exception:
+            failed.append("engine")
+        app.state.shutdown_incomplete = failed
+        if cancelled is not None:
+            raise cancelled
 
 
 app = FastAPI(title="Hermes Product Crawler", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PUT"],
     allow_headers=["Content-Type", "Authorization"],
 )
 
@@ -160,6 +192,12 @@ app.include_router(collection_router(lambda: store, authenticated,
     cleanup_guard=lambda: app.state.campaigns.mutation_lock))
 from .update_routes import update_router
 app.include_router(update_router(lambda: app.state.updater, authenticated))
+from .product_companion_routes import companion_router
+app.include_router(companion_router(lambda: app.state.product_companion, authenticated))
+from .autonomous_companion_routes import autonomous_router
+app.include_router(autonomous_router(lambda: app.state.autonomous_companion, authenticated))
+from .companion_autonomy_integration import autonomy_integration_router
+app.include_router(autonomy_integration_router(lambda: app.state.autonomous_companion, authenticated))
 
 
 @app.middleware("http")
@@ -1322,7 +1360,9 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                                  probe_child_id:str|None=None,job_sample:bool=False,
                                  digital_proof:bool=False,turnaround_time:int|None=None,
                                  package_quantity:int|None=None,source_size_value:str|None=None,
-                                 source_stock_value:str|None=None):
+                                 source_stock_value:str|None=None,source_hardware_value:str|None=None,
+                                 source_round_corners_value:str|None=None,observe_shipping_controls:bool=False,select_ground_shipping:bool=False,
+                                 benchmark_destination_zip:str|None=None,benchmark_destination_state:str|None=None):
     """Advance one exact default selection to the shipping calculator, never checkout."""
     from .fourover_probe import PRODUCT_JS
     import re
@@ -1335,15 +1375,31 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                       and p.get('supplier')=='fourover' and p.get('stage')=='queued'),None)
     if not product or product.get('supplier')!='fourover' or product.get('stage')=='excluded':
         raise HTTPException(404,'Mapped 4over product not found')
-    if source_size_value is not None and (product.get('storefront_product_id')!=product_id
+    pinned_real_estate=product_id=='6669' and product.get('supplier_url')=='https://4over.com/real-estate-post'
+    if source_size_value is not None and ((product.get('storefront_product_id')!=product_id and not pinned_real_estate)
             or not re.fullmatch(r'[0-9]{1,12}',source_size_value)):
         raise HTTPException(422,'Source size override is only for a queued supplemental product')
-    if source_stock_value is not None and (product.get('storefront_product_id')!=product_id
+    if source_stock_value is not None and ((product.get('storefront_product_id')!=product_id and not pinned_real_estate)
             or source_size_value is None or not re.fullmatch(r'[0-9]{1,12}',source_stock_value)):
         raise HTTPException(422,'Source stock override requires a queued supplemental product and size')
     source_url=product.get('supplier_url')
+    real_estate_scope=product_id=='6669' and source_url=='https://4over.com/real-estate-post'
+    if (benchmark_destination_zip is not None or benchmark_destination_state is not None) and (
+            not observe_shipping_controls or not re.fullmatch(r'\d{5}',benchmark_destination_zip or '')
+            or not re.fullmatch(r'[A-Z]{2}',benchmark_destination_state or '')):
+        raise HTTPException(422,'A paired benchmark ZIP/state requires guarded passive shipping observation')
+    if select_ground_shipping and not observe_shipping_controls:
+        raise HTTPException(422,'Native Ground selection requires guarded shipping observation')
+    if observe_shipping_controls:
+        from .fourover_real_estate import QUOTE_HTTP_EVENTS
+        if not real_estate_scope or QUOTE_HTTP_EVENTS.get() is None:
+            raise HTTPException(422,'Shipping control observation requires the guarded Real Estate Post exact-quote wrapper')
+    if ((source_hardware_value is not None or source_round_corners_value is not None)
+            and (not real_estate_scope or source_hardware_value!='1078'
+                 or source_round_corners_value not in {'1079','1080'})):
+        raise HTTPException(422,'Pinned Real Estate Post hardware and corner choices required')
     if ((width is None)!=(height is None) or (width is not None and not (1<=width<=1000 and 1<=height<=1000))
-            or not 1<=sets<=10000 or turnaround_time not in (None,1,2)
+            or not 1<=sets<=10000 or turnaround_time not in ((None,1,2,4) if real_estate_scope else (None,1,2))
             or (package_quantity is not None and not 1<=package_quantity<=100000)):
         raise HTTPException(422,'Both bounded dimensions are required')
     target_fields=None
@@ -1382,6 +1438,21 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
     shipping_payloads=[]
     project_payloads=[]
     pending_shipping_shapes=set()
+    source_request_statuses=[]
+    source_http_events=None
+    partial_evidence=None
+    if real_estate_scope:
+        from .fourover_real_estate import QUOTE_HTTP_EVENTS, QUOTE_PARTIAL_EVIDENCE
+        source_http_events=QUOTE_HTTP_EVENTS.get()
+        partial_evidence=QUOTE_PARTIAL_EVIDENCE.get()
+        if partial_evidence is not None:
+            partial_evidence.update(product_id=product_id,sets=sets,width=width,height=height,
+                source_http_events=source_http_events,project_response_shapes=project_response_shapes,
+                shipping_response_shapes=shipping_response_shapes,source_request_statuses=source_request_statuses)
+    def observe_supplier_status(response):
+        if (source_http_events is not None and urlparse(response.url).hostname in {'4over.com','www.4over.com'}
+                and response.status in {429,503}):
+            source_http_events.append({'status':response.status,'retry_after':response.headers.get('retry-after')})
     def safe_shape(value,depth=0):
         if depth>5:return 'depth_limit'
         if isinstance(value,dict):return {str(key)[:80]:safe_shape(item,depth+1) for key,item in list(value.items())[:40]}
@@ -1399,6 +1470,10 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
             if isinstance(parsed,dict) and path=='/print/project/summary/':project_payloads.append(parsed)
         except Exception:body='unreadable';values={}
         record={'method':request.method,'body_shape':body,'safe_values':values}
+        if real_estate_scope:
+            from .fourover_real_estate import project_context
+            try:record['selection_context']=project_context(request.post_data_json)
+            except Exception:record['selection_context']=None
         if path=='/print/shipment/shippingRates/':shipping_request_shapes.append(record)
         else:project_request_shapes.append(record)
     async def response_shape(response):
@@ -1415,22 +1490,59 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                     projected.append({key:item.get(key) for key in ('method_code','method_title','amount',
                                       'available','production_estimate','shipping_time','in_hand_delivery',
                                       'handling_fee')})
+                    if real_estate_scope:
+                        for key in ('carrier_code','carrier_title','carrier_name','carrier'):
+                            if isinstance(item.get(key),str) and len(item[key])<=100:
+                                projected[-1][key]=item[key]
         except Exception:body='unreadable';projected=[]
         if path=='/print/shipment/shippingRates/':
-            shipping_response_shapes.append({'status':response.status,'body_shape':body,'rates':projected})
-        else:project_response_shapes.append({'status':response.status,'body_shape':body,
-                                              'totals':parsed.get('totals') if isinstance(parsed,dict) else None})
+            record={'status':response.status,'body_shape':body,'rates':projected}
+            if real_estate_scope:
+                from .fourover_real_estate import project_context
+                try:record['selection_context']=project_context(response.request.post_data_json)
+                except Exception:record['selection_context']=None
+            shipping_response_shapes.append(record)
+        else:
+            record={'status':response.status,'body_shape':body,
+                    'totals':parsed.get('totals') if isinstance(parsed,dict) else None}
+            if real_estate_scope:
+                from .fourover_real_estate import project_context
+                try:record['selection_context']=project_context(response.request.post_data_json)
+                except Exception:record['selection_context']=None
+                if isinstance(parsed,dict) and isinstance(parsed.get('product_options'),list):
+                    record['product_options']=[{key:str(item.get(key,''))[:300] for key in ('label','value')}
+                        for item in parsed['product_options'][:20] if isinstance(item,dict)
+                        and re.search(r'size|stock|colorspec|drill|grommet|hardware|corner|turnaround',str(item.get('label','')),re.I)]
+            project_response_shapes.append(record)
     def queue_response_shape(response):
         if urlparse(response.url).path not in {'/print/shipment/shippingRates/','/print/project/summary/'}:return
         task=asyncio.create_task(response_shape(response))
         pending_shipping_shapes.add(task)
         task.add_done_callback(pending_shipping_shapes.discard)
     async with app.state.engine.browser_pool.page('https://4over.com',headless=False) as page:
+        blocked_observation_writes=[]
+        if observe_shipping_controls:
+            from .fourover_shipping_observation import forbidden_observation_write
+            async def guard_observation_writes(route):
+                path=urlparse(route.request.url).path
+                if forbidden_observation_write(route.request.method,path):
+                    blocked_observation_writes.append(path)
+                    await route.abort()
+                else:await route.continue_()
+            await page.route('**/*',guard_observation_writes)
+        if real_estate_scope:page.on('response',observe_supplier_status)
         page.on('request',request_shape)
         page.on('response',queue_response_shape)
-        page.on('response',lambda response:routes.append((urlparse(response.url).path,response.status))
-                if response.request.resource_type in {'xhr','fetch'} and
-                urlparse(response.url).hostname in {'4over.com','www.4over.com'} else None)
+        def observe_route_status(response):
+            if (response.request.resource_type not in {'xhr','fetch'}
+                    or urlparse(response.url).hostname not in {'4over.com','www.4over.com'}):return
+            path=urlparse(response.url).path
+            routes.append((path,response.status))
+            if real_estate_scope:
+                from .fourover_real_estate import readiness_http_status
+                safe=readiness_http_status(path,response.status)
+                if safe:source_request_statuses.append(safe)
+        page.on('response',observe_route_status)
         await page.goto(source_url,wait_until='domcontentloaded',timeout=45000)
         if urlparse(page.url).path.rstrip('/')!=urlparse(source_url).path.rstrip('/'):
             raise HTTPException(409,'Supplier page redirected')
@@ -1441,6 +1553,9 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                 409,
                 '4over calculator unavailable in the saved browser session; check supplier sign-in before retrying',
             ) from exc
+        if real_estate_scope:
+            from .fourover_real_estate import wait_for_preconfiguration_readiness
+            await wait_for_preconfiguration_readiness(page)
         snapshot=await page.evaluate(PRODUCT_JS)
         if source_size_value is not None:
             source_size=next((f for f in snapshot['fields'] if f['label'].lower().startswith('size')
@@ -1477,6 +1592,22 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                 await page.locator('#'+field['id']).select_option(choice)
                 await asyncio.sleep(0.12)
                 snapshot=await page.evaluate(PRODUCT_JS)
+        if source_hardware_value is not None:
+            for option_id,requested in (('892',source_hardware_value),('893',source_round_corners_value)):
+                field=next((field for field in snapshot['fields'] if field['name']==f'options[{option_id}]'
+                    and field['id'] and not field['disabled'] and any(choice['value']==requested and not choice['disabled']
+                    for choice in field['choices'])),None)
+                if field is None:raise HTTPException(422,'Requested Real Estate Post custom option unavailable')
+                await page.locator('#'+field['id']).select_option(requested)
+                snapshot=await page.evaluate(PRODUCT_JS)
+                retained=next((item for item in snapshot['fields'] if item['name']==field['name']),{})
+                if retained.get('selected')!=requested or retained.get('disabled'):
+                    raise HTTPException(422,'Real Estate Post custom option did not remain selected')
+        source_selection=[{**{key:field.get(key) for key in ('id','name','label','selected','disabled')},
+                           'selected_label':next((choice['label'] for choice in field['choices'] if choice['value']==field['selected']),None)}
+                          for field in snapshot['fields']] if real_estate_scope else None
+        if partial_evidence is not None:
+            partial_evidence.update(selected_child_id=snapshot.get('selected_child_id'),source_selection=source_selection)
         if not snapshot.get('selected_child_id'):
             raise HTTPException(422,'Default child selection unavailable')
         if child_id is not None and snapshot['selected_child_id']!=child_id:
@@ -1532,20 +1663,71 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
             if await control.is_checked()!=selected:
                 raise HTTPException(422,'Requested service control did not remain selected')
         turnaround_selected_before_shipping=False
-        if turnaround_time is not None:
+        verified_turnaround_before_shipping=None
+        if real_estate_scope and turnaround_time==4:
+            # Commit our own project label before dependent controls are read.
+            # End/Tab supplies ordinary keyup/blur for either KO binding style.
+            project_name=page.locator('input[name="project_name"]')
+            if await project_name.count()==1 and await project_name.is_visible():
+                await project_name.fill('Hermes pricing verification')
+                await project_name.press('End')
+                await project_name.press('Tab')
+            from .fourover_real_estate import select_turnaround_before_shipping, commit_quantity_one_before_turnaround
+            await commit_quantity_one_before_turnaround(page)
+            verified_turnaround_before_shipping=await select_turnaround_before_shipping(page)
+            turnaround_selected_before_shipping=True
+        elif turnaround_time is not None:
             early=page.locator(f'input[name="turnaround_time"][value="{turnaround_time}"]')
             if await early.count()==1 and await early.is_visible() and await early.is_enabled():
                 await early.evaluate('(e) => e.click()')
                 turnaround_selected_before_shipping=await early.is_checked()
                 if not turnaround_selected_before_shipping:
                     raise HTTPException(422,'Requested turnaround did not remain selected')
+        source_content=None
+        if real_estate_scope:
+            source_content=await page.evaluate('''() => {
+              const clean=(text,limit)=>String(text||'').replace(/\\s+/g,' ').trim().slice(0,limit);
+              const cleanNode=(node,limit)=>{
+                if(!node)return '';
+                const copy=node.cloneNode(true);copy.querySelectorAll('script,style,noscript').forEach(e=>e.remove());
+                return clean(copy.textContent,limit);
+              };
+              const details=document.querySelector('.product.info.detailed');
+              const description=document.querySelector('.product.attribute.description');
+              const urls=[...document.querySelectorAll('.column.main a[href]')].map(a=>a.href)
+                .filter(url=>url.startsWith('https://4over.com/media/asset/templates/')&&/\\.(pdf|ai|eps|psd|zip)(?:[?#]|$)/i.test(url));
+              const domImages=[...document.querySelectorAll('.product.media img')].map(img=>img.getAttribute('data-src')||img.src)
+                .filter(url=>String(url||'').startsWith('https://'));
+              const declared=[];let remaining=10000;
+              const walk=(node,depth=0)=>{
+                if(depth>14||--remaining<0||!node||typeof node!=='object')return;
+                if(Array.isArray(node)){node.slice(0,100).forEach(value=>walk(value,depth+1));return;}
+                for(const [key,value] of Object.entries(node)){
+                  if(key==='mage/gallery/gallery'&&value&&Array.isArray(value.data)&&value.data.length<=100){
+                    value.data.forEach(item=>{
+                      if(item&&item.type!=='video'&&typeof(item.full||item.img)==='string'&&(item.full||item.img).startsWith('https://'))
+                        declared.push({full:item.full||item.img,img:typeof item.img==='string'?item.img:null,
+                          thumb:typeof item.thumb==='string'?item.thumb:null,caption:clean(item.caption,300)});
+                    });
+                  }else if(!/account|customer|token|secret|session|password/i.test(key))walk(value,depth+1);
+                }
+              };
+              [...document.querySelectorAll('script[type="text/x-magento-init"],script[type="application/json"]')].slice(0,100)
+                .forEach(script=>{try{walk(JSON.parse(script.textContent||''));}catch(_){}});
+              const images=declared.length?declared.map(item=>item.full):domImages;
+              return {title:clean(document.querySelector('h1.page-title')?.textContent,300),
+                description:cleanNode(description,16000),details_text:cleanNode(details,24000),
+                text_capture_status:'scripts_styles_removed',gallery_capture_status:declared.length?'declared_public_gallery':'dom_only_not_complete_gallery_evidence',
+                template_urls:[...new Set(urls)].slice(0,100),gallery_images:[...new Set(images)].slice(0,100),
+                declared_gallery:declared.slice(0,100)};
+            }''')
         button=page.locator('.column.main button').filter(has_text='Proceed to Shipping')
         try: await button.first.wait_for(state='visible',timeout=6000)
         except Exception: pass
         if await button.count()!=1:
             raise HTTPException(422,'Shipping step unavailable')
         name=page.locator('input[name="project_name"]')
-        if await name.count() and await name.is_visible():
+        if not real_estate_scope and await name.count() and await name.is_visible():
             await name.fill('Hermes pricing verification')
         if width is not None:
             for dimension in ('width','height'):
@@ -1580,12 +1762,27 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
         try:await control.wait_for(state='visible',timeout=10000)
         except Exception:raise HTTPException(422,'Sets control unavailable') from None
         if await control.count()!=1:raise HTTPException(422,'Sets control ambiguous')
-        await control.fill(str(sets))
-        await control.press('Tab')
+        if real_estate_scope:
+            from .fourover_real_estate import enter_set_count
+            await enter_set_count(control,sets)
+        else:
+            await control.fill(str(sets))
+            await control.press('Tab')
         await asyncio.sleep(1)
         set_control=await control.evaluate('''e => ({value:e.value,min:e.min,max:e.max,step:e.step,
           valid:e.checkValidity(),rangeOverflow:e.validity.rangeOverflow,
           rangeUnderflow:e.validity.rangeUnderflow})''')
+        if real_estate_scope:
+            metadata=await control.evaluate('''e => {
+              const clean=value=>String(value||'').slice(0,400);
+              let parent=e.parentElement,wrapper='';
+              for(let i=0;i<3&&parent;i++,parent=parent.parentElement){
+                if(parent.hasAttribute('data-bind')){wrapper=clean(parent.getAttribute('data-bind'));break;}
+              }
+              return {id:clean(e.id),name:clean(e.name),type:clean(e.type),class_name:clean(e.className),
+                data_bind:clean(e.getAttribute('data-bind')),nearest_wrapper_data_bind:wrapper};
+            }''')
+            set_control.update(metadata)
         if await control.input_value() != str(sets):
             raise HTTPException(422,'Supplier rejected requested set count')
         if not set_control['valid']:
@@ -1602,10 +1799,54 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
             if await button.is_visible():
                 await button.click(timeout=10000)
             await asyncio.sleep(1)
-        try:
-            await page.wait_for_function('''() => [...document.querySelectorAll('[class*="subtotal"]')]
-              .some(e=>e.getClientRects().length>0 && /\$\s*\d+[,.]\d{2}/.test(e.textContent||''))''',timeout=12000)
-        except Exception: await asyncio.sleep(1)
+        turnaround_control=None
+        quote_readiness=None
+        benchmark_destination=None
+        if partial_evidence is not None:
+            partial_evidence.update(selected_child_id=snapshot.get('selected_child_id'),source_selection=source_selection,
+                set_control=set_control,source_content=source_content,
+                selected_services={'job_sample':job_sample,'digital_proof':digital_proof})
+        if benchmark_destination_zip is not None:
+            from .fourover_shipping_observation import select_existing_benchmark_destination
+            benchmark_destination=await select_existing_benchmark_destination(page,
+                benchmark_destination_zip,benchmark_destination_state)
+        if real_estate_scope:
+            turnaround_control=await page.evaluate('''() => {
+              const root=document.querySelector('.column.main');
+              const controls=[...(root?.querySelectorAll('input[name="turnaround_time"]')||[])];
+              const checked=controls.filter(e=>e.checked);
+              if(checked.length!==1)return {retained:false,controls_present:controls.length>0};
+              const e=checked[0],label=e.id?root.querySelector(`label[for="${CSS.escape(e.id)}"]`):null;
+              return {value:e.value,retained:!e.disabled,label:String(label?.textContent||e.closest('label')?.textContent||e.parentElement?.textContent||'')
+                .replace(/\\s+/g,' ').trim().slice(0,160)};
+            }''')
+        if (verified_turnaround_before_shipping is not None and turnaround_control
+                and turnaround_control.get('controls_present') is False):
+            # Some source layouts unmount the hidden product step. The final
+            # bound summary still must confirm this exact4-day selection.
+            turnaround_control=verified_turnaround_before_shipping
+        if real_estate_scope:
+            from .fourover_real_estate import wait_for_rendered_quote, selection, SIZE_VALUES, STOCK_VALUES
+            retained={field['name']:field['selected'] for field in source_selection}
+            native_size=next((key for key,value in SIZE_VALUES.items() if value==retained.get('super_attribute[211]')),None)
+            native_stock=next((key for key,value in STOCK_VALUES.items() if value==retained.get('super_attribute[197]')),None)
+            # This source renders Total without a subtotal class. Wait for its
+            # exact project context and displayed money rather than burning
+            # the generic twelve-second CSS timeout on every post quote.
+            if native_size is not None and native_stock is not None and 1<=sets<=200:
+                exact_selection=selection(native_size,native_stock,retained.get('options[893]')=='1080',sets)
+                if select_ground_shipping:
+                    # The native Ground action changes tax and totals again.
+                    # Its final summary+display check below is authoritative.
+                    quote_readiness={'status':'deferred_until_native_ground_selected'}
+                else:
+                    ready=await wait_for_rendered_quote(page,project_response_shapes,exact_selection)
+                    quote_readiness={'status':'matching_summary_and_total' if ready else 'not_ready_before_deadline'}
+        else:
+            try:
+                await page.wait_for_function('''() => [...document.querySelectorAll('[class*="subtotal"]')]
+                  .some(e=>e.getClientRects().length>0 && /\$\s*\d+[,.]\d{2}/.test(e.textContent||''))''',timeout=12000)
+            except Exception: await asyncio.sleep(1)
         if product_id == '6742':
             # 4over can return a nonzero project summary while the shipping
             # step still paints "Price Per Set: $0.00". A zero placeholder is
@@ -1624,6 +1865,21 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                 }''',timeout=8000)
             except Exception:
                 pass
+        shipping_hydration=None
+        selected_ground_service=None
+        source_observation_error=None
+        if observe_shipping_controls:
+            from .fourover_shipping_observation import wait_for_shipping_hydration
+            shipping_hydration=await wait_for_shipping_hydration(page,shipping_response_shapes)
+            if select_ground_shipping:
+                from .fourover_shipping_observation import select_native_ground_shipping
+                try:
+                    selected_ground_service=await select_native_ground_shipping(page,shipping_response_shapes,
+                        project_response_shapes,exact_selection,timeout=20.0)
+                except ValueError as error:
+                    # Capture only the safe final view below before returning a
+                    # held observation; no retry or quote completion follows.
+                    source_observation_error=str(error)
         after=await page.evaluate('''() => {
           const clean=s=>String(s||'').replace(/\\s+/g,' ').trim().slice(0,120);
           const visible=e=>e.getClientRects().length>0;
@@ -1631,7 +1887,7 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
             .map(e=>clean(e.textContent)).filter(Boolean).slice(0,30);
           const amounts=[...document.querySelectorAll('[class*="subtotal"], [data-bind*="subtotal"], [class*="shipping-rate"]')]
             .filter(visible).map(e=>clean(e.textContent)).filter(Boolean).slice(0,20);
-          const money=[...document.querySelectorAll('span, strong, b, div')]
+          const money=[...document.querySelectorAll('span, strong, b, div, li.grand-total')]
             .filter(e=>visible(e) && /\$\s*\d/.test(clean(e.textContent,100)) && clean(e.textContent,100).length<80)
             .map(e=>clean(e.textContent)).filter(Boolean).slice(0,30);
           const fields=[...document.querySelectorAll('input,select')].filter(visible)
@@ -1658,6 +1914,13 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                        if field.get('type')=='number' and field.get('label')=='Sets']
         if rendered_sets and rendered_sets!=[str(sets)]:
             raise HTTPException(422,'Supplier changed requested set count')
+        service_controls=None
+        if real_estate_scope:
+            service_controls=await page.evaluate('''() => Object.fromEntries(['job_sample','digital_proof'].map(name=>{
+              const controls=[...document.querySelectorAll(`input[name="${name}"]`)];
+              return [name,{present:controls.length>0,ambiguous:controls.length>1,
+                checked:controls.length===1?!!controls[0].checked:false}];
+            }))''')
         import re
         canary=None
         amounts=after.get('amounts') or []
@@ -1690,6 +1953,9 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                 amount=re.search(r'\$\s*([0-9,]+\.\d{2})',choice.get('label') or '')
                 if code and amount:
                     selector_rates[code.group(1)]=Decimal(amount.group(1).replace(',',''))
+        if shipping_hydration and shipping_hydration.get('status')=='matched':
+            selector_rates={item['method_code']:Decimal(item['cents'])/100
+                            for item in shipping_hydration['choices']}
         native_rates={}
         if shipping_response_shapes and shipping_response_shapes[-1].get('rates'):
             for rate in shipping_response_shapes[-1]['rates']:
@@ -1778,8 +2044,28 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                                       'same_as_base_rates':same_rates,
                                       'reason':'independent_rendered_target_check_required',
                                       'verification':'not_bound_to_target_configuration'}
-        return {'product_id':product_id,'selected_child_id':snapshot['selected_child_id'],
+        shipping_control_observation=None
+        if observe_shipping_controls:
+            from .fourover_shipping_observation import SHIPPING_CONTROL_OBSERVATION_JS, observation_labels
+            shipping_control_observation=await page.evaluate(SHIPPING_CONTROL_OBSERVATION_JS,
+                observation_labels(shipping_response_shapes))
+            shipping_control_observation['rate_hydration']=shipping_hydration
+            from .fourover_shipping_observation import CURRENT_DESTINATION_JS
+            shipping_control_observation['current_destination']=await page.evaluate(CURRENT_DESTINATION_JS)
+            shipping_control_observation['benchmark_destination']=benchmark_destination
+            shipping_control_observation['selected_ground_service']=selected_ground_service
+            shipping_control_observation['write_guard']={'blocked_paths':blocked_observation_writes,
+                'address_mutations_allowed':False,'cart_or_order_mutations_allowed':False}
+        result={'product_id':product_id,'selected_child_id':snapshot['selected_child_id'],
                 'width':width,'height':height,'sets':sets,'set_control':set_control,
+                'source_selection':source_selection,'turnaround_control':turnaround_control,
+                'source_content':source_content,'service_controls':service_controls,
+                'source_http_events':source_http_events,
+                'source_request_statuses':source_request_statuses,
+                'source_observation_error':source_observation_error,
+                'turnaround_readiness':partial_evidence.get('turnaround_readiness') if partial_evidence is not None else None,
+                'run_size_readiness':partial_evidence.get('run_size_readiness') if partial_evidence is not None else None,
+                'preconfiguration_readiness':partial_evidence.get('preconfiguration_readiness') if partial_evidence is not None else None,
                 'dimension_control':dimension_control,
                 'selected_turnaround_time':turnaround_time,
                 'selected_package_quantity':package_quantity,
@@ -1791,11 +2077,17 @@ async def fourover_shipping_pilot(campaign_id:str,product_id:str,width:int|None=
                 'shipping_response_shapes':shipping_response_shapes[-3:],
                 'project_request_shapes':project_request_shapes[-3:],
                 'project_response_shapes':project_response_shapes[-3:],
+                'quote_readiness':quote_readiness,
                 'shipping_rate_binding':shipping_rate_binding,
                 'shipping_rate_replay':replay,
                 'shipping_rate_option_probe':option_probe,
                 'shipping_view':after,'canary':canary,
                 'scope':'one_default_configuration_no_order_placed'}
+        if observe_shipping_controls:
+            from .fourover_shipping_observation import passive_pilot_projection
+            result['shipping_control_observation']=shipping_control_observation
+            return passive_pilot_projection(result)
+        return result
 
 
 class FourOverGatorExactQuoteRequest(BaseModel):
@@ -1804,6 +2096,123 @@ class FourOverGatorExactQuoteRequest(BaseModel):
     width: int = Field(ge=6, le=36)
     height: int = Field(ge=6, le=36)
     sets: int = Field(ge=1, le=200)
+
+
+class FourOverRealEstatePostExactQuoteRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    size: Literal['18x24','24x30']
+    stock: Literal['pvc_3mm','aluminum_sandwich_3mm']
+    hardware: Literal['white_6ft_gothic_post'] = 'white_6ft_gothic_post'
+    rounded_corners: StrictBool
+    sets: StrictInt = Field(ge=1, le=200)
+    turnaround: Literal['regular_4_business_days'] = 'regular_4_business_days'
+    job_sample: StrictBool = False
+    digital_proof: StrictBool = False
+    require_fresh: StrictBool = True
+    observe_shipping_controls: StrictBool = False
+    select_ground_shipping: StrictBool = False
+    benchmark_destination_zip: StrictStr | None = Field(default=None,pattern=r'^\d{5}$')
+    benchmark_destination_state: StrictStr | None = Field(default=None,pattern=r'^[A-Z]{2}$')
+
+    @model_validator(mode='after')
+    def benchmark_destination_scope(self):
+        if self.select_ground_shipping and (not self.observe_shipping_controls or not self.require_fresh):
+            raise ValueError('Native Ground selection requires fresh guarded shipping observation')
+        if self.benchmark_destination_zip is not None or self.benchmark_destination_state is not None:
+            if (self.benchmark_destination_zip is None or self.benchmark_destination_state is None
+                    or not self.observe_shipping_controls or not self.require_fresh):
+                raise ValueError('Paired benchmark ZIP/state requires fresh passive shipping observation')
+        return self
+
+
+REAL_ESTATE_QUOTE_TIMEOUT=40
+REAL_ESTATE_SHIPPING_OBSERVATION_TIMEOUT=90
+
+
+@app.post('/api/v1/campaigns/{campaign_id}/fourover-real-estate-post-exact-quote/{product_id}',
+          dependencies=[Depends(authenticated),Depends(active_or_supplemental_fourover)])
+async def fourover_real_estate_post_exact_quote(campaign_id:str,product_id:str,
+                                               payload:FourOverRealEstatePostExactQuoteRequest):
+    """One complete-package source quote; every non-child option is retained."""
+    from .fourover_real_estate import (SOURCE, SIZE_VALUES, STOCK_VALUES, selection, summarize, RealEstateQuoteArchive, QUOTE_HTTP_EVENTS, QUOTE_DEADLINE, QUOTE_PARTIAL_EVIDENCE)
+    from .pacing import source_pacing, retry_after_seconds
+    from .transport import RateLimiter
+    if product_id!='6669' or payload.job_sample or payload.digital_proof:
+        raise HTTPException(422,'Only the complete Real Estate Post with services off is supported')
+    if payload.observe_shipping_controls and not payload.require_fresh:
+        raise HTTPException(422,'Passive shipping inspection requires a fresh source observation')
+    campaign=app.state.campaigns.get(campaign_id)
+    product=next((item for item in campaign['products'] if item['id']==product_id),None)
+    if product is None:
+        product=next((item for item in campaign.get('supplemental_product_jobs',[])
+            if item.get('storefront_product_id')==product_id and item.get('stage')=='queued'),None)
+    if not product or product.get('supplier')!='fourover' or product.get('supplier_url')!=SOURCE:
+        raise HTTPException(409,'Pinned Real Estate Post source mapping required')
+    chosen=selection(payload.size,payload.stock,payload.rounded_corners,payload.sets)
+    archive=RealEstateQuoteArchive(store.root)
+    saved=archive.get(campaign_id,chosen)
+    if saved and not payload.require_fresh:
+        return {**saved['quote'],'cache':{'status':'historical_evidence','captured_at':saved['captured_at'],
+            'price_fresh':False,'checkout_eligible':False}}
+    if getattr(app.state,'real_estate_quote_lock',None) is None:
+        app.state.real_estate_quote_lock=asyncio.Lock()
+    async with app.state.real_estate_quote_lock:
+        profile=next((item for item in store.profiles('source')
+            if str(item.get('host',item.get('domain',''))).removeprefix('www.')=='4over.com'),{})
+        rate,concurrency=source_pacing(profile,store.config)
+        limiter=RateLimiter(store)
+        quote_timeout=(REAL_ESTATE_SHIPPING_OBSERVATION_TIMEOUT if payload.observe_shipping_controls else REAL_ESTATE_QUOTE_TIMEOUT)
+        if payload.observe_shipping_controls:
+            # Instance-scoped lease: other jobs keep their existing45s permits.
+            limiter.PERMIT_SECONDS=max(getattr(limiter,'PERMIT_SECONDS',45),quote_timeout+5)
+        async def check_scope():
+            current=active_or_supplemental_fourover(campaign_id,product_id)
+            matched=next((item for item in current['products'] if item['id']==product_id),None)
+            if matched is None:
+                matched=next((item for item in current.get('supplemental_product_jobs',[])
+                    if item.get('storefront_product_id')==product_id and item.get('stage')=='queued'),None)
+            if not matched or matched.get('supplier_url')!=SOURCE:
+                raise ValueError('Real Estate Post source scope changed')
+        token=await limiter.acquire('https://4over.com',rate,concurrency,check_scope)
+        started=time.monotonic();status=0;backoff=0;source_events=[]
+        event_context=QUOTE_HTTP_EVENTS.set(source_events)
+        deadline_context=QUOTE_DEADLINE.set(started+quote_timeout)
+        partial={}
+        partial_context=QUOTE_PARTIAL_EVIDENCE.set(partial)
+        try:
+            async with asyncio.timeout(quote_timeout):
+                pilot=await fourover_shipping_pilot(campaign_id,product_id,sets=payload.sets,
+                    source_size_value=SIZE_VALUES[payload.size],source_stock_value=STOCK_VALUES[payload.stock],
+                    source_hardware_value='1078',source_round_corners_value='1080' if payload.rounded_corners else '1079',
+                    turnaround_time=4,job_sample=False,digital_proof=False,
+                    observe_shipping_controls=payload.observe_shipping_controls,
+                    select_ground_shipping=payload.select_ground_shipping,
+                    benchmark_destination_zip=payload.benchmark_destination_zip,
+                    benchmark_destination_state=payload.benchmark_destination_state)
+            if source_events:
+                raise ValueError('real_estate_supplier_backoff_required')
+            quote=summarize(pilot,chosen)
+            if payload.observe_shipping_controls:
+                quote['shipping_control_observation']=pilot.get('shipping_control_observation')
+                quote['shipping_rates']=pilot.get('shipping_rates',[])
+            record=archive.save(campaign_id,chosen,quote,pilot)
+            status=200
+            return {**quote,'cache':{'status':'new_source_observation','captured_at':record['captured_at'],
+                'price_fresh':True,'checkout_eligible':False}}
+        except ValueError as exc:
+            evidence_id=archive.save_conflict(campaign_id,chosen,pilot if 'pilot' in locals() else partial,str(exc)) if 'pilot' in locals() or partial else None
+            raise HTTPException(409,{'code':str(exc),'evidence_id':evidence_id}) from exc
+        except TimeoutError as exc:
+            evidence_id=archive.save_conflict(campaign_id,chosen,partial or {'source_http_events':source_events},'supplier_quote_time_budget_exhausted')
+            raise HTTPException(409,{'code':'supplier_quote_time_budget_exhausted','evidence_id':evidence_id}) from exc
+        finally:
+            if source_events:
+                status=source_events[-1]['status']
+                backoff=max(retry_after_seconds(item.get('retry_after'),default=30) for item in source_events)
+            QUOTE_HTTP_EVENTS.reset(event_context)
+            QUOTE_DEADLINE.reset(deadline_context)
+            QUOTE_PARTIAL_EVIDENCE.reset(partial_context)
+            await asyncio.to_thread(limiter.release,'https://4over.com',token,time.monotonic()-started,status,backoff,rate)
 
 
 @app.post('/api/v1/campaigns/{campaign_id}/fourover-gator-exact-quote/{product_id}',
@@ -2240,18 +2649,24 @@ def attach_campaign_dps_runtime_review_batch(campaign_id:str,payload:CampaignCom
 class SourceCollectionRequest(BaseModel):
     model_config = {"extra":"forbid"}
     urls:list[str] = Field(min_length=1,max_length=500)
+    profile_id:str|None = Field(default=None,max_length=64)
+    profile_options:dict = Field(default_factory=dict)
 
 
 def source_collector():
     if app.state.source_collections is None:
-        from .campaign_sources import SourceCollector
-        app.state.source_collections=SourceCollector(store)
+        from .source_collection_profiles import SourceCollectionProfiles
+        app.state.source_collections=SourceCollectionProfiles(store,app.state.engine.browser_pool)
     return app.state.source_collections
 
 
 @app.post('/api/v1/source-collections', dependencies=[Depends(authenticated)])
 async def start_source_collection(payload:SourceCollectionRequest):
-    try:return await source_collector().start(payload.urls)
+    try:
+        if payload.profile_id is None and not payload.profile_options:
+            return await source_collector().start(payload.urls)
+        return await source_collector().start(payload.urls,profile_id=payload.profile_id,
+            profile_options=payload.profile_options)
     except ValueError as exc:raise HTTPException(400,str(exc)) from exc
 
 
@@ -2267,9 +2682,24 @@ def get_source_collection(job_id:str,include_data:bool=False):
     except ValueError as exc:raise HTTPException(400,str(exc)) from exc
 
 
+class SourceCollectionResumeRequest(BaseModel):
+    model_config = {"extra":"forbid"}
+    urls:list[StrictStr]|None = Field(default=None,min_length=1,max_length=1000)
+    max_nodes_per_product:StrictInt|None = Field(default=None,ge=1,le=8192)
+
+    @model_validator(mode='after')
+    def selected_budget_only(self):
+        if self.max_nodes_per_product is not None and self.urls is None:
+            raise ValueError('A node-budget increase requires selected page URLs')
+        return self
+
+
 @app.post('/api/v1/source-collections/{job_id}/resume', dependencies=[Depends(authenticated)])
-async def resume_source_collection(job_id:str):
-    try:return await source_collector().resume(job_id)
+async def resume_source_collection(job_id:str,payload:SourceCollectionResumeRequest|None=None):
+    try:
+        if payload is None or (payload.urls is None and payload.max_nodes_per_product is None):
+            return await source_collector().resume(job_id)
+        return await source_collector().resume(job_id,urls=payload.urls,max_nodes_per_product=payload.max_nodes_per_product)
     except (FileNotFoundError,KeyError):raise HTTPException(404,'Source collection not found')
     except ValueError as exc:raise HTTPException(409,str(exc)) from exc
 
@@ -2579,6 +3009,11 @@ class DiagnosisScopedPriceRequest(BaseModel):
     revision: StrictInt
 
 
+class CoroplastObservedBranchRequest(BaseModel):
+    model_config = {"extra": "forbid"}
+    revision: StrictInt = Field(ge=1)
+    selections: dict[StrictStr, StrictStr] = Field(min_length=1, max_length=12)
+
 
 class DiagnosisSourceReferencesRequest(BaseModel):
     model_config = {"extra": "forbid"}
@@ -2779,6 +3214,18 @@ def get_product_diagnosis(diagnosis_id: str):
         raise diagnosis_error(exc) from exc
 
 
+@app.post("/api/v1/product-diagnoses/{diagnosis_id}/b2sign-template-assets",
+          dependencies=[Depends(authenticated)])
+async def collect_b2sign_template_assets(diagnosis_id: str):
+    """Verify only template links already recorded in this B2Sign diagnosis."""
+    from .b2sign_template_assets import collect
+    try:
+        diagnosis = app.state.product_diagnoses.get(diagnosis_id)
+        return await collect(diagnosis, app.state.engine.browser_pool, store)
+    except (LookupError, ValueError, ExtractionError) as exc:
+        raise diagnosis_error(exc) from exc
+
+
 @app.post("/api/v1/product-diagnoses/{diagnosis_id}/refresh", dependencies=[Depends(authenticated)])
 async def refresh_product_diagnosis(diagnosis_id: str):
     try:
@@ -2792,6 +3239,18 @@ async def select_product_observed_choice(diagnosis_id: str, payload: DiagnosisOb
     try:
         return await app.state.product_diagnoses.select_observed_choice(
             diagnosis_id, payload.revision, payload.field_key, payload.value)
+    except (LookupError, ValueError, ExtractionError) as exc:
+        raise diagnosis_error(exc) from exc
+
+
+@app.post("/api/v1/product-diagnoses/{diagnosis_id}/fourover-coroplast-observe",
+          dependencies=[Depends(authenticated)])
+async def observe_coroplast_native_branch(diagnosis_id: str, payload: CoroplastObservedBranchRequest):
+    try:
+        return await app.state.product_diagnoses.configure_coroplast(
+            diagnosis_id, payload.revision, payload.selections)
+    except TimeoutError as exc:
+        raise HTTPException(409, 'coroplast_observation_timeout_no_price_completion') from exc
     except (LookupError, ValueError, ExtractionError) as exc:
         raise diagnosis_error(exc) from exc
 

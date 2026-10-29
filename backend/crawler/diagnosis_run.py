@@ -47,7 +47,7 @@ def _binding(field, *, required):
         return None
     kind = field.get("kind")
     if kind in {"select", "number"}:
-        raw = field.get("source_id") or field.get("source_name")
+        raw = field.get("source_id") or field.get("source_name") or field.get("source_data_id")
     elif kind == "radio":
         raw = field.get("source_name")
     else:
@@ -58,7 +58,8 @@ def _binding(field, *, required):
         if required:
             raise ValueError(f"An observed control name or ID is required: {label}")
         return None
-    base = re.sub(r"_[a-z0-9]{5,}$", "", raw, flags=re.I)
+    data_id_fallback = not field.get("source_id") and not field.get("source_name") and raw == field.get("source_data_id")
+    base = raw if data_id_fallback else re.sub(r"_[a-z0-9]{5,}$", "", raw, flags=re.I)
     normalized = field_key(base)
     if not normalized:
         raise ValueError(f"The observed control has no usable browser key: {label}")
@@ -110,6 +111,8 @@ def compile_browser_policy(diagnosis, urls, adapter, filters):
     for field in policy["fields"]:
         if not field["configurable"]:
             continue
+        if field.get("kind") == "required_text":
+            raise ValueError(f"Required product text cannot be guessed by a browser run: {field['label']}")
         if (field.get("binding_kind") not in {None, "native_control"}
                 or field.get("value_origin") not in {None, "native_value"}
                 or any(choice.get("value_origin") not in {None, "native_value"}

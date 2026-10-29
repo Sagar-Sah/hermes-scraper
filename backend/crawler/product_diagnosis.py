@@ -64,6 +64,16 @@ DIAGNOSIS_JS = r"""() => {
   let roots = [...document.querySelectorAll(scopeSelectors.join(','))].filter(visible);
   if (!roots.length) roots = [document.querySelector('main') || document.querySelector('article')].filter(Boolean);
   const excluded = /(?:password|username|email|e-mail|login|log in|sign in|search|newsletter|subscribe|coupon|promo code|credit card|card number|payment|billing|upload|artwork file|captcha|csrf|token|verification code|security code|one.time|two.factor|\botp\b|\bpin\b|agree|privacy|terms)/i;
+  const parentLabel = e => {
+    for(let n=e,depth=0;n&&depth<3;n=n.parentElement,depth++){
+      const parent=n.parentElement;if(!parent||parent.matches('body,main,form,header,footer,nav'))break;
+      if(parent.querySelectorAll('select,input:not([type="hidden"]),textarea').length!==1)continue;
+      const named=[...parent.children].filter(x=>x!==n&&visible(x)&&x.matches('label,.control-label,.field-label'));
+      const direct=[...parent.childNodes].filter(x=>x.nodeType===3).map(x=>x.textContent).join(' ');
+      const label=clean(named.length===1?named[0].textContent:direct);if(label)return label;
+    }
+    return '';
+  };
   const localLabel = e => {
     const linked = clean([...e.labels || []].map(text).join(' '));
     if (linked) return linked;
@@ -71,16 +81,19 @@ DIAGNOSIS_JS = r"""() => {
     if (labelled) return labelled;
     if (e.getAttribute('aria-label')) return clean(e.getAttribute('aria-label'));
     const wrap = e.closest('.form-group,.field,.form-row,.control-group,[data-field]');
-    return text(wrap?.querySelector('label'));
+    return text(wrap?.querySelector('label')) || parentLabel(e);
   };
-  const controls = [...new Set(roots.flatMap(r=>[...r.querySelectorAll('select,input[type="radio"],input[type="checkbox"],input[type="number"]')]))];
+  const controls = [...new Set(roots.flatMap(r=>[...r.querySelectorAll('select,input[type="radio"],input[type="checkbox"],input[type="number"],input[type="text"],input:not([type]),textarea')]))];
+  const nonProductText='form#commentform,.comment-form,form[action*="wp-comments-post"],.woocommerce-Reviews,.product-reviews,form.product-reviews-form,[data-role="product-review"],.contact-form,.contact-widget,[data-widget="contact"],[data-form-type="contact"],.chat-widget,[data-widget="chat"],[data-role="chat"]';
   const fields = [], groups = new Map();
   let omitted = 0;
   for (const e of controls) {
     if ((!visible(e) && !(['radio','checkbox'].includes(e.type) && [...e.labels || []].some(visible))) || e.closest('header,footer,nav,[role="search"],form[role="search"]')) continue;
     const form = e.closest('form');
     if (form?.querySelector('input[type="password"]')) continue;
-    const kind = e.tagName === 'SELECT' ? 'select' : e.type;
+    const freeText=e.tagName==='TEXTAREA'||e.tagName==='INPUT'&&e.type==='text';
+    if(freeText&&(!e.required&&e.getAttribute('aria-required')!=='true'||e.disabled||e.closest(nonProductText)))continue;
+    const kind = freeText ? 'required_text' : e.tagName === 'SELECT' ? 'select' : e.type;
     const ownLabel = localLabel(e);
     const container = e.closest('fieldset,.form-group,.field,.form-row,.control-group,[data-field]');
     const heading = container?.querySelector('legend,h2,h3,h4,h5,h6,.control-label,.field-label');
@@ -90,7 +103,7 @@ DIAGNOSIS_JS = r"""() => {
     const foilGroup = kind === 'radio' && /^raisedFoilColor\d+$/.test(e.name || '') && !!e.closest('#order-form');
     const sourceName = foilGroup ? 'raisedFoilColor' : e.name || '';
     const label = foilGroup ? 'Foil Colors' : (kind === 'radio' || kind === 'checkbox') ? legend || ownLabel : ownLabel;
-    if (!label || excluded.test([label,e.name,e.id,form?.getAttribute('action')].join(' '))) { omitted++; continue; }
+    if (!label || excluded.test([label,e.name,e.id,e.getAttribute('data-id'),form?.getAttribute('action')].join(' '))) { omitted++; continue; }
     const group = (kind === 'radio' || kind === 'checkbox') && (sourceName || e.closest('fieldset'));
     const groupKey = group ? kind + ':' + (sourceName || legend) : null;
     if (groupKey && groups.has(groupKey)) {
@@ -103,11 +116,14 @@ DIAGNOSIS_JS = r"""() => {
     }
     if (fields.length >= 200) { omitted++; continue; }
     const field = {label,kind,choices:[],selected_values:[],required:!!e.required,disabled:e.matches(':disabled'),multiple:kind==='checkbox'||kind==='select'&&e.multiple,
-      configurable:true,source_key:sourceName || e.id || label,source_name:sourceName,source_id:e.id || ''};
+      configurable:true,source_key:sourceName || e.id || e.getAttribute('data-id') || label,source_name:sourceName,source_id:e.id || '',
+      ...(!sourceName&&!e.id&&e.getAttribute('data-id')?{source_data_id:e.getAttribute('data-id')}: {})};
     if (kind === 'select') {
       field.choices = [...e.options].slice(0,500).map(o=>({value:o.value,label:clean(o.label || o.textContent),disabled:!!o.disabled || !!o.closest('optgroup')?.disabled}));
       field.selected_values = [...e.selectedOptions].slice(0,500).map(o=>o.value);
       if (e.options.length > 500) omitted++;
+    } else if (kind === 'required_text') {
+      field.required=true;field.value_missing=e.validity?.valueMissing===true;
     } else if (kind === 'number') {
       const numeric = s => /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?$/i.test(s || '') && Number.isFinite(Number(s));
       field.selected_values = numeric(e.value) ? [e.value] : [];
@@ -138,10 +154,29 @@ DIAGNOSIS_JS = r"""() => {
   const description = descriptionElement ? clean(descriptionElement.innerText,8000) : '';
   const imageElements = product ? [...product.querySelectorAll('.woocommerce-product-gallery img,[itemprop="image"],.product-image img,.product-images img')].filter(visible) : [];
   const images = imageElements.slice(0,50).map(e=>({url:e.currentSrc || e.src || '',alt:clean(e.alt)}));
+  // Only product-scoped, visible supplier download links. Never inspect the
+  // downloaded file or copy account, upload, search, or footer links.
+  const artwork_templates = [...document.querySelectorAll('#productdownloads a[href],.product-downloads a[href],.product-details a[href],table a[href]')]
+    .filter(visible).slice(0,100).map(a=>{
+      const label=text(a),href=a.getAttribute('href')||'';
+      let target;try{target=new URL(href,location.href);}catch(_){return null;}
+      if(target.protocol!=='https:'||target.username||target.password||target.search||target.hash)return null;
+      const knownWs=(target.hostname==='display-templates.s3.us-west-2.amazonaws.com'&&/^\/(?:PDF|PSB)\/[^/]+\.(?:pdf|ai|eps|zip)$/i.test(target.pathname))
+        ||(target.hostname==='s3-us-west-2.amazonaws.com'&&/^\/display-templates\/(?:PDF|PSB)\/[^/]+\.(?:pdf|ai|eps|zip)$/i.test(target.pathname));
+      const supplierHost=target.hostname===location.hostname;
+      const knownB2=supplierHost&&/^\/downloadable\/[a-f0-9]{40}$/i.test(target.pathname);
+      const namedFile=supplierHost&&/\.(?:pdf|ai|eps|zip)$/i.test(target.pathname);
+      if(!knownWs&&!knownB2&&!namedFile)return null;
+      if(!/template|download|artwork|dieline|die.line/i.test(label+' '+target.pathname))return null;
+      const row=a.closest('tr');return{url:target.href,label:clean(label,80),choice_hint:clean(row?.innerText||'',240)};
+    }).filter(Boolean).slice(0,50);
+  const fileSetupHeading = [...document.querySelectorAll('h2,h3,h4,h5,h6')]
+    .find(e=>visible(e)&&/^(?:file setup|artwork setup|artwork requirements)$/i.test(text(e)));
+  const artwork_setup = fileSetupHeading ? clean(fileSetupHeading.parentElement?.innerText||'',3000) : '';
   const busy = [...document.querySelectorAll('#ajaxLoader,[aria-busy="true"],.loading-overlay,.loading-mask')].some(visible);
   const price_login_required = [...document.querySelectorAll('a,span,p,label,div')].some(e =>
     visible(e) && /(?:please\s+)?(?:log|sign)\s*in\s+to\s+(?:view|see|access)\s+(?:the\s+)?(?:price|prices|pricing)\b|unit price\s*:?\s*please\s+log\s*in/i.test(text(e)));
-  return {title,fields,content:{title,description,images},session_status:price_login_required?'login_required':session_status,price_login_required,omitted,busy,document_ready:document.readyState!=='loading'};
+  return {title,fields,content:{title,description,images,artwork_templates,artwork_setup,source_host:location.hostname},session_status:price_login_required?'login_required':session_status,price_login_required,omitted,busy,document_ready:document.readyState!=='loading'};
 }"""
 
 
@@ -628,12 +663,12 @@ def normalize_snapshot(raw):
 
     fields, keys, unsupported = [], set(), False
     for field in raw.get("fields", [])[:200]:
-        if field.get("kind") not in {"select", "custom_select", "static", "radio", "checkbox", "number"}:
+        if field.get("kind") not in {"select", "custom_select", "static", "radio", "checkbox", "number", "required_text"}:
             continue
         label = clean(field.get("label"))
         if not label:
             continue
-        raw_values = [field.get("source_name", ""), field.get("source_id", ""), field.get("source_key", "")] + [c.get("value", "") for c in field.get("choices", [])[:500]] + list(field.get("selected_values", [])[:500])
+        raw_values = [field.get("source_name", ""), field.get("source_id", ""), field.get("source_data_id", ""), field.get("source_key", "")] + [c.get("value", "") for c in field.get("choices", [])[:500]] + list(field.get("selected_values", [])[:500])
         if any(not isinstance(v, str) or len(v) > 2048 for v in raw_values):
             unsupported = True
             continue
@@ -648,13 +683,17 @@ def normalize_snapshot(raw):
                "selected_values": selected, "required": bool(field.get("required")),
                "disabled": bool(field.get("disabled")), "multiple": field.get("multiple") is True or field["kind"] == "checkbox", "configurable": True,
                "source_name": field.get("source_name", ""), "source_id": field.get("source_id", "")}
+        if not out["source_name"] and not out["source_id"] and field.get("source_data_id"):
+            out["source_data_id"] = field["source_data_id"]
         for metadata, allowed in (("binding_kind", {"display_label_only", "native_control"}),
                                   ("value_origin", {"display_label_surrogate", "native_value"})):
             if field.get(metadata) in allowed:
                 out[metadata] = field[metadata]
         if field.get("warnings") == ["field_label_from_choices"]:
             out["warnings"] = ["field_label_from_choices"]
-        if out["kind"] == "number":
+        if out["kind"] == "required_text":
+            out.update(choices=[], selected_values=[], required=True)
+        elif out["kind"] == "number":
             def numeric(value):
                 return isinstance(value, str) and len(value) < 80 and bool(re.fullmatch(r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?", value)) and abs(float(value)) != float("inf")
             out["selected_values"] = [v for v in selected if numeric(v)]
@@ -676,12 +715,34 @@ def normalize_snapshot(raw):
             images.append({"url": _public_url(url.geturl()), "alt": clean(item.get("alt"))})
         except ValueError:
             continue
-    content = {"title": title, "description": clean(content.get("description"), 8000), "images": images}
+    source_host = content.get('source_host')
+    templates = []
+    for item in content.get('artwork_templates', [])[:50]:
+        try:
+            url = urlsplit(str(item.get('url', '')))
+            if (url.scheme != 'https' or not url.hostname or url.username or url.password or url.query or url.fragment
+                    or len(url.geturl()) > 500 or url.hostname not in {source_host, 'display-templates.s3.us-west-2.amazonaws.com', 's3-us-west-2.amazonaws.com'}
+                    or url.hostname == 's3-us-west-2.amazonaws.com' and not url.path.startswith(('/display-templates/PDF/', '/display-templates/PSB/'))):
+                continue
+            templates.append({'url': _public_url(url.geturl()), 'label': clean(item.get('label'), 80),
+                              'choice_hint': clean(item.get('choice_hint'), 240)})
+        except (ValueError, AttributeError):
+            continue
+    artwork_setup = clean(content.get('artwork_setup'), 3000)
+    explicit_to_size = bool(re.search(r'\b(?:artwork\s+)?built\s+to\s+(?:the\s+)?(?:ordered|final)\s+size\b|\bprint\s+to\s+(?:the\s+)?(?:ordered|final)\s+size\b', artwork_setup, re.I))
+    explicit_no_bleed = bool(re.search(r'\b(?:do\s+not\s+include|no)\s+(?:crop\s+marks\s+or\s+)?bleeds?\b', artwork_setup, re.I))
+    template_status = ('source_links_observed' if templates else
+                       'to_size_no_bleed_exception' if explicit_to_size and explicit_no_bleed else 'unresolved')
+    content = {"title": title, "description": clean(content.get("description"), 8000), "images": images,
+               "artwork_templates": templates,
+               "artwork_setup": artwork_setup,
+               "artwork_template_status": template_status}
     for key, label in (("title", "Product title"), ("description", "Description"), ("images", "Images")):
         if content[key]:
             fields.append({"key": f"content_{key}", "label": label, "kind": "content", "choices": [], "selected_values": [], "required": False, "disabled": False, "multiple": False, "configurable": False})
     status = raw.get("session_status")
     warnings = ["diagnosis_limits_reached"] if raw.get("omitted") or unsupported else []
+    warnings += ["required_free_text_control:" + field["label"] for field in fields if field["kind"] == "required_text"]
     if raw.get('price_login_required') is True:
         warnings.append('supplier_price_login_required')
     warnings += [w for w in raw.get("source_warnings", []) if w in {
@@ -1527,6 +1588,75 @@ class ProductDiagnosisManager(SupplierProfileExecutorMixin):
                     'evidence':evidence,'historical_only':not current,'current_selection_revalidated':False,
                     'source_requests_initiated':0,'source_data_finalized':False,'woocommerce_import_ready':False,'checkout_verified':False}
 
+
+    async def configure_coroplast(self, diagnosis_id, expected_revision, selections):
+        """Observe one explicitly selected branch on the retained 6383 page.
+
+        No price/proceed button, customer field or address-book action is used.
+        The ordinary native changes share the campaign origin limiter.
+        """
+        from .fourover_coroplast import SOURCE, configure_and_observe, selection_from_diagnosis, forbidden_write
+        self.get(diagnosis_id)
+        async with self._locks.setdefault(diagnosis_id, asyncio.Lock()):
+            record = self._records[diagnosis_id]
+            page = self._pages.get(diagnosis_id)
+            if type(expected_revision) is not int or record['revision'] != expected_revision:
+                raise ValueError('diagnosis_revision_conflict')
+            selection_from_diagnosis(record, selections)
+            if page is None or page.is_closed() or page.url != SOURCE:
+                raise ValueError('coroplast_owned_page_unavailable')
+
+            async def check():
+                if (self._closed or page.is_closed() or self._pages.get(diagnosis_id) is not page
+                        or self._records.get(diagnosis_id) is not record
+                        or record['revision'] != expected_revision or page.url != SOURCE):
+                    raise ValueError('coroplast_owned_page_changed')
+
+            statuses = []
+            blocked_writes = []
+            async def guard_source_write(route):
+                if forbidden_write(route.request.method, route.request.url):
+                    blocked_writes.append(True)
+                    await route.abort()
+                else:
+                    await route.continue_()
+            def response_seen(response):
+                if (urlsplit(response.url).hostname in {'4over.com','www.4over.com'}
+                        and response.request.resource_type in {'xhr','fetch'}
+                        and response.status in {401,403,429,503}):
+                    statuses.append(response.status)
+            token = await self._choice_limiter.acquire('https://4over.com', 1, 1, check)
+            started = time.monotonic(); status = 500
+            page.on('response', response_seen)
+            try:
+                await page.route('**/*', guard_source_write)
+                async with asyncio.timeout(25):
+                    result = await configure_and_observe(page, copy.deepcopy(record), selections, check)
+                    await check()
+                    if blocked_writes:
+                        raise ValueError('coroplast_forbidden_source_write_blocked')
+                    if statuses:
+                        status = statuses[-1]
+                        raise ValueError('coroplast_supplier_backoff_required' if status in {429,503}
+                                         else 'coroplast_supplier_pricing_access_unverified')
+                    # Read only; _refresh_locked does not click 4over controls.
+                    refreshed = await self._refresh_locked(diagnosis_id)
+                    if refreshed.get('status') != 'ready' or refreshed.get('url') != SOURCE:
+                        raise ValueError('coroplast_diagnosis_not_retained')
+                    result['diagnosis_revision_after'] = refreshed['revision']
+                    result['diagnosis'] = refreshed
+                    record['coroplast_observation'] = copy.deepcopy({k:v for k,v in result.items() if k!='diagnosis'})
+                    self._persist(record)
+                    status = 200
+                    return result
+            finally:
+                page.remove_listener('response', response_seen)
+                try:
+                    await page.unroute('**/*', guard_source_write)
+                finally:
+                    if statuses: status = statuses[-1]
+                    await asyncio.to_thread(self._choice_limiter.release, 'https://4over.com', token,
+                                            time.monotonic()-started, status, 30, 1)
 
     async def select_observed_choice(self, diagnosis_id, expected_revision, field_key, value):
         """Change one currently offered native dropdown choice in the open page.

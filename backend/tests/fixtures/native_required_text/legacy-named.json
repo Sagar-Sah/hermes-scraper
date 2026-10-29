@@ -1,0 +1,176 @@
+{
+  "raw": {
+    "title": "Synthetic fixture",
+    "fields": [
+      {
+        "label": "Size",
+        "kind": "select",
+        "source_key": "size_dynamic123",
+        "source_name": "size",
+        "source_id": "size_dynamic123",
+        "choices": [
+          {
+            "value": "1",
+            "label": "Small",
+            "disabled": false
+          },
+          {
+            "value": "2",
+            "label": "Large",
+            "disabled": false
+          }
+        ],
+        "selected_values": [
+          "1"
+        ],
+        "required": true,
+        "disabled": false
+      }
+    ],
+    "session_status": "unknown"
+  },
+  "expected_snapshot": {
+    "title": "Synthetic fixture",
+    "fields": [
+      {
+        "key": "e3b5d123c6a88487dc02",
+        "label": "Size",
+        "kind": "select",
+        "choices": [
+          {
+            "value": "1",
+            "label": "Small",
+            "disabled": false
+          },
+          {
+            "value": "2",
+            "label": "Large",
+            "disabled": false
+          }
+        ],
+        "selected_values": [
+          "1"
+        ],
+        "required": true,
+        "disabled": false,
+        "multiple": false,
+        "configurable": true,
+        "source_name": "size",
+        "source_id": "size_dynamic123"
+      },
+      {
+        "key": "content_title",
+        "label": "Product title",
+        "kind": "content",
+        "choices": [],
+        "selected_values": [],
+        "required": false,
+        "disabled": false,
+        "multiple": false,
+        "configurable": false
+      }
+    ],
+    "content": {
+      "title": "Synthetic fixture",
+      "description": "",
+      "images": [],
+      "artwork_templates": [],
+      "artwork_setup": "",
+      "artwork_template_status": "unresolved"
+    },
+    "pricing_access": "not_established",
+    "session_status": "unknown",
+    "warnings": []
+  },
+  "selection": [
+    {
+      "key": "e3b5d123c6a88487dc02",
+      "include": false,
+      "fixed_values": [
+        "1"
+      ]
+    },
+    {
+      "key": "content_title",
+      "include": true,
+      "fixed_values": []
+    }
+  ],
+  "expected_policy": {
+    "schema": "diagnosis-selection-v1",
+    "revision": 1,
+    "source_url": "https://fixture.example/product",
+    "coverage": "current_page_only",
+    "fields": [
+      {
+        "key": "e3b5d123c6a88487dc02",
+        "label": "Size",
+        "configurable": true,
+        "kind": "select",
+        "disabled": false,
+        "multiple": false,
+        "choices": [
+          {
+            "value": "1",
+            "label": "Small",
+            "disabled": false,
+            "placeholder": false
+          },
+          {
+            "value": "2",
+            "label": "Large",
+            "disabled": false,
+            "placeholder": false
+          }
+        ],
+        "selected_values": [
+          "1"
+        ],
+        "min": null,
+        "max": null,
+        "step": null,
+        "source_name": "size",
+        "source_id": "size_dynamic123",
+        "include": false,
+        "fixed_values": [
+          "1"
+        ]
+      },
+      {
+        "key": "content_title",
+        "label": "Product title",
+        "configurable": false,
+        "kind": "content",
+        "disabled": false,
+        "multiple": false,
+        "choices": [],
+        "selected_values": [],
+        "min": null,
+        "max": null,
+        "step": null,
+        "include": true,
+        "fixed_values": []
+      }
+    ],
+    "hidden_fixed": {
+      "e3b5d123c6a88487dc02": [
+        "1"
+      ]
+    },
+    "included_field_keys": [
+      "content_title"
+    ],
+    "omitted_content_keys": [],
+    "fingerprint": "73446982f877d96fe16c86b6b0aaee811df876925c36ca688f34810408131f23"
+  },
+  "legacy_content_fields": {
+    "title": "Synthetic fixture",
+    "description": "",
+    "images": []
+  },
+  "document_metadata_additions": {
+    "artwork_templates": [],
+    "artwork_setup": "",
+    "artwork_template_status": "unresolved"
+  }
+}

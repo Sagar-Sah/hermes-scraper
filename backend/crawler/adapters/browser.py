@@ -180,6 +180,9 @@ SNAPSHOT_JS = r"""({priceSelector,modernServices=false}) => {
  };
  const path = e => {
    if(paths.has(e))return paths.get(e);
+   const dataId=!e.id&&!e.name&&e.matches('select,input,textarea')?e.getAttribute('data-id'):null;
+   if(dataId){const candidate=e.tagName.toLowerCase()+'[data-id="'+CSS.escape(dataId)+'"]';
+     if(document.querySelectorAll(candidate).length===1){paths.set(e,candidate);return candidate;}}
    const pending=[];let prefix='';
    for(let n=e;n&&n.nodeType===1;n=n.parentElement){
      if(paths.has(n)){prefix=paths.get(n);break;}
@@ -201,14 +204,25 @@ SNAPSHOT_JS = r"""({priceSelector,modernServices=false}) => {
    return prefix;
  };
  const clean = s => (s||'').replace(/\s+/g,' ').trim();
+ const parentLabel = e => {
+   for(let n=e,depth=0;n&&depth<3;n=n.parentElement,depth++){
+     const parent=n.parentElement;if(!parent||parent.matches('body,main,form,header,footer,nav'))break;
+     if(parent.querySelectorAll('select,input:not([type="hidden"]),textarea').length!==1)continue;
+     const named=[...parent.children].filter(x=>x!==n&&visible(x)&&x.matches('label,.control-label,.field-label'));
+     const direct=[...parent.childNodes].filter(x=>x.nodeType===3).map(x=>x.textContent).join(' ');
+     const text=clean(named.length===1?named[0].textContent:direct);if(text&&text.length<=240)return text;
+   }
+   return '';
+ };
  const label = e => {
-   if(!labels.has(e))labels.set(e,clean(e.getAttribute('aria-label') || Array.from(e.labels||[]).map(x=>x.innerText).join(' ') || e.name || e.id));
+   if(!labels.has(e))labels.set(e,clean(e.getAttribute('aria-label') || Array.from(e.labels||[]).map(x=>x.innerText).join(' ') || e.name || e.id || parentLabel(e) || e.getAttribute('data-id')));
    return labels.get(e);
  };
+ const rawKey = e => e.id||e.name?(e.id||e.name).replace(/_[a-z0-9]{5,}$/i,''):e.getAttribute('data-id')||label(e).replace(/_[a-z0-9]{5,}$/i,'');
  const excluded = /country|shipping|delivery.?address|address.?type|zip.?code|postal|billing|stateprovince|language|currency/i;
  const root=document.querySelector('#order-form') || document.querySelector('form.variations_form') || document.querySelector('main') || document.body;
  if(!root||!document.body)return {title:document.title||'',controls:[],unsupported:[],price:null,basis:null,images:[],busy:true,document_ready:false,challenge:false,login:false};
- const controls=[],unsupported=[],coverageGaps=new Set(),serviceContext=[];
+ const controls=[],unsupported=[],coverageGaps=new Set(),serviceContext=[],requiredText=[];
  const serviceContextObserved=!!document.querySelector('#order-form[data-printproducttype]');
  // The source's collapsed service section can hide priced proof/design choices.
  // Record only these known product-service radio selections as diagnostics.
@@ -229,12 +243,12 @@ SNAPSHOT_JS = r"""({priceSelector,modernServices=false}) => {
  }
  for(const e of root.querySelectorAll('select')) {
    if(!visible(e)||e.disabled)continue;
-   const text=label(e),rawKey=(e.id||e.name||text).replace(/_[a-z0-9]{5,}$/i,'');
-   if(excluded.test(text+' '+rawKey)||modernServices&&e.closest('#collapseOne'))continue;
+   const text=label(e),key=rawKey(e);
+   if(excluded.test(text+' '+key)||modernServices&&e.closest('#collapseOne'))continue;
    const choices=Array.from(e.options).map(o=>({value:o.value,label:clean(o.textContent),disabled:o.disabled,
      placeholder:o.disabled||/^\s*(?:[-–—]+|select(?:\s|$)|please select|choose(?:\s|$))/i.test(o.textContent||'')}));
-   if(choices.some(o=>/^(custom|other)(?:\s|$)/i.test(o.label)))unsupported.push('custom_values:'+rawKey);
-   controls.push({kind:'select',raw_key:rawKey,label:text,selector:path(e),value:e.value,
+   if(choices.some(o=>/^(custom|other)(?:\s|$)/i.test(o.label)))unsupported.push('custom_values:'+key);
+   controls.push({kind:'select',raw_key:key,label:text,selector:path(e),value:e.value,
      selected_label:clean(e.selectedOptions[0]?.textContent),choices:choices.filter(o=>!/^(custom|other)(?:\s|$)/i.test(o.label))});
  }
  const groups=new Map();
@@ -292,10 +306,19 @@ SNAPSHOT_JS = r"""({priceSelector,modernServices=false}) => {
  }
  for(const e of root.querySelectorAll('input[type=number],input[type=text]')) {
    if(!visible(e)||e.disabled||e.readOnly)continue;
-   const text=label(e),rawKey=(e.id||e.name||text).replace(/_[a-z0-9]{5,}$/i,'');
-   if(excluded.test(text+' '+rawKey)||!/quantity|qty|run.?size|width|height|length|diameter|page.?count/i.test(text+' '+rawKey))continue;
-   controls.push({kind:'number',raw_key:rawKey,label:text,selector:path(e),value:e.value,selected_label:e.value,
+   const text=label(e),key=rawKey(e);
+   if(excluded.test(text+' '+key)||!/quantity|qty|run.?size|width|height|length|diameter|page.?count/i.test(text+' '+key))continue;
+   controls.push({kind:'number',raw_key:key,label:text,selector:path(e),value:e.value,selected_label:e.value,
       choices:e.value?[{value:e.value,label:e.value}]:[],min:e.min,max:e.max,step:e.step});
+ }
+ // Unsupported required text is a dependency, never a generated value or a
+ // finite product dimension. Read only identity/label and native validity.
+ const nonProductText='form#commentform,.comment-form,form[action*="wp-comments-post"],.woocommerce-Reviews,.product-reviews,form.product-reviews-form,[data-role="product-review"],.contact-form,.contact-widget,[data-widget="contact"],[data-form-type="contact"],.chat-widget,[data-widget="chat"],[data-role="chat"]';
+ for(const e of root.querySelectorAll('input[type="text"],input:not([type]),textarea')){
+   if(!visible(e)||e.disabled||!(e.required||e.getAttribute('aria-required')==='true')||e.closest('header,footer,nav,[role="search"],form[role="search"]')||e.closest(nonProductText))continue;
+   const key=e.id||e.name||e.getAttribute('data-id')||'',text=parentLabel(e)||label(e);
+   if(excluded.test(text+' '+key)||/password|username|email|search|coupon|token|csrf|captcha|billing|address|payment|credit.card/i.test(text+' '+key)||/quantity|qty|run.?size|width|height|length|diameter|page.?count/i.test(label(e)+' '+rawKey(e)))continue;
+   requiredText.push({raw_key:key,label:text,selector:path(e),value_missing:e.validity?.valueMissing===true});
  }
  for(const e of root.querySelectorAll('input[type=checkbox],[role=combobox]:not(select),[role=slider]')) {
    if(visible(e)&&!e.disabled&&!/terms|agree|newsletter|remember|proof|guideline/i.test(label(e)))unsupported.push('unhandled_control:'+label(e));
@@ -326,7 +349,7 @@ SNAPSHOT_JS = r"""({priceSelector,modernServices=false}) => {
  // the product URL, so waiting for controls can only end in a false timeout.
  const productText=clean(document.querySelector('article')?.innerText||document.querySelector('main')?.innerText||fullBodyText).slice(0,4000);
  const priceLoginNotice=!price && /(?:please\s+)?(?:log|sign)\s+in\s+to\s+(?:see|view|access)\s+(?:the\s+)?(?:price|pricing|prices)|(?:price|pricing|prices)\s+(?:are\s+)?(?:available|visible)\s+(?:only\s+)?(?:after|when)\s+(?:you\s+)?(?:log|sign)\s+in/i.test(productText);
- return {title:clean(h1?.textContent||document.title),controls,unsupported,coverage_gaps:Array.from(coverageGaps),service_context:serviceContext,service_context_observed:serviceContextObserved,price,basis,images,busy,
+ return {title:clean(h1?.textContent||document.title),controls,unsupported,required_text_fields:requiredText,coverage_gaps:Array.from(coverageGaps),service_context:serviceContext,service_context_observed:serviceContextObserved,price,basis,images,busy,
    product_type:document.querySelector('#order-form')?.getAttribute('data-printproducttype')||null,
    product_slug:document.querySelector('#order-form')?.getAttribute('data-ptype')||null,
    store_type:document.querySelector('#order-form')?.getAttribute('data-currentstoretype')||null,
@@ -393,9 +416,23 @@ def observed_amount(snapshot: dict) -> Decimal:
     return amount
 
 
+def unit_price_or_subtotal_unproven(snapshot: dict) -> bool:
+    if snapshot.get("basis") != "source_display_price":
+        return False
+    quantity = next((c for c in snapshot.get("controls", []) if c.get("key") == "quantity"), {})
+    text = str(quantity.get("value", "")).replace(",", "")
+    if not text.isdigit():
+        text = str(quantity.get("selected_label", "")).replace(",", "").strip()
+    return text.isdigit() and int(text) > 1
+
+
 def make_record(
     url: str, snapshot: dict, evidence_ids: list[str], partial: set[str], metadata: dict
 ) -> dict:
+    if snapshot.get("required_text_fields"):
+        raise AdapterError("required_product_text", "Required product text must be supplied and supported before this selection can be quoted")
+    if unit_price_or_subtotal_unproven(snapshot):
+        raise AdapterError("unit_price_or_subtotal_not_established", "The displayed price may be per unit; a proven line-total basis is required for quantities above one")
     controls = snapshot["controls"]
     amount = observed_amount(snapshot)
     q_control = next((c for c in controls if c["key"] == "quantity"), None)
@@ -1840,7 +1877,27 @@ class BrowserAdapter:
                         return await reset_once("selection_changed", mismatched)
                     return state
 
+                async def hold_required_text(state):
+                    fields = state.get("required_text_fields") or []
+                    if not fields:
+                        return False
+                    safe_fields = []
+                    for field in fields[:30]:
+                        key = field_key(field.get("raw_key") or field.get("label"))
+                        partial.add("required_free_text_control:" + key)
+                        safe_fields.append({"key": public_control_text(key),
+                            "label": public_control_text(field.get("label")),
+                            "value_missing": field.get("value_missing") is True})
+                    counters["invalid_branches"] += 1
+                    await emit("required_product_text", {"fields": safe_fields, "published_rows": 0,
+                        "reason": "required_free_text_value_not_supported"})
+                    return True
+
                 async def record_quote(final, prefix, extra_evidence=()):
+                    if final.get("required_text_fields"):
+                        raise AdapterError("required_product_text", "Required product text is not supported for an automatic quote")
+                    if unit_price_or_subtotal_unproven(final):
+                        raise AdapterError("unit_price_or_subtotal_not_established", "The displayed price has no established line-total basis")
                     observation = {
                         "kind": "visible_product_quote",
                         "url": page.url,
@@ -1927,6 +1984,8 @@ class BrowserAdapter:
                     remaining = None if limit is None else limit - counters["rows"]
                     if (
                         not bulk_requested
+                        or state.get("required_text_fields")
+                        or unit_price_or_subtotal_unproven(state)
                         or remaining == 1
                         or str(state.get("product_type")) not in {"1", "27", "36"}
                     ):
@@ -2588,6 +2647,8 @@ class BrowserAdapter:
                     ):
                         partial.add("requested_control_missing")
                         return
+                    if await hold_required_text(state):
+                        return
                     if modern_requested:
                         # One bounded ordinary fresh-page recovery per previously
                         # unpublished leaf. No recursion and no retry of saved rows.
@@ -2616,6 +2677,14 @@ class BrowserAdapter:
                                 partial.add(final_error.reason);counters["invalid_branches"] += 1;return
                     else:
                         final = await settle(require_price=True)
+                    if await hold_required_text(final):
+                        return
+                    if unit_price_or_subtotal_unproven(final):
+                        partial.add("unit_price_or_subtotal_not_established")
+                        counters["invalid_branches"] += 1
+                        await emit("quote_basis_held", {"reason": "unit_price_or_subtotal_not_established",
+                            "basis": "source_display_price", "published_rows": 0})
+                        return
                     if any(
                         str(c["value"]) != str(prefix.get(c["key"]))
                         for c in final["controls"]

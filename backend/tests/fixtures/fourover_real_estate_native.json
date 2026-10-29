@@ -1,0 +1,355 @@
+{
+  "captured_at": "2026-10-29T05:42:57.432775+00:00",
+  "evidence": {
+    "height": null,
+    "product_id": "6669",
+    "project_response_shapes": [
+      {
+        "body_shape": {
+          "product_options": {
+            "item_shape": {
+              "label": "str",
+              "value": "str"
+            },
+            "length": 8,
+            "type": "list"
+          },
+          "reward_points": "int",
+          "totals": {
+            "grand_total": "float",
+            "subtotal": "float"
+          }
+        },
+        "product_options": [
+          {
+            "label": "Size",
+            "value": "18&quot; x 24&quot;"
+          },
+          {
+            "label": "Hardware",
+            "value": "White 6ft Post (Gothic Cap)"
+          },
+          {
+            "label": "1\u201d Round Corners",
+            "value": "Yes"
+          },
+          {
+            "label": "Stock",
+            "value": "3mm PVC"
+          },
+          {
+            "label": "Colorspec",
+            "value": "4/4 (4 color both sides)"
+          },
+          {
+            "label": "Grommets",
+            "value": "Real Estate Post Grommets"
+          },
+          {
+            "label": "Run Size",
+            "value": "1"
+          },
+          {
+            "label": "Turnaround Time",
+            "value": "4 Business Days"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": true,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1080",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {
+            "0": 1
+          }
+        },
+        "status": 200,
+        "totals": {
+          "grand_total": 100.0,
+          "subtotal": 100.0
+        }
+      },
+      {
+        "body_shape": {
+          "product_options": {
+            "item_shape": {
+              "label": "str",
+              "value": "str"
+            },
+            "length": 8,
+            "type": "list"
+          },
+          "reward_points": "int",
+          "totals": {
+            "grand_total": "float",
+            "subtotal": "float"
+          }
+        },
+        "product_options": [
+          {
+            "label": "Size",
+            "value": "18&quot; x 24&quot;"
+          },
+          {
+            "label": "Hardware",
+            "value": "White 6ft Post (Gothic Cap)"
+          },
+          {
+            "label": "1\u201d Round Corners",
+            "value": "Yes"
+          },
+          {
+            "label": "Stock",
+            "value": "3mm PVC"
+          },
+          {
+            "label": "Colorspec",
+            "value": "4/4 (4 color both sides)"
+          },
+          {
+            "label": "Grommets",
+            "value": "Real Estate Post Grommets"
+          },
+          {
+            "label": "Run Size",
+            "value": "1"
+          },
+          {
+            "label": "Turnaround Time",
+            "value": "4 Business Days"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": true,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1080",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {
+            "0": 1
+          }
+        },
+        "status": 200,
+        "totals": {
+          "grand_total": 100.0,
+          "subtotal": 100.0
+        }
+      },
+      {
+        "body_shape": {
+          "product_options": {
+            "item_shape": {
+              "label": "str",
+              "value": "str"
+            },
+            "length": 8,
+            "type": "list"
+          },
+          "reward_points": "int",
+          "totals": {
+            "grand_total": "float",
+            "subtotal": "float"
+          }
+        },
+        "product_options": [
+          {
+            "label": "Size",
+            "value": "18&quot; x 24&quot;"
+          },
+          {
+            "label": "Hardware",
+            "value": "White 6ft Post (Gothic Cap)"
+          },
+          {
+            "label": "1\u201d Round Corners",
+            "value": "Yes"
+          },
+          {
+            "label": "Stock",
+            "value": "3mm PVC"
+          },
+          {
+            "label": "Colorspec",
+            "value": "4/4 (4 color both sides)"
+          },
+          {
+            "label": "Grommets",
+            "value": "Real Estate Post Grommets"
+          },
+          {
+            "label": "Run Size",
+            "value": "1"
+          },
+          {
+            "label": "Turnaround Time",
+            "value": "4 Business Days"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": true,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1080",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {
+            "0": 1
+          }
+        },
+        "status": 200,
+        "totals": {
+          "grand_total": 100.0,
+          "subtotal": 100.0
+        }
+      }
+    ],
+    "selected_child_id": "83545",
+    "selected_services": {
+      "digital_proof": false,
+      "job_sample": false
+    },
+    "service_controls": {
+      "digital_proof": {
+        "ambiguous": false,
+        "checked": false,
+        "present": false
+      },
+      "job_sample": {
+        "ambiguous": false,
+        "checked": false,
+        "present": false
+      }
+    },
+    "set_control": {
+      "max": "200",
+      "min": "1",
+      "rangeOverflow": false,
+      "rangeUnderflow": false,
+      "step": "",
+      "valid": true,
+      "value": "1"
+    },
+    "sets": 1,
+    "shipping_view": {
+      "money": [
+        "Price Per Set: $100.00",
+        "$100.00",
+        "Subtotal $100.00 Total $100.00 Taxes may apply",
+        "$100.00 Taxes may apply"
+      ]
+    },
+    "source_content": {
+      "description": "legacy capture omitted from test fixture",
+      "gallery_images": [
+        "https://4over.com/media/catalog/product/post.jpg"
+      ]
+    },
+    "source_http_events": [],
+    "source_selection": [
+      {
+        "disabled": false,
+        "id": "attribute211",
+        "label": "Size *",
+        "name": "super_attribute[211]",
+        "selected": "544",
+        "selected_label": "18\" x 24\""
+      },
+      {
+        "disabled": false,
+        "id": "attribute197",
+        "label": "Stock *",
+        "name": "super_attribute[197]",
+        "selected": "372",
+        "selected_label": "3mm PVC"
+      },
+      {
+        "disabled": false,
+        "id": "attribute204",
+        "label": "Colorspec *",
+        "name": "super_attribute[204]",
+        "selected": "97",
+        "selected_label": "4/4 (4 color both sides)"
+      },
+      {
+        "disabled": false,
+        "id": "attribute216",
+        "label": "Drill Hole *",
+        "name": "super_attribute[216]",
+        "selected": "230",
+        "selected_label": "-"
+      },
+      {
+        "disabled": false,
+        "id": "attribute229",
+        "label": "Grommets *",
+        "name": "super_attribute[229]",
+        "selected": "1033",
+        "selected_label": "Real Estate Post Grommets"
+      },
+      {
+        "disabled": false,
+        "id": "select_892",
+        "label": "Hardware",
+        "name": "options[892]",
+        "selected": "1078",
+        "selected_label": "White 6ft Post (Gothic Cap) +$80.00"
+      },
+      {
+        "disabled": false,
+        "id": "select_893",
+        "label": "1\u201d Round Corners",
+        "name": "options[893]",
+        "selected": "1080",
+        "selected_label": "Yes"
+      }
+    ],
+    "turnaround_control": {
+      "label": "4 Business Days",
+      "retained": true,
+      "value": "4"
+    },
+    "width": null
+  },
+  "fixture_provenance": {
+    "kind": "synthetic",
+    "notice": "Monetary values and capture identifiers are synthetic. Public product selectors, option IDs and failure structures are retained. This file is not supplier pricing evidence.",
+    "purpose": "Public parser and control-contract regression only"
+  },
+  "id": "dcbfd3a483e7817bb8cc4abc0bb1c95d",
+  "reason": "real_estate_server_applied_options_missing",
+  "selection": {
+    "child_id": "83545",
+    "digital_proof": false,
+    "hardware": "white_6ft_gothic_post",
+    "job_sample": false,
+    "product_id": "6669",
+    "rounded_corners": true,
+    "sets": 1,
+    "size": "18x24",
+    "source_url": "https://4over.com/real-estate-post",
+    "stock": "pvc_3mm",
+    "turnaround_time": "4"
+  },
+  "status": "unverified_source_observation_no_price_completion"
+}

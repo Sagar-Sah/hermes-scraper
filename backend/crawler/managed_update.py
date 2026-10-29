@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+from contextlib import closing
 import fcntl
 import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -238,38 +239,79 @@ def database_path(root, data_dir, env):
     return Path(url[len("sqlite:///"):]).resolve() if url else Path(data_dir) / "atlas.db"
 
 
+def _sqlite_backup_snapshot(source, target):
+    """One independent committed snapshot; never replay copied WAL/SHM files."""
+    if source.is_symlink() or not source.is_file() or target.is_symlink():
+        raise UpdateError("unsafe_backup_source")
+    fd = os.open(target, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    os.close(fd)
+    os.chmod(target, 0o600)
+    uri = "file:" + quote(str(source.absolute()), safe="/") + "?mode=ro"
+    with closing(sqlite3.connect(uri, uri=True, timeout=30)) as incoming, closing(sqlite3.connect(target)) as outgoing:
+        incoming.backup(outgoing)
+        outgoing.execute("PRAGMA journal_mode=DELETE")
+        if outgoing.execute("PRAGMA quick_check").fetchone() != ("ok",):
+            raise UpdateError("database_backup_failed")
+
+
+def _sqlite_backup_source(path):
+    if path.is_symlink() or not path.is_file():
+        raise UpdateError("unsafe_backup_source")
+    with os.fdopen(os.open(path, os.O_RDONLY | os.O_NOFOLLOW), "rb") as stream:
+        header = stream.read(16)
+    return header == b"SQLite format 3\x00" or path.suffix.lower() in {".db", ".sqlite", ".sqlite3"}
+
+
 def backup_state(root, data_dir, env, operation_id):
     if not isinstance(operation_id, str) or re.fullmatch(r"[0-9a-f]{32}", operation_id) is None:
         raise UpdateError("invalid_operation_id")
     destination = private_directory(Path(data_dir) / "managed-updates/backups" / operation_id)
     source = database_path(root, data_dir, env)
     if source.is_symlink() or not source.is_file(): raise UpdateError("database_backup_failed")
+    state_trees = []
+    for name in ("campaigns", "campaign-automation", "printograph-owned-browser-runs",
+                 "product-companion", "autonomous-companion"):
+        folder = Path(data_dir) / name
+        if folder.is_symlink(): raise UpdateError("unsafe_backup_source")
+        if not folder.exists(): continue
+        if not folder.is_dir(): raise UpdateError("unsafe_backup_source")
+        paths = list(folder.rglob("*"))
+        for path in paths:
+            info = path.lstat()
+            if (path.is_symlink() or info.st_uid != os.getuid()
+                    or not (stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode))):
+                raise UpdateError("unsafe_backup_source")
+        state_trees.append((name, folder, paths))
     wal = Path(str(source) + "-wal")
     needed = source.stat().st_size + 2 * (wal.stat().st_size if wal.is_file() else 0) + 64 * 1024 * 1024
+    needed += 2 * sum(path.stat().st_size for _, _, paths in state_trees for path in paths if path.is_file())
     if shutil.disk_usage(destination).free < needed:
         raise UpdateError("backup_space_required")
-    uri = "file:" + quote(str(source), safe="/") + "?mode=ro"
-    with sqlite3.connect(uri, uri=True, timeout=30) as incoming, sqlite3.connect(destination / "atlas.db") as outgoing:
-        incoming.backup(outgoing)
-        outgoing.execute("PRAGMA journal_mode=DELETE")
-        if outgoing.execute("PRAGMA quick_check").fetchone() != ("ok",): raise UpdateError("database_backup_failed")
-    os.chmod(destination / "atlas.db", 0o600)
-    for source_file, target_name in ((Path(root) / ".env", "dotenv"), (Path(data_dir) / "encryption.key", "encryption.key"),
-            (Path(str(source) + "-wal"), "atlas.db-wal.snapshot"), (Path(str(source) + "-shm"), "atlas.db-shm.snapshot")):
+    _sqlite_backup_snapshot(source, destination / "atlas.db")
+    for source_file, target_name in ((Path(root) / ".env", "dotenv"), (Path(data_dir) / "encryption.key", "encryption.key")):
         if source_file.exists():
             if source_file.is_symlink() or not source_file.is_file(): raise UpdateError("unsafe_backup_source")
             shutil.copyfile(source_file, destination / target_name); os.chmod(destination / target_name, 0o600)
-    for name in ("campaigns", "campaign-automation", "printograph-owned-browser-runs"):
-        folder = Path(data_dir) / name
-        if not folder.exists(): continue
-        if folder.is_symlink(): raise UpdateError("unsafe_backup_source")
+    for name, folder, paths in state_trees:
         target = private_directory(destination / name)
-        for path in folder.rglob("*"):
+        for path in paths:
             if path.is_symlink(): raise UpdateError("unsafe_backup_source")
             relative = path.relative_to(folder)
             if path.is_dir(): private_directory(target / relative)
             elif path.is_file():
-                shutil.copyfile(path, target / relative); os.chmod(target / relative, 0o600)
+                # Online backup has already incorporated committed WAL state.
+                # Sidecars must never accompany the independent destination DB.
+                sidecar = next((suffix for suffix in ("-wal", "-shm", "-journal") if path.name.endswith(suffix)), None)
+                if sidecar:
+                    primary = path.with_name(path.name[:-len(sidecar)])
+                    if not primary.is_file() or primary.is_symlink(): raise UpdateError("unsafe_backup_source")
+                    if _sqlite_backup_source(primary): continue
+                private_directory((target / relative).parent)
+                if _sqlite_backup_source(path):
+                    _sqlite_backup_snapshot(path, target / relative)
+                else:
+                    if (target / relative).is_symlink(): raise UpdateError("unsafe_backup_source")
+                    shutil.copyfile(path, target / relative); os.chmod(target / relative, 0o600)
     write_private(destination / "launch-config.json", {"environment": {k: v for k, v in env.items()
         if k.startswith(("ATLAS_", "AWS_")) or k == "DATABASE_URL"}, "profiles_preserved_in_place": True})
     return operation_id

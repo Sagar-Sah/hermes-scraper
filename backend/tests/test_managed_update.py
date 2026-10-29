@@ -467,3 +467,75 @@ async def test_interrupted_update_pauses_before_any_worker_open_without_resettin
         assert product.epoch == 7 and product.status == "queued"
     assert calls == ["fence", "paused", "release"]
     assert workspace.updater.status()["operation"]["collection_paused"] is True
+
+
+def test_companion_state_backup_snapshots_budget_and_outbox_without_wal_replay(workspace):
+    from crawler.companion_director import DirectorBudget
+    with sqlite3.connect(workspace.data / "atlas.db") as database:
+        database.execute("CREATE TABLE retained(value TEXT)")
+    autonomous = workspace.data / "autonomous-companion"
+    autonomous.mkdir(mode=0o700)
+    budget = DirectorBudget(autonomous / "director", clock=lambda: 1793318400)
+    assert budget.reserve("held-request", "0.75") is True
+    budget.finish("held-request", uncertain=True)
+    token = "synthetic-connector-" + "x" * 48
+    write_private(autonomous / "environments/staging-write.json", {"token": token, "role": "write", "connected": False})
+    write_private(autonomous / "cycles" / ("a" * 32 + ".json"), {"status": "paused", "held": ["uncertain-source-request"]})
+    write_private(workspace.data / "product-companion/pairs.json", {"confirmed_pairs": ["9532", "6862"]})
+    outbox_path = autonomous / "notifications/outbox.sqlite3"
+    outbox_path.parent.mkdir(mode=0o700)
+    outbox = sqlite3.connect(outbox_path)
+    outbox.execute("PRAGMA journal_mode=WAL")
+    outbox.execute("PRAGMA wal_autocheckpoint=0")
+    outbox.execute("CREATE TABLE notifications(id TEXT,status TEXT)")
+    outbox.execute("INSERT INTO notifications VALUES ('saved-notice','held')")
+    outbox.commit()
+    assert Path(str(outbox_path) + "-wal").stat().st_size > 0
+    outbox.execute("INSERT INTO notifications VALUES ('not-committed','pending')")
+    identifier = "c" * 32
+    try:
+        assert backup_state(workspace.root, workspace.data, {}, identifier) == identifier
+        destination = workspace.data / "managed-updates/backups" / identifier
+        backed_budget = destination / "autonomous-companion/director/director-budget.sqlite3"
+        with sqlite3.connect(backed_budget) as restored:
+            assert restored.execute("PRAGMA quick_check").fetchone() == ("ok",)
+            assert restored.execute("SELECT id,state,reserved,cost FROM requests").fetchall() == [("held-request", "uncertain", "0.75", None)]
+        with sqlite3.connect(destination / "autonomous-companion/notifications/outbox.sqlite3") as restored:
+            assert restored.execute("PRAGMA quick_check").fetchone() == ("ok",)
+            assert restored.execute("PRAGMA journal_mode").fetchone() == ("delete",)
+            assert restored.execute("SELECT * FROM notifications").fetchall() == [("saved-notice", "held")]
+        assert not list(destination.rglob("*-wal")) and not list(destination.rglob("*-shm"))
+        assert not list(destination.rglob("*-journal"))
+        copied = json.loads((destination / "autonomous-companion/environments/staging-write.json").read_text())
+        assert copied["token"] == token
+        assert json.loads((destination / "autonomous-companion/cycles" / ("a" * 32 + ".json")).read_text())["status"] == "paused"
+        assert json.loads((destination / "product-companion/pairs.json").read_text())["confirmed_pairs"] == ["9532", "6862"]
+        # Subsequent live changes cannot mutate the independent backup.
+        budget.reserve("later-request", "0.25")
+        write_private(autonomous / "environments/staging-write.json", {"token": "later-rotated-token"})
+        assert json.loads((destination / "autonomous-companion/environments/staging-write.json").read_text())["token"] == token
+        with sqlite3.connect(backed_budget) as restored:
+            assert restored.execute("SELECT COUNT(*) FROM requests").fetchone() == (1,)
+        assert all(path.stat().st_mode & 0o077 == 0 for path in destination.rglob("*"))
+        assert token not in json.dumps(workspace.updater.status())
+    finally:
+        outbox.rollback()
+        outbox.close()
+
+
+@pytest.mark.parametrize("kind", ["root", "nested", "broken"])
+def test_companion_state_backup_rejects_symlinked_private_state(workspace, kind):
+    with sqlite3.connect(workspace.data / "atlas.db") as database:
+        database.execute("CREATE TABLE retained(value TEXT)")
+    external = workspace.root / "external-state"
+    external.mkdir()
+    (external / "secret.json").write_text('{"private":"outside"}')
+    companion = workspace.data / "autonomous-companion"
+    if kind in {"root", "broken"}:
+        companion.symlink_to(external if kind == "root" else workspace.root / "absent-state", target_is_directory=True)
+    else:
+        companion.mkdir(mode=0o700)
+        (companion / "private-link.json").symlink_to(external / "secret.json")
+    with pytest.raises(UpdateError, match="unsafe_backup_source"):
+        backup_state(workspace.root, workspace.data, {}, "b" * 32)
+    assert (external / "secret.json").read_text() == '{"private":"outside"}'

@@ -677,7 +677,7 @@ def safe_quantity_expand_diagnostic(value):
     if status in {'clicked','already_available'} and set(value)=={'status'}:return {'schema':'native-quantity-expansion/v1','status':status}
     if status=='unavailable' and set(value)=={'status','reason'} and type(value['reason']) is str and value['reason'] in QUANTITY_EXPAND_REASONS:return {'schema':'native-quantity-expansion/v1','status':status,'reason':value['reason']}
     return None
-def quantity_expand_js(attributes,source,*,controller_proved,ui_proved,assets_proved):
+def quantity_expand_js(attributes,source,*,controller_proved,ui_proved,assets_proved,full_domain=False):
     return r'''({selection,rows})=>{
  const no=reason=>({status:"unavailable",reason});
  if(!PROVED||location.href!==SOURCE||location.origin!=="https://4over.com"||location.search||location.hash)return no("source_unproved");
@@ -701,8 +701,8 @@ def quantity_expand_js(attributes,source,*,controller_proved,ui_proved,assets_pr
        &&current[i]?.qty===v.quantity&&["number","string"].includes(typeof current[i]?.price)&&Number(current[i].price)===Number(v.price)))return no("table_unretained");
   const quantities=rows.map(v=>v.quantity);if(new Set(quantities).size!==quantities.length||!quantities.includes(selection.run_size))return no("quantity_unproved");
   const shown=[...table.querySelectorAll('li.runsizes_row:not(.custom_runsize_row)')].filter(visible).map(e=>String(e.querySelector('.runsize')?.textContent||'').trim().replace(/,/g,''));
-  if(shown.includes(String(selection.run_size)))return {status:"already_available"};
-  if(quantities.indexOf(selection.run_size)<7||shown.length!==7||!shown.every((v,i)=>v===String(quantities[i])))return no("collapsed_rows_unmounted");
+  if(shown.includes(String(selection.run_size))&&!FULL_DOMAIN)return {status:"already_available"};
+  if((!FULL_DOMAIN&&quantities.indexOf(selection.run_size)<7)||shown.length!==7||!shown.every((v,i)=>v===String(quantities[i])))return no("collapsed_rows_unmounted");
   const actions=[...table.querySelectorAll('li.runsizes-table_actions')].filter(visible);if(actions.length!==1||actions[0].classList.contains('active'))return no("collapsed_action_unmounted");
   const action=actions[0];if(action.getAttribute('data-bind')?.replace(/\s+/g,' ').trim()!=="css: {'active': isExpanded()}, visible: isCollapsable()")return no("action_binding_changed");
   const spans=[...action.querySelectorAll(':scope > span')].filter(visible);if(spans.length!==1)return no("action_unmounted");const e=spans[0];
@@ -710,7 +710,135 @@ def quantity_expand_js(attributes,source,*,controller_proved,ui_proved,assets_pr
     ||e.hasAttribute('onclick')||e.closest('a,button')||e.getAttribute('aria-disabled')==='true'||action.getAttribute('aria-disabled')==='true')return no("action_binding_changed");
   HTMLElement.prototype.click.call(e);return {status:"clicked"};
  }catch(_){return no("table_unretained");}
-}'''.replace('PROVED',json.dumps(controller_proved is True and ui_proved is True and assets_proved is True)).replace('SOURCE',json.dumps(source)).replace('READER',automatic_observed_state_js(attributes,source,controller_proved,ui_proved))
+}'''.replace('PROVED',json.dumps(controller_proved is True and ui_proved is True and assets_proved is True)).replace('FULL_DOMAIN',json.dumps(full_domain is True)).replace('SOURCE',json.dumps(source)).replace('READER',automatic_observed_state_js(attributes,source,controller_proved,ui_proved))
+
+
+def native_domain_read_js(attributes,source,*,controller_proved,ui_proved):
+    """Read product controls only; no click, model write or private project read.
+
+    The public package model is recorded separately from the visible quantity
+    rows. A collapsed list therefore stays partial even if the model has every
+    tier. Conditional production is the observed quantity's disclosure only.
+    """
+    return r'''({selection,rows})=>{
+ const no=reason=>({status:"unknown",reason});
+ if(!PROVED||location.href!==SOURCE||location.origin!=="https://4over.com"||location.search||location.hash)return no("source_unproved");
+ const dom=(READER)(),yes=(o,keys)=>o&&keys.every(k=>o[k]===true);
+ if(dom.child_id!==selection.child_id||!yes(dom.source_controller,["modules_proved","available","registration_defined","child_matches_dom","quantity_matches_dom","quantity_strict_row","ready"])
+   ||!yes(dom.source_ui,["modules_proved","registry_available","tabs_registered","project_registered","current_is_product_options"]))return no("retained_product_options_unproved");
+ const forms=[...document.querySelectorAll('#product_addtocart_form')];if(forms.length!==1)return no("form_unproved");const form=forms[0];
+ const visible=e=>{if(!e||!e.getClientRects().length)return false;for(let n=e;n;n=n.parentElement){const s=getComputedStyle(n);if(n.hidden||n.hasAttribute('inert')||s.display==='none'||s.visibility==='hidden'||s.visibility==='collapse')return false;}return true;};
+ const text=e=>String(e?.textContent||'').replace(/\s+/g,' ').trim();
+ const label=e=>{const labels=[...(e.labels||[])];return labels.length===1?text(labels[0]):text(e.closest('label'));};
+ const attrs={},keys=Object.keys(selection.attributes);
+ if(!keys.length||keys.length>32)return no("attribute_domain_unproved");
+ for(const key of keys){
+  const nodes=[...form.querySelectorAll('select')].filter(e=>e.name==='super_attribute['+key+']'),observed=dom.attributes[key];
+  if(nodes.length!==1||!observed||observed.count!==1||observed.value!==selection.attributes[key]||observed.enabled!==true||observed.choice_enabled!==true||!(observed.visible===true||observed.implicit_fixed_dash===true))return no("attribute_domain_unretained");
+  const e=nodes[0];if(e.options.length>512)return no("attribute_domain_too_large");
+  attrs[key]={count:1,selected:e.value,enabled:!e.disabled,visible:visible(e),implicit_fixed_dash:observed.implicit_fixed_dash===true,
+   options:[...e.options].map(o=>({value:o.value,label:text(o),enabled:!o.disabled&&!o.parentElement?.disabled}))};
+ }
+ const scope={};for(const key of ["job_sample","digital_proof"]){const nodes=[...form.querySelectorAll('input[type="checkbox"]')].filter(e=>e.name===key),known=dom.services[key];
+  if(nodes.length!==1||known?.count!==1||known.checked!==false||known.enabled!==true)return no("scope_controls_unretained");
+  scope[key]={count:1,checked:nodes[0].checked,enabled:!nodes[0].disabled,visible:visible(nodes[0])};}
+ if(dom.set_control_count===0&&dom.sets===null)scope.sets={count:0,binding:"one_native_job"};
+ else if(dom.set_control_count===1&&dom.sets?.value==="1"&&dom.sets.valid===true&&dom.sets.enabled===true)scope.sets={count:1,binding:"retained_control",value:1,enabled:true,valid:true};
+ else return no("scope_controls_unretained");
+ const tables=[...form.querySelectorAll('ul.runsizes-table')].filter(visible);if(tables.length!==1)return no("quantity_table_unmounted");const table=tables[0];
+ const searches=[...form.querySelectorAll('#run-size-search')];if(searches.length>1||searches.some(e=>String(e.value)!==''))return no("quantity_search_active");
+ const native=[...table.querySelectorAll('li.runsizes_row:not(.custom_runsize_row)')].filter(visible);
+ if(!native.length||native.length>1000)return no("quantity_rows_unproved");
+ const shown=native.map(e=>{const nodes=e.querySelectorAll('.runsize'),label=nodes.length===1?text(nodes[0]):'';return {value:label.replace(/,/g,''),label,enabled:!e.hasAttribute('disabled')&&e.getAttribute('aria-disabled')!=='true'};});
+ if(shown.some(v=>!/^\d+$/.test(v.value)||Number(v.value)<1||!Number.isSafeInteger(Number(v.value))))return no("quantity_rows_unproved");
+ const modelName='FourOver_Project/js/model/product-package-prices',r=window.require;
+ if(typeof r!=='function'||typeof r.defined!=='function'||r.defined(modelName)!==true)return no("quantity_model_unproved");
+ const model=r(modelName);if(typeof model!=='function'||typeof model.peek!=='function')return no("quantity_model_unproved");const current=model.peek();
+ if(!Array.isArray(rows)||!rows.length||rows.length>1000||!Array.isArray(current)||current.length!==rows.length
+   ||!rows.every((v,i)=>Number.isSafeInteger(v.quantity)&&v.quantity>0&&typeof v.price==='string'&&/^[0-9]+(?:\.[0-9]+)?$/.test(v.price)&&Number(v.price)>0&&current[i]?.qty===v.quantity&&Number(current[i].price)===Number(v.price)))return no("quantity_model_unretained");
+ const actions=[...table.querySelectorAll('li.runsizes-table_actions')].filter(visible),spans=actions.flatMap(e=>[...e.querySelectorAll(':scope > span')].filter(visible));
+ if(actions.length>1||spans.length>1||spans.some(e=>!["Show More","Show Less"].includes(text(e))))return no("quantity_expansion_unproved");
+ const more=spans.filter(e=>text(e)==='Show More').length;
+ const extra=[];for(const e of [...form.querySelectorAll('select,input:not([type="hidden"]),textarea')].filter(visible)){
+  const name=String(e.name||'');if(keys.some(k=>name==='super_attribute['+k+']')||["run_size","custom_run_size","turnaround_time","job_sample","digital_proof","qty","sets","project_name","trim_size"].includes(name)||e.id==='run-size-search'||e.id==='project_name'||['button','submit','reset'].includes(e.type))continue;
+  extra.push({tag:e.tagName.toLowerCase(),type:String(e.type||''),name:/^[A-Za-z0-9_\[\]-]{1,100}$/.test(name)?name:"unrecognized"});}
+ if(extra.length>32)return no("additional_controls_too_large");
+ const production=[...form.querySelectorAll('input[name="turnaround_time"]')].map(e=>({value:e.value,label:label(e),selected:e.checked===true,enabled:!e.disabled,visible:visible(e)||[...(e.labels||[])].some(visible)}));
+ if(production.length>32)return no("production_domain_too_large");
+ return {status:"observed",child_id:dom.child_id,observed_run_size:dom.run_size,selected_attributes:selection.attributes,attribute_controls:attrs,scope_controls:scope,additional_option_fields:extra,
+  quantity_controls:{rendered:shown,model_available:current.map(e=>e.qty),remaining_expand_controls:more,truncated:more!==0||shown.length!==current.length},production_controls:production};
+}'''.replace('PROVED',json.dumps(controller_proved is True and ui_proved is True)).replace('SOURCE',json.dumps(source)).replace('READER',automatic_observed_state_js(attributes,source,controller_proved,ui_proved))
+
+
+NATIVE_DOMAIN_REASONS=frozenset(('source_unproved','retained_product_options_unproved','form_unproved','attribute_domain_unproved',
+    'attribute_domain_unretained','attribute_domain_too_large','scope_controls_unretained','quantity_table_unmounted','quantity_search_active',
+    'quantity_rows_unproved','quantity_model_unproved','quantity_model_unretained','quantity_expansion_unproved','additional_controls_too_large',
+    'production_domain_too_large','native_domain_observation_unavailable','native_domain_observation_invalid','table_identity_unproved'))
+
+
+def safe_native_domain_observation(raw,*,source,selection,table,document_sha256,page_generation,snapshot_id,observed_at):
+    """Closed public evidence projection. Never interprets omitted data as pass."""
+    unknown={'schema':'fourover-native-domain-observation/v1','status':'unknown','reason':'native_domain_observation_invalid',
+             'expanded_rendered_domain':'unknown','source_domain_complete':False}
+    if type(raw) is not dict:return unknown
+    if raw.get('status')=='unknown':
+        reason=raw.get('reason')
+        if set(raw)=={'status','reason'} and type(reason) is str and reason in NATIVE_DOMAIN_REASONS:return {**unknown,'reason':reason}
+        return unknown
+    try:
+        if (_url(source).netloc!='4over.com' or set(raw)!={'status','child_id','observed_run_size','selected_attributes','attribute_controls','scope_controls','additional_option_fields','quantity_controls','production_controls'}
+                or raw['status']!='observed' or raw['child_id']!=selection['child_id'] or raw['selected_attributes']!=selection['attributes']
+                or type(raw['observed_run_size']) is not str or not ID.fullmatch(raw['observed_run_size'])
+                or not HEX.fullmatch(document_sha256) or not HEX.fullmatch(table['sha256'])
+                or not re.fullmatch('[a-f0-9]{32}',page_generation) or not re.fullmatch('[a-f0-9]{32}',snapshot_id)
+                or type(observed_at) not in (int,float) or not isfinite(observed_at) or observed_at<=0):return unknown
+        attrs=raw['attribute_controls'];scope=raw['scope_controls'];quantities=raw['quantity_controls'];production=raw['production_controls'];extra=raw['additional_option_fields']
+        if type(attrs) is not dict or set(attrs)!=set(selection['attributes']) or type(scope) is not dict or set(scope)!={'sets','job_sample','digital_proof'}:return unknown
+        def label(text):return type(text) is str and len(text)<=160 and not any(ord(c)<32 for c in text)
+        for key,value in attrs.items():
+            if (type(value) is not dict or set(value)!={'count','selected','enabled','visible','implicit_fixed_dash','options'} or value['count']!=1 or type(value['count']) is not int
+                    or value['selected']!=selection['attributes'][key] or value['enabled'] is not True or type(value['visible']) is not bool or type(value['implicit_fixed_dash']) is not bool
+                    or not(value['visible'] or value['implicit_fixed_dash']) or type(value['options']) is not list or not 1<=len(value['options'])<=512):return unknown
+            seen=set()
+            for option in value['options']:
+                if (type(option) is not dict or set(option)!={'value','label','enabled'} or type(option['value']) is not str or option['value'] and not ID.fullmatch(option['value'])
+                        or option['value'] in seen or not label(option['label']) or type(option['enabled']) is not bool):return unknown
+                seen.add(option['value'])
+            if sum(o['value']==value['selected'] and o['enabled'] for o in value['options'])!=1:return unknown
+        for key in ('job_sample','digital_proof'):
+            value=scope[key]
+            if type(value) is not dict or set(value)!={'count','checked','enabled','visible'} or type(value['count']) is not int or value['count']!=1 or value['checked'] is not False or value['enabled'] is not True or type(value['visible']) is not bool:return unknown
+        sets=scope['sets']
+        if sets!={'count':0,'binding':'one_native_job'} and sets!={'count':1,'binding':'retained_control','value':1,'enabled':True,'valid':True}:return unknown
+        if type(sets.get('count')) is not int or 'value' in sets and type(sets['value']) is not int:return unknown
+        if (type(quantities) is not dict or set(quantities)!={'rendered','model_available','remaining_expand_controls','truncated'} or type(quantities['rendered']) is not list
+                or not 1<=len(quantities['rendered'])<=1000 or type(quantities['model_available']) is not list or not 1<=len(quantities['model_available'])<=1000
+                or type(quantities['remaining_expand_controls']) is not int or not 0<=quantities['remaining_expand_controls']<=1 or type(quantities['truncated']) is not bool):return unknown
+        expected=[r['quantity'] for r in table['rows']]
+        if quantities['model_available']!=expected or any(type(q) is not int or q<1 for q in expected) or len(expected)!=len(set(expected)):return unknown
+        shown=[]
+        for row in quantities['rendered']:
+            if type(row) is not dict or set(row)!={'value','label','enabled'} or type(row['value']) is not str or not ID.fullmatch(row['value']) or not label(row['label']) or type(row['enabled']) is not bool:return unknown
+            if row['label'].replace(',','')!=row['value']:return unknown
+            shown.append(int(row['value']))
+        if len(shown)!=len(set(shown)) or any(q not in expected for q in shown):return unknown
+        if type(extra) is not list or len(extra)>32:return unknown
+        for field in extra:
+            if (type(field) is not dict or set(field)!={'tag','type','name'} or field['tag'] not in {'input','select','textarea'}
+                    or not label(field['type']) or not re.fullmatch(r'[A-Za-z0-9_\[\]-]{1,100}',field['name'])):return unknown
+        if type(production) is not list or len(production)>32:return unknown
+        for row in production:
+            if (type(row) is not dict or set(row)!={'value','label','selected','enabled','visible'} or type(row['value']) is not str or not ID.fullmatch(row['value'])
+                    or not label(row['label']) or any(type(row[k]) is not bool for k in ('selected','enabled','visible'))):return unknown
+        complete=(shown==expected and not quantities['truncated'] and quantities['remaining_expand_controls']==0 and all(row['enabled'] for row in quantities['rendered']))
+        result={'schema':'fourover-native-domain-observation/v1',**raw,'source_url':source,'scope':dict(SCOPE),'observed_at':observed_at,
+                'document_sha256':document_sha256,'price_response_sha256':table['sha256'],'page_generation':page_generation,'snapshot_id':snapshot_id,
+                'expanded_rendered_domain':'verified' if complete else 'unknown','source_domain_complete':False,
+                'production_scope':'observed_current_quantity_only','model_values_sha256':digest(_encoded(quantities['model_available']))}
+        result['rendered_controls_sha256']=digest(_encoded({key:raw[key] for key in ('selected_attributes','attribute_controls','scope_controls','quantity_controls','production_controls','additional_option_fields')}))
+        if len(_encoded(result))>256*1024:return unknown
+        return result
+    except (KeyError,TypeError,ValueError,OverflowError):return unknown
 
 TRIM_PUBLIC_MODULES={
  'FourOver_TrimSize/js/view/register-options-manager.js':'9fd9d14b87a9976f23adb22485f070512fae3f2e442d5553779b2020dc9163c4',
@@ -1567,17 +1695,26 @@ class AutomaticFourOverSession:
         self.cursor['inflight']={'selection':selection,'semantic':semantic_key(self.source,entry['child_id'],q)}
         self.persist();return selection
     def time_to_yield(self):return time.monotonic()+36>=self.session_deadline
-    async def reveal_quantity(self,selection,table):
+    async def reveal_quantity(self,selection,table,*,full_domain=False):
         # Presentation only. No reservation, selection/model mutation or supplier
         # request. The original full prequantity gate still follows this helper.
+        if type(full_domain) is not bool:raise Held('source_quantity_expand_changed')
         clicked=False
         while True:
             await self.check()
             if (self.stage!='child' or self.selection is not selection or self.cursor.get('inflight') is not None
                     or self.summary_request_observed or self.summary_seen or self.summary_pending or self.summary is not None
-                    or self.proceed_receipt is not None or spent(self.store.root,self.source,selection['child_id'],selection['run_size'])):raise Held('stale_quote_epoch')
+                    or self.proceed_receipt is not None or not full_domain and spent(self.store.root,self.source,selection['child_id'],selection['run_size'])):raise Held('stale_quote_epoch')
+            # Full-domain mode is a read/presentation action. Existing quote
+            # reservations still apply in prepare_selection and normal reveal;
+            # observing an already-loaded list never reopens a spent quote.
             state=await self.state();await self.check()
-            if str(selection['run_size']) in state.get('available_run_sizes',[]):return
+            if str(selection['run_size']) in state.get('available_run_sizes',[]):
+                # Show More must finish rendering the whole child table, not
+                # merely reveal the next requested row while later tiers are
+                # still absent. A collapsed visible subset is never domain
+                # completion evidence.
+                if (not full_domain and not clicked) or state.get('available_run_sizes',[])==[str(row['quantity']) for row in table['rows']]:return
             if clicked:
                 await asyncio.sleep(.1);continue
             if (self.tables.get(selection['child_id']) is not table or table.get('page_generation')!=self.session_id
@@ -1586,7 +1723,7 @@ class AutomaticFourOverSession:
             proved=all(name in self.quantity_expand_assets or type(self.public_assets.get(name)) is dict and self.public_assets[name].get('sha256')==sha
                 and self.public_assets[name].get('source_static_prefix')==self.prefix for name,sha in QUANTITY_EXPAND_PUBLIC_ASSETS.items())
             result=await self.page.evaluate(quantity_expand_js(selection['attributes'],self.source,
-                controller_proved=len(self.controller_modules)==len(CONTROLLER_PUBLIC_MODULES),ui_proved=len(self.ui_modules)==len(UI_PUBLIC_MODULES),assets_proved=proved),
+                controller_proved=len(self.controller_modules)==len(CONTROLLER_PUBLIC_MODULES),ui_proved=len(self.ui_modules)==len(UI_PUBLIC_MODULES),assets_proved=proved,full_domain=full_domain),
                 {'selection':selection,'rows':table['rows']})
             await self.check()
             if self.stage!='child' or self.selection is not selection or self.cursor.get('inflight') is not None:raise Held('stale_quote_epoch')
@@ -1594,6 +1731,36 @@ class AutomaticFourOverSession:
             if self.quantity_expand_diagnostic is None:raise Held('source_quantity_expand_changed')
             if result['status']=='clicked':clicked=True
             await asyncio.sleep(.1)
+    async def capture_native_domain(self,selection,table,*,expand_all=False):
+        """Read domain evidence; optional expansion never selects or quotes."""
+        if type(expand_all) is not bool:raise Held('source_quantity_expand_changed')
+        def unknown(reason):
+            return {'schema':'fourover-native-domain-observation/v1','status':'unknown','reason':reason,
+                    'expanded_rendered_domain':'unknown','source_domain_complete':False}
+        await self.check()
+        if (self.stage!='child' or self.selection is not selection or self.cursor.get('inflight') is not None
+                or self.proceed_receipt is not None or self.tables.get(selection['child_id']) is not table
+                or table.get('page_generation')!=self.session_id or table.get('attributes')!=selection['attributes']):
+            return unknown('table_identity_unproved')
+        original_run_size=None
+        if expand_all:
+            original=await self.state();original_run_size=original.get('run_size')
+            await self.reveal_quantity(selection,table,full_domain=True)
+        try:
+            raw=await self.page.evaluate(native_domain_read_js(selection['attributes'],self.source,
+                controller_proved=len(self.controller_modules)==len(CONTROLLER_PUBLIC_MODULES),ui_proved=len(self.ui_modules)==len(UI_PUBLIC_MODULES)),
+                {'selection':selection,'rows':table['rows']})
+        except asyncio.CancelledError:raise
+        except Exception:
+            raw={'status':'unknown','reason':'native_domain_observation_unavailable'}
+        await self.check()
+        if self.stage!='child' or self.selection is not selection or self.cursor.get('inflight') is not None:
+            return unknown('table_identity_unproved')
+        if expand_all and type(raw) is dict and raw.get('status')=='observed' and raw.get('observed_run_size')!=original_run_size:
+            raise Held('source_quantity_expansion_changed_selection')
+        return safe_native_domain_observation(raw,source=self.source,selection=selection,table=table,
+            document_sha256=getattr(self,'document_sha256',''),page_generation=self.session_id,
+            snapshot_id=self.catalog['reference']['snapshot_id'],observed_at=time.time())
     async def prepare_quote_label(self,state):
         ui=state.get('source_ui') if type(state) is dict else None
         if type(ui) is not dict or ui.get('current_project_name_present') is not True:return
@@ -1681,6 +1848,7 @@ class AutomaticFourOverSession:
                     if deferred_current is not None or not any(candidate['quantity']!=q and not spent(self.store.root,self.source,entry['child_id'],candidate['quantity']) for candidate in pending):
                         raise Held('source_current_quantity_has_no_unspent_native_change')
                     deferred_current=row;continue
+                native_domain=await self.capture_native_domain(selection,table)
                 if self.prepare_selection(entry,q) is None:continue
                 # Native summary is armed only after the semantic once reservation,
                 # immediately before the ordinary source quantity action.
@@ -1709,6 +1877,13 @@ class AutomaticFourOverSession:
                         'catalog_reference':self.catalog['reference'],'observed_at':self.summary['observed_at'],'quote_epoch':self.epoch,
                         'page_generation':self.session_id,'price_epoch':table['price_epoch'],'source_static_prefix':self.prefix,
                         'source_data_finalized':False,'woocommerce_import_ready':False,'shipping_verified':False}
+                    # Capture was made while Product Options was still visible.
+                    # Existing retained quote/Proceed guards bind it to this
+                    # child and generation. It is evidence, never a standalone
+                    # whole-domain or every-production-combination certificate.
+                    domain_raw=_encoded(native_domain);domain_path=self.store.put_object(domain_raw,'fourover-native-domain.json')
+                    receipt['native_domain_observation']=native_domain
+                    receipt['native_domain_evidence']={'object_path':domain_path,'sha256':digest(domain_raw)}
                     if self.proceed_receipt is not None:
                         receipt['native_quote_transition']={'schema':'native-proceed-quote-retention/v1','basis':'visible_options_and_production_before_atomic_native_proceed',
                             'pre_proceed_context_sha256':digest(_encoded(self.proceed_receipt)),

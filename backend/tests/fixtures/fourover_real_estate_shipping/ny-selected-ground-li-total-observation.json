@@ -1,0 +1,1520 @@
+{
+  "captured_at": "2026-10-29T08:17:08.882288+00:00",
+  "evidence": {
+    "height": null,
+    "product_id": "6669",
+    "project_response_shapes": [
+      {
+        "body_shape": {
+          "product_options": {
+            "item_shape": {
+              "label": "str",
+              "value": "str"
+            },
+            "length": 8,
+            "type": "list"
+          },
+          "reward_points": "int",
+          "totals": {
+            "grand_total": "float",
+            "subtotal": "float",
+            "tax": "float"
+          }
+        },
+        "product_options": [
+          {
+            "label": "Size",
+            "value": "18&quot; x 24&quot;"
+          },
+          {
+            "label": "Hardware",
+            "value": "White 6ft Post (Gothic Cap)"
+          },
+          {
+            "label": "1\u201d Round Corners",
+            "value": "No"
+          },
+          {
+            "label": "Stock",
+            "value": "3mm PVC"
+          },
+          {
+            "label": "Colorspec",
+            "value": "4/4 (4 color both sides)"
+          },
+          {
+            "label": "Grommets",
+            "value": "Real Estate Post Grommets"
+          },
+          {
+            "label": "Run Size",
+            "value": "1"
+          },
+          {
+            "label": "Turnaround Time",
+            "value": "4 Business Days"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": true,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1079",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {
+            "0": 1
+          }
+        },
+        "status": 200,
+        "totals": {
+          "grand_total": 68.0,
+          "subtotal": 100.0,
+          "tax": 41.0
+        }
+      },
+      {
+        "body_shape": {
+          "product_options": {
+            "item_shape": {
+              "label": "str",
+              "value": "str"
+            },
+            "length": 8,
+            "type": "list"
+          },
+          "reward_points": "int",
+          "totals": {
+            "grand_total": "float",
+            "subtotal": "float",
+            "tax": "float"
+          }
+        },
+        "product_options": [
+          {
+            "label": "Size",
+            "value": "18&quot; x 24&quot;"
+          },
+          {
+            "label": "Hardware",
+            "value": "White 6ft Post (Gothic Cap)"
+          },
+          {
+            "label": "1\u201d Round Corners",
+            "value": "No"
+          },
+          {
+            "label": "Stock",
+            "value": "3mm PVC"
+          },
+          {
+            "label": "Colorspec",
+            "value": "4/4 (4 color both sides)"
+          },
+          {
+            "label": "Grommets",
+            "value": "Real Estate Post Grommets"
+          },
+          {
+            "label": "Run Size",
+            "value": "1"
+          },
+          {
+            "label": "Turnaround Time",
+            "value": "4 Business Days"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": true,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1079",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {
+            "0": 1
+          }
+        },
+        "status": 200,
+        "totals": {
+          "grand_total": 68.0,
+          "subtotal": 100.0,
+          "tax": 41.0
+        }
+      },
+      {
+        "body_shape": {
+          "product_options": {
+            "item_shape": {
+              "label": "str",
+              "value": "str"
+            },
+            "length": 8,
+            "type": "list"
+          },
+          "reward_points": "int",
+          "totals": {
+            "grand_total": "float",
+            "shipping": "float",
+            "subtotal": "float",
+            "tax": "float"
+          }
+        },
+        "product_options": [
+          {
+            "label": "Size",
+            "value": "18&quot; x 24&quot;"
+          },
+          {
+            "label": "Hardware",
+            "value": "White 6ft Post (Gothic Cap)"
+          },
+          {
+            "label": "1\u201d Round Corners",
+            "value": "No"
+          },
+          {
+            "label": "Stock",
+            "value": "3mm PVC"
+          },
+          {
+            "label": "Colorspec",
+            "value": "4/4 (4 color both sides)"
+          },
+          {
+            "label": "Grommets",
+            "value": "Real Estate Post Grommets"
+          },
+          {
+            "label": "Run Size",
+            "value": "1"
+          },
+          {
+            "label": "Turnaround Time",
+            "value": "4 Business Days"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": true,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1079",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {
+            "0": 1
+          }
+        },
+        "status": 200,
+        "totals": {
+          "grand_total": 129.0,
+          "shipping": 20.0,
+          "subtotal": 100.0,
+          "tax": 9.0
+        }
+      }
+    ],
+    "quote_readiness": {
+      "status": "deferred_until_native_ground_selected"
+    },
+    "selected_child_id": "83545",
+    "selected_services": {
+      "digital_proof": false,
+      "job_sample": false
+    },
+    "service_controls": {
+      "digital_proof": {
+        "ambiguous": false,
+        "checked": false,
+        "present": false
+      },
+      "job_sample": {
+        "ambiguous": false,
+        "checked": false,
+        "present": false
+      }
+    },
+    "set_control": {
+      "class_name": "sets-count",
+      "data_bind": "value: shipment.jobs().length, event: { input: function() { component.manualShipmentSet(shipment, event); }, keyup: function() { component.refreshShipmentAfterKeyUp(shipment, event); } }",
+      "id": "",
+      "max": "200",
+      "min": "1",
+      "name": "",
+      "nearest_wrapper_data_bind": "",
+      "rangeOverflow": false,
+      "rangeUnderflow": false,
+      "step": "",
+      "type": "number",
+      "valid": true,
+      "value": "1"
+    },
+    "sets": 1,
+    "shipping_control_observation": {
+      "actions": [
+        {
+          "class_name": "",
+          "data_bind": "",
+          "disabled": false,
+          "id": "gallery-prev-area",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "action skip gallery-next-area",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "fotorama__thumb__arr fotorama__thumb__arr--left fotorama__arr--disabled",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb fotorama__active",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "fotorama__thumb__arr fotorama__thumb__arr--right",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": "Next",
+          "name": "",
+          "role": "button",
+          "tag": "div"
+        },
+        {
+          "class_name": "product-favorite__toggle",
+          "data_bind": "click: toggleFormVisibility, enable: isOnProductOptionsStep(), attr: { '[literal]': isRequisitionAddFormVisible() ? '[literal]' : '[literal]', '[literal]': !isOnProductOptionsStep() ? $t('[literal]') : (isRequisitionAddFormVisible() ? $t('[literal]') : $t('[literal]')), title: !isOnProductOptionsSte",
+          "disabled": true,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "action skip gallery-prev-area",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "",
+          "data_bind": "",
+          "disabled": false,
+          "id": "gallery-next-area",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "action secondary btn-small",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "action start-over",
+          "data_bind": "click: resetProjectBtnAction.bind($data, '[literal]')",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "step-header",
+          "data_bind": "",
+          "disabled": false,
+          "id": "step-header-product.configuration",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "step-header",
+          "data_bind": "",
+          "disabled": false,
+          "id": "step-header-product.sets.shipping",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "action project__toggle-shipment",
+          "data_bind": "click: $parent.toggleShipment.bind($parent, shipment), attr: {'[literal]': !$parent.isShipmentCollapsed(shipment)}",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "action address-edit",
+          "data_bind": "click: component.showEditAddressFormPopup.bind(component, [shipment, '[literal]'])",
+          "disabled": false,
+          "id": "",
+          "label": "Edit",
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "",
+          "data_bind": "attr: {'[literal]': '[literal]' + address.telephone}",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "action address-lookup",
+          "data_bind": "click: component.showAddressListPopup.bind(component, [shipment, '[literal]'])",
+          "disabled": false,
+          "id": "",
+          "label": "Address Book Lookup",
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "action address-new",
+          "data_bind": "click: component.showNewAddressFormPopup.bind(component, [shipment, '[literal]'])",
+          "disabled": false,
+          "id": "",
+          "label": "New Address",
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "action btn-add",
+          "data_bind": "click: createShipment.bind($data)",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "action primary btn-upload",
+          "data_bind": "enable: !isProjectNameInvalid() && !allowAddToCart() && isSelectedShippingMethods(), text: $t('[literal]'), click: uploadToArt.bind($data)",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "action secondary tocart",
+          "data_bind": "enable: isSelectedShippingMethods() && !isProjectNameInvalid() && allowAddToCart(), text: addToCartButton, click: addToCart.bind($data)",
+          "disabled": true,
+          "id": "",
+          "label": "Add to Cart",
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "action btn-save",
+          "data_bind": "click: saveAndClose",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button"
+        },
+        {
+          "class_name": "data switch",
+          "data_bind": "",
+          "disabled": false,
+          "id": "tab-label-description-title",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "data switch",
+          "data_bind": "",
+          "disabled": false,
+          "id": "tab-label-specs-title",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        },
+        {
+          "class_name": "data switch",
+          "data_bind": "",
+          "disabled": false,
+          "id": "tab-label-templates-title",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "a"
+        }
+      ],
+      "benchmark_destination": {
+        "account_default_changed": false,
+        "address_record_written": false,
+        "postcode": "10001-7800",
+        "selection": "current_destination_retained",
+        "state": "NY",
+        "status": "bound_postal_and_state"
+      },
+      "bound_postal_displays": [
+        {
+          "binding": "html: address.postcode",
+          "destination_role_requires_shipping_type_confirmation": true,
+          "postcode": "10001-7800",
+          "scope": "visible_ship_from_address_postcode"
+        }
+      ],
+      "carrier_logos": [],
+      "controls": [
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__thumb__arr fotorama__thumb__arr--left fotorama__arr--disabled",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb fotorama__active",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__nav__frame fotorama__nav__frame--thumb",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "fotorama__thumb__arr fotorama__thumb__arr--right",
+          "data_bind": "",
+          "disabled": false,
+          "id": "",
+          "label": "Next",
+          "name": "",
+          "role": "button",
+          "tag": "div",
+          "type": "",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "product-favorite__toggle",
+          "data_bind": "click: toggleFormVisibility, enable: isOnProductOptionsStep(), attr: { '[literal]': isRequisitionAddFormVisible() ? '[literal]' : '[literal]', '[literal]': !isOnProductOptionsStep() ? $t('[literal]') : (isRequisitionAddFormVisible() ? $t('[literal]') : $t('[literal]')), title: !isOnProductOptionsSte",
+          "disabled": true,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "button",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "step-header",
+          "data_bind": "",
+          "disabled": false,
+          "id": "step-header-product.configuration",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "button",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "step-header",
+          "data_bind": "",
+          "disabled": false,
+          "id": "step-header-product.sets.shipping",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "button",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "action project__toggle-shipment",
+          "data_bind": "click: $parent.toggleShipment.bind($parent, shipment), attr: {'[literal]': !$parent.isShipmentCollapsed(shipment)}",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "button",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "sets-count",
+          "data_bind": "value: shipment.jobs().length, event: { input: function() { component.manualShipmentSet(shipment, event); }, keyup: function() { component.refreshShipmentAfterKeyUp(shipment, event); } }",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "input",
+          "type": "number",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "",
+          "data_bind": "textInput: job.name, attr: { name: '[literal]' + $parent.component.getShipmentSetKey($parent.shipmentIndex, $index()), id: '[literal]' + $parent.component.getShipmentSetKey($parent.shipmentIndex, $index()), placeholder: $parent.component.getShipmentSetPlaceholder($parent.shipmentIndex, $index())}",
+          "disabled": false,
+          "id": "set_nameshipment_[number]_set_[number]",
+          "label": null,
+          "name": "set_nameshipment_[number]_set_[number]",
+          "role": "",
+          "tag": "input",
+          "type": "text",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": true,
+          "choice_count": null,
+          "class_name": "radio",
+          "data_bind": "attr: {id: '[literal]' + shipment.uuid, name: '[literal]' + shipment.uuid}, value: '[literal]', checked: shipment.shippingType",
+          "disabled": false,
+          "id": "shipping_type_default_[uuid]",
+          "label": "Default Shipping",
+          "name": "shipping_type_[uuid]",
+          "role": "",
+          "tag": "input",
+          "type": "radio",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": false,
+          "choice_count": null,
+          "class_name": "radio",
+          "data_bind": "attr: {id: '[literal]' + shipment.uuid, name: '[literal]' + shipment.uuid}, value: '[literal]', checked: shipment.shippingType",
+          "disabled": false,
+          "id": "shipping_type_drop_shipping_[uuid]",
+          "label": "Shipping",
+          "name": "shipping_type_[uuid]",
+          "role": "",
+          "tag": "input",
+          "type": "radio",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": 8,
+          "class_name": "",
+          "data_bind": "optionsCaption: $t('[literal]'), options: component.shippingRates()[component.getRateCacheKey(shipment)], optionsText: function(methodData) { return methodData.method_title + '[literal]' + component.formatPrice(methodData.amount) }, optionsValue: function(methodData) { return methodData.carrier_code",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "select",
+          "type": "select-one",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": 4,
+          "class_name": "font-bold",
+          "data_bind": "options: rate.cutoff_times.split('[literal]')",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "select",
+          "type": "select-one",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "action btn-add",
+          "data_bind": "click: createShipment.bind($data)",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "submit",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "action primary btn-upload",
+          "data_bind": "enable: !isProjectNameInvalid() && !allowAddToCart() && isSelectedShippingMethods(), text: $t('[literal]'), click: uploadToArt.bind($data)",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "submit",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": false,
+          "choice_count": null,
+          "class_name": "",
+          "data_bind": "attr: {name: '[literal]', id: '[literal]'}, checked: allowAddToCart",
+          "disabled": false,
+          "id": "allow-add-to-cart",
+          "label": null,
+          "name": "allow-add-to-cart",
+          "role": "",
+          "tag": "input",
+          "type": "checkbox",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "action secondary tocart",
+          "data_bind": "enable: isSelectedShippingMethods() && !isProjectNameInvalid() && allowAddToCart(), text: addToCartButton, click: addToCart.bind($data)",
+          "disabled": true,
+          "id": "",
+          "label": "Add to Cart",
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "submit",
+          "value_kind": "redacted"
+        },
+        {
+          "checked": null,
+          "choice_count": null,
+          "class_name": "action btn-save",
+          "data_bind": "click: saveAndClose",
+          "disabled": false,
+          "id": "",
+          "label": null,
+          "name": "",
+          "role": "",
+          "tag": "button",
+          "type": "submit",
+          "value_kind": "redacted"
+        }
+      ],
+      "current_destination": {
+        "postcode": "10001-7800",
+        "state": "NY",
+        "status": "bound_postal_and_state"
+      },
+      "headings": [],
+      "limits": {
+        "address_values_returned": false,
+        "addressbook_ids_returned": false,
+        "customer_details_returned": false,
+        "mutations_performed": false,
+        "native_destination_changed": false
+      },
+      "note": "Unrecognized labels and all non-postal/state/country/service values are redacted. Rate cards contain only native service labels and currency amounts.",
+      "production_facilities": [],
+      "public_js_assets": [
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/requirejs/require.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/requirejs/mixins.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Smile_ElasticsuiteTracker/js/tracking.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/requirejs-config.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/dataPost.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/common.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/bootstrap.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/core/app.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_PageCache/js/form-key-provider.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_PurchaseOrderRule/js/validation/messages.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Translation/js/mage-translation-dictionary.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/FindCanary_PageBuilder/js/resource/lozad/lozadConfig.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/theme.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/detect-ie.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/lozad.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/user-agent.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/js/phone-mask.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Smile_ElasticsuiteTracker/js/user-consent.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/template.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/modal/confirm.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/widget.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/model/user-agent.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/requirejs/domReady.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/jquery.validate.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/translate.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bootstrap.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/apply/main.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/cookies.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/smart-keyboard-handler.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/dropdown-observe.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/mage.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/requirejs/text.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_ReCaptchaWebapiUi/js/jquery-mixin.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/js/lib/jquery.inputmask.bundle.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/js/intersection-observer.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/core/renderer/types.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/core/renderer/layout.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/underscore.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/jquery.metadata.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/knockoutjs/knockout.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/knockoutjs/knockout-es5.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/wrapper.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/js/lozad.min.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/modal/modal.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/modal/modal-mixin.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/version.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/template/engine.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/bootstrap.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/extender/observable_array.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/extender/bound-nodes.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/apply/scripts.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/main.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/js-cookie/cookie-wrapper.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/registry/registry.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/console-logger.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/key-codes.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/core.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/z-index.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/js/bodyScrollLock.min.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/knockoutjs/knockout-repeat.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/knockoutjs/knockout-fast-foreach.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/core/events.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/template/observable_source.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/template/renderer.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/matchMedia.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/js-cookie/js.cookie.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/core/storage/local.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/resizable.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/i18n.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/scope.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/range.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/mage-init.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/keyboard.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/optgroup.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/after-render.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/autoselect.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/datepicker.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/outer_click.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/fadeVisible.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/dimVisible.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/collapsible.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/staticChecked.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/simple-checked.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/bind-html.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/tooltip.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/bindings/color-picker.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/compare.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/arrays.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/misc.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/objects.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/strings.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/utils/template.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/logger.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/entry-factory.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/console-output-handler.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/formatter.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/message-pool.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/levels-pool.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/logger-utils.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/data.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/disable-selection.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/focusable.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/form.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/ie.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/keycode.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/labels.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/jquery-patch.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/plugin.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/safe-active-element.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/safe-blur.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/scroll-parent.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/tabbable.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/ui-modules/unique-id.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/core/class.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/knockout/template/loader.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/view/utils/async.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/spectrum/spectrum.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/jquery/spectrum/tinycolor.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/moment.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/logger/entry.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/view/utils/dom-observer.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/lib/view/utils/bindings.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/loader.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Wishlist/js/add-to-wishlist.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_PageCache/js/page-cache.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/sticky-header.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Smile_ElasticsuiteCore/js/form-mini.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/dropdowns.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/customer-logged-in.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/dropdown.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/tabs.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/magnifier/magnify.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Bss_DependentCustomOption/js/dco-control.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/accordion.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/FourOver_Project/js/artwork-popup.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Csp/js/nonce-injector.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_GoogleTagManager/js/google-tag-manager.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_PageBuilder/js/widget-initializer.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/cookie-status.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_GoogleTagManager/js/google-tag-manager-cart.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Ui/js/block-loader.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/FourOver_FranchiseSalesKit/js/brandedkit_menu.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_ConfigurableProduct/js/catalog-add-to-cart.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Customer/js/customer-global-session-loader.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Customer/js/section-config.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Customer/js/invalidation-processor.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Banner/js/model/banner.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Catalog/js/product/view/provider.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_GoogleTagManager/js/actions/product-detail.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/menu.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_QuickOrder/js/mage/menu.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/mage/menu-mixin.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/menu-mixin.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/view/breadcrumbs.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Catalog/js/product/breadcrumbs.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_Theme/js/view/add-home-breadcrumb.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_ProductVideo/js/fotorama-add-video-events.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_ProductVideo/js/fotorama-add-video-events-mixin.js",
+        "https://4over.com/static/version1792805087/frontend/FourOver/default/en_US/Magento_ConfigurableProduct/js/configurable.js"
+      ],
+      "rate_cards": [],
+      "rate_hydration": {
+        "binding_scope": "attached_native_shipping_method_options; not a destination or carrier-identity proof",
+        "choices": [
+          {
+            "cents": 2000,
+            "method_code": "03"
+          },
+          {
+            "cents": 8600,
+            "method_code": "12"
+          },
+          {
+            "cents": 10400,
+            "method_code": "02"
+          },
+          {
+            "cents": 12200,
+            "method_code": "13"
+          },
+          {
+            "cents": 13100,
+            "method_code": "59"
+          },
+          {
+            "cents": 14000,
+            "method_code": "01"
+          },
+          {
+            "cents": 15800,
+            "method_code": "14"
+          }
+        ],
+        "native_count": 7,
+        "selector_count": 1,
+        "status": "matched",
+        "visible_selector_count": 1
+      },
+      "schema": "fourover-shipping-controls/v1",
+      "selected_ground_service": null,
+      "status": "passive_observation",
+      "write_guard": {
+        "address_mutations_allowed": false,
+        "blocked_paths": [],
+        "cart_or_order_mutations_allowed": false
+      }
+    },
+    "shipping_rates": [
+      {
+        "binding": {
+          "carrier_identity": "source_fields_only",
+          "configuration_scope": "same_guarded_pilot_selection",
+          "postcode": "10001-7800",
+          "state": "NY",
+          "status": "native_choices_and_destination_retained"
+        },
+        "rates": [
+          {
+            "amount": 20.0,
+            "available": true,
+            "carrier_code": "mapi",
+            "method_code": "03",
+            "method_title": "Ground Shipping",
+            "production_estimate": "2026-11-03",
+            "shipping_time": "4"
+          },
+          {
+            "amount": 86.0,
+            "available": true,
+            "carrier_code": "mapi",
+            "method_code": "12",
+            "method_title": "3 Day Shipping Service",
+            "production_estimate": "2026-11-03",
+            "shipping_time": "3"
+          },
+          {
+            "amount": 104.0,
+            "available": true,
+            "carrier_code": "mapi",
+            "method_code": "02",
+            "method_title": "2 Day Air Shipping",
+            "production_estimate": "2026-11-03",
+            "shipping_time": "2"
+          },
+          {
+            "amount": 122.0,
+            "available": true,
+            "carrier_code": "mapi",
+            "method_code": "13",
+            "method_title": "Next Day Shipping by 5pm",
+            "production_estimate": "2026-11-03",
+            "shipping_time": "1"
+          },
+          {
+            "amount": 131.0,
+            "available": true,
+            "carrier_code": "mapi",
+            "method_code": "59",
+            "method_title": "2nd Day Air A.M.",
+            "production_estimate": "2026-11-03",
+            "shipping_time": "2"
+          },
+          {
+            "amount": 140.0,
+            "available": true,
+            "carrier_code": "mapi",
+            "method_code": "01",
+            "method_title": "Next Day Shipping by 12 noon",
+            "production_estimate": "2026-11-03",
+            "shipping_time": "1"
+          },
+          {
+            "amount": 158.0,
+            "available": true,
+            "carrier_code": "mapi",
+            "method_code": "14",
+            "method_title": "Next Day Air Early A.M.",
+            "production_estimate": "2026-11-03",
+            "shipping_time": "1"
+          }
+        ],
+        "status": 200
+      }
+    ],
+    "shipping_response_shapes": [
+      {
+        "rates": [
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": false,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1079",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {}
+        },
+        "status": 200
+      },
+      {
+        "rates": [
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": false,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1079",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {}
+        },
+        "status": 200
+      },
+      {
+        "rates": [
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          },
+          {
+            "production_estimate": "2026-11-03"
+          }
+        ],
+        "selection_context": {
+          "contiguous_job_slots": false,
+          "custom_run_size": "0",
+          "product_id": "83548",
+          "product_options[options][892]": "1078",
+          "product_options[options][893]": "1079",
+          "product_options[super_attribute][197]": "372",
+          "product_options[super_attribute][204]": "97",
+          "product_options[super_attribute][211]": "544",
+          "product_options[super_attribute][216]": "230",
+          "product_options[super_attribute][229]": "1033",
+          "product_options[turnaround_time]": "4",
+          "run_size": "1",
+          "shipment_job_counts": {}
+        },
+        "status": 200
+      }
+    ],
+    "shipping_view": {
+      "money": [
+        "Price Per Set: $100.00",
+        "$100.00",
+        "$20.00",
+        "$9.00",
+        "$129.00 Taxes may apply",
+        "$129.00"
+      ]
+    },
+    "source_content": {
+      "declared_gallery": [],
+      "description": "Our Real Estate Posts is an incredibly convenient solution for any Realtor. The hardware is durable and lightweight enough for a single person to install. The arm, quick-install ground stake, caps, and hanging hardware all fit within the body of the vertical post for compact storage and transport. This product will make displaying a Real Estate sign easy and dig-free. The Single Arm Vinyl Post is a great exterior sign frame for real estate and directional signs. Offered with our 3mm PVC and 3mm Double-sided White Aluminum Sandwich board makes it quick to change out signage or move the location of your signage with ease.Optional Rider Signs are sold separately under the Rider Sign Category.Hardware 6 foot Single Arm Vinyl Post Decorative Gothic Cap 2 Rider Clips Mounting Hardware Steel Post Stake (4\u201dX34\u201d) Vinyl Arm (2\u201dX3.5\u201dX40\u201d) Vinyl Post (4\u201dX4\u201dX72\u201d)",
+      "details_text": "Description Our Real Estate Posts is an incredibly convenient solution for any Realtor. The hardware is durable and lightweight enough for a single person to install. The arm, quick-install ground stake, caps, and hanging hardware all fit within the body of the vertical post for compact storage and transport. This product will make displaying a Real Estate sign easy and dig-free. The Single Arm Vinyl Post is a great exterior sign frame for real estate and directional signs. Offered with our 3mm PVC and 3mm Double-sided White Aluminum Sandwich board makes it quick to change out signage or move the location of your signage with ease.Optional Rider Signs are sold separately under the Rider Sign Category.Hardware 6 foot Single Arm Vinyl Post Decorative Gothic Cap 2 Rider Clips Mounting Hardware Steel Post Stake (4\u201dX34\u201d) Vinyl Arm (2\u201dX3.5\u201dX40\u201d) Vinyl Post (4\u201dX4\u201dX72\u201d) Specs Size 24\" x 30\" 18\" x 24\" Stock 3mm PVC Aluminum Sandwich Board 3mm - Double-sided White Colorspec 4/4 (4 color both sides) Drill Hole 3/8\" Drill hole Real Estate Post Grommets Real Estate Post Grommets Hardware White 6ft Post (Gothic Cap) 1\u201d Round Corners No Yes Turnaround Time 4 Business Days Templates File Preparation: For specific instructions see our FAQ\u2019s (e.g. Akuafoil and Spot UV). Resolution: 300dpi Color Mode: CMYK Bleed: 0.5\u201d (0.25 on each side) File Types: PDF (recommended), JPG, EPS and TIFF",
+      "gallery_capture_status": "dom_only_not_complete_gallery_evidence",
+      "gallery_images": [
+        "https://4over.com/media/catalog/product/cache/1db2a69e8df1635010b66ecca00a5378/d/e/default.jpeg",
+        "https://4over.com/media/catalog/product/cache/1db2a69e8df1635010b66ecca00a5378/d/o/double-sided_white_alumi_sandwich_real_estate_2-20240723-153015.png",
+        "https://4over.com/media/catalog/product/cache/1db2a69e8df1635010b66ecca00a5378/d/o/double-sided_white_alumi_sandwich_real_estate_4-20240723-153024.png",
+        "https://4over.com/media/catalog/product/cache/e42d0de19113ffc587c93e3bf09261f4/d/e/default.jpeg",
+        "https://4over.com/media/catalog/product/cache/e42d0de19113ffc587c93e3bf09261f4/d/o/double-sided_white_alumi_sandwich_real_estate_4-20240723-153024.png",
+        "https://4over.com/media/catalog/product/cache/e42d0de19113ffc587c93e3bf09261f4/p/d/pdp_sign_hardware_w_rider_closeup_4_1_.jpeg",
+        "https://4over.com/media/catalog/product/cache/e42d0de19113ffc587c93e3bf09261f4/p/d/pdp_sign_featuring_additional_clips_no_rider_closeup.jpeg",
+        "https://4over.com/media/catalog/product/cache/e42d0de19113ffc587c93e3bf09261f4/h/a/hardware_view_2_1.jpeg"
+      ],
+      "template_urls": [],
+      "text_capture_status": "scripts_styles_removed",
+      "title": "Real Estate Post"
+    },
+    "source_http_events": [],
+    "source_observation_error": "native_ground_selected_summary_not_ready_before_deadline",
+    "source_selection": [
+      {
+        "disabled": false,
+        "id": "attribute211",
+        "label": "Size *",
+        "name": "super_attribute[211]",
+        "selected": "544",
+        "selected_label": "18\" x 24\""
+      },
+      {
+        "disabled": false,
+        "id": "attribute197",
+        "label": "Stock *",
+        "name": "super_attribute[197]",
+        "selected": "372",
+        "selected_label": "3mm PVC"
+      },
+      {
+        "disabled": false,
+        "id": "attribute204",
+        "label": "Colorspec *",
+        "name": "super_attribute[204]",
+        "selected": "97",
+        "selected_label": "4/4 (4 color both sides)"
+      },
+      {
+        "disabled": false,
+        "id": "attribute216",
+        "label": "Drill Hole *",
+        "name": "super_attribute[216]",
+        "selected": "230",
+        "selected_label": "-"
+      },
+      {
+        "disabled": false,
+        "id": "attribute229",
+        "label": "Grommets *",
+        "name": "super_attribute[229]",
+        "selected": "1033",
+        "selected_label": "Real Estate Post Grommets"
+      },
+      {
+        "disabled": false,
+        "id": "select_892",
+        "label": "Hardware",
+        "name": "options[892]",
+        "selected": "1078",
+        "selected_label": "White 6ft Post (Gothic Cap) +$80.00"
+      },
+      {
+        "disabled": false,
+        "id": "select_893",
+        "label": "1\u201d Round Corners",
+        "name": "options[893]",
+        "selected": "1079",
+        "selected_label": "No"
+      }
+    ],
+    "turnaround_control": {
+      "label": "4 Business Days",
+      "retained": true,
+      "value": "4"
+    },
+    "width": null
+  },
+  "fixture_provenance": {
+    "kind": "synthetic",
+    "notice": "Monetary values and capture identifiers are synthetic. Public product selectors, option IDs and failure structures are retained. This file is not supplier pricing evidence.",
+    "purpose": "Public parser and control-contract regression only"
+  },
+  "id": "809658127449656c45a0d433cf41a38e",
+  "reason": "native_ground_selected_summary_not_ready_before_deadline",
+  "selection": {
+    "child_id": "83545",
+    "digital_proof": false,
+    "hardware": "white_6ft_gothic_post",
+    "job_sample": false,
+    "product_id": "6669",
+    "rounded_corners": false,
+    "sets": 1,
+    "size": "18x24",
+    "source_url": "https://4over.com/real-estate-post",
+    "stock": "pvc_3mm",
+    "turnaround_time": "4"
+  },
+  "status": "unverified_source_observation_no_price_completion"
+}

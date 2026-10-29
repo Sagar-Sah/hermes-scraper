@@ -1,0 +1,1242 @@
+{
+  "audit_id": "d63ffbbbbab5e7f95cf1c58ce2ba3b20",
+  "capture_limitations": [
+    "Historical inventory retained from audit33adc253022843d2a988a1d8fe6f8799. Its visibility:false for the legacy quantity tier was based on aria-hidden and is invalid as physical visibility evidence. Source control labels and field purposes remain observations; use companion_field_visibility regressions and the corrected runtime audit for physical quantity visibility."
+  ],
+  "diagnosis": {
+    "created_at": "2026-10-29T15:37:16.815003+00:00",
+    "fields": [
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose width",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "6",
+            "value": "6"
+          },
+          {
+            "disabled": false,
+            "label": "7",
+            "value": "7"
+          },
+          {
+            "disabled": false,
+            "label": "8",
+            "value": "8"
+          },
+          {
+            "disabled": false,
+            "label": "9",
+            "value": "9"
+          },
+          {
+            "disabled": false,
+            "label": "10",
+            "value": "10"
+          },
+          {
+            "disabled": false,
+            "label": "11",
+            "value": "11"
+          },
+          {
+            "disabled": false,
+            "label": "12",
+            "value": "12"
+          },
+          {
+            "disabled": false,
+            "label": "13",
+            "value": "13"
+          },
+          {
+            "disabled": false,
+            "label": "14",
+            "value": "14"
+          },
+          {
+            "disabled": false,
+            "label": "15",
+            "value": "15"
+          },
+          {
+            "disabled": false,
+            "label": "16",
+            "value": "16"
+          },
+          {
+            "disabled": false,
+            "label": "17",
+            "value": "17"
+          },
+          {
+            "disabled": false,
+            "label": "18",
+            "value": "18"
+          },
+          {
+            "disabled": false,
+            "label": "19",
+            "value": "19"
+          },
+          {
+            "disabled": false,
+            "label": "20",
+            "value": "20"
+          },
+          {
+            "disabled": false,
+            "label": "21",
+            "value": "21"
+          },
+          {
+            "disabled": false,
+            "label": "22",
+            "value": "22"
+          },
+          {
+            "disabled": false,
+            "label": "23",
+            "value": "23"
+          },
+          {
+            "disabled": false,
+            "label": "24",
+            "value": "24"
+          },
+          {
+            "disabled": false,
+            "label": "25",
+            "value": "25"
+          },
+          {
+            "disabled": false,
+            "label": "26",
+            "value": "26"
+          },
+          {
+            "disabled": false,
+            "label": "27",
+            "value": "27"
+          },
+          {
+            "disabled": false,
+            "label": "28",
+            "value": "28"
+          },
+          {
+            "disabled": false,
+            "label": "29",
+            "value": "29"
+          },
+          {
+            "disabled": false,
+            "label": "30",
+            "value": "30"
+          },
+          {
+            "disabled": false,
+            "label": "31",
+            "value": "31"
+          },
+          {
+            "disabled": false,
+            "label": "32",
+            "value": "32"
+          },
+          {
+            "disabled": false,
+            "label": "33",
+            "value": "33"
+          },
+          {
+            "disabled": false,
+            "label": "34",
+            "value": "34"
+          },
+          {
+            "disabled": false,
+            "label": "35",
+            "value": "35"
+          },
+          {
+            "disabled": false,
+            "label": "36",
+            "value": "36"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "ea173d418e6a2dae83df",
+        "kind": "select",
+        "label": "WIDTH *"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose height",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "6",
+            "value": "6"
+          },
+          {
+            "disabled": false,
+            "label": "7",
+            "value": "7"
+          },
+          {
+            "disabled": false,
+            "label": "8",
+            "value": "8"
+          },
+          {
+            "disabled": false,
+            "label": "9",
+            "value": "9"
+          },
+          {
+            "disabled": false,
+            "label": "10",
+            "value": "10"
+          },
+          {
+            "disabled": false,
+            "label": "11",
+            "value": "11"
+          },
+          {
+            "disabled": false,
+            "label": "12",
+            "value": "12"
+          },
+          {
+            "disabled": false,
+            "label": "13",
+            "value": "13"
+          },
+          {
+            "disabled": false,
+            "label": "14",
+            "value": "14"
+          },
+          {
+            "disabled": false,
+            "label": "15",
+            "value": "15"
+          },
+          {
+            "disabled": false,
+            "label": "16",
+            "value": "16"
+          },
+          {
+            "disabled": false,
+            "label": "17",
+            "value": "17"
+          },
+          {
+            "disabled": false,
+            "label": "18",
+            "value": "18"
+          },
+          {
+            "disabled": false,
+            "label": "19",
+            "value": "19"
+          },
+          {
+            "disabled": false,
+            "label": "20",
+            "value": "20"
+          },
+          {
+            "disabled": false,
+            "label": "21",
+            "value": "21"
+          },
+          {
+            "disabled": false,
+            "label": "22",
+            "value": "22"
+          },
+          {
+            "disabled": false,
+            "label": "23",
+            "value": "23"
+          },
+          {
+            "disabled": false,
+            "label": "24",
+            "value": "24"
+          },
+          {
+            "disabled": false,
+            "label": "25",
+            "value": "25"
+          },
+          {
+            "disabled": false,
+            "label": "26",
+            "value": "26"
+          },
+          {
+            "disabled": false,
+            "label": "27",
+            "value": "27"
+          },
+          {
+            "disabled": false,
+            "label": "28",
+            "value": "28"
+          },
+          {
+            "disabled": false,
+            "label": "29",
+            "value": "29"
+          },
+          {
+            "disabled": false,
+            "label": "30",
+            "value": "30"
+          },
+          {
+            "disabled": false,
+            "label": "31",
+            "value": "31"
+          },
+          {
+            "disabled": false,
+            "label": "32",
+            "value": "32"
+          },
+          {
+            "disabled": false,
+            "label": "33",
+            "value": "33"
+          },
+          {
+            "disabled": false,
+            "label": "34",
+            "value": "34"
+          },
+          {
+            "disabled": false,
+            "label": "35",
+            "value": "35"
+          },
+          {
+            "disabled": false,
+            "label": "36",
+            "value": "36"
+          },
+          {
+            "disabled": false,
+            "label": "37",
+            "value": "37"
+          },
+          {
+            "disabled": false,
+            "label": "38",
+            "value": "38"
+          },
+          {
+            "disabled": false,
+            "label": "39",
+            "value": "39"
+          },
+          {
+            "disabled": false,
+            "label": "40",
+            "value": "40"
+          },
+          {
+            "disabled": false,
+            "label": "41",
+            "value": "41"
+          },
+          {
+            "disabled": false,
+            "label": "42",
+            "value": "42"
+          },
+          {
+            "disabled": false,
+            "label": "43",
+            "value": "43"
+          },
+          {
+            "disabled": false,
+            "label": "44",
+            "value": "44"
+          },
+          {
+            "disabled": false,
+            "label": "45",
+            "value": "45"
+          },
+          {
+            "disabled": false,
+            "label": "46",
+            "value": "46"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "4e0d17f5bbc4d2a93415",
+        "kind": "select",
+        "label": "HEIGHT *"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose an Option...",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "4mm White Coroplast",
+            "value": "645"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "c30f3cd6c4fa3c154766",
+        "kind": "select",
+        "label": "STOCK *"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose an Option...",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "4/0 (4 color front)",
+            "value": "18"
+          },
+          {
+            "disabled": false,
+            "label": "4/4 (4 color both sides)",
+            "value": "97"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "2a0b04fbb62c307a0913",
+        "kind": "select",
+        "label": "COLORSPEC *"
+      },
+      {
+        "choices": [],
+        "configurable": true,
+        "disabled": false,
+        "key": "026b255e80c5d6b63689",
+        "kind": "number",
+        "label": "Quantity"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose an Option...",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "Flute Direction (Horizontal)",
+            "value": "595"
+          },
+          {
+            "disabled": false,
+            "label": "Flute Direction (Vertical)",
+            "value": "596"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "625c25f729e3c6e56bc8",
+        "kind": "select",
+        "label": "FLUTE DIRECTIONS"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose an Option...",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "Contour Cut & H-Stakes",
+            "value": "597"
+          },
+          {
+            "disabled": false,
+            "label": "H-Stakes & Grommets",
+            "value": "598"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "a192fd0b481738835958",
+        "kind": "select",
+        "label": "FINISH OPTIONS"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose an Option...",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "None",
+            "value": "599"
+          },
+          {
+            "disabled": false,
+            "label": "All 4 Corners +$2.00",
+            "value": "600"
+          },
+          {
+            "disabled": false,
+            "label": "Top Corners Only +$3.00",
+            "value": "601"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "7591c4252c8009cef232",
+        "kind": "select",
+        "label": "GROMMETS"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Choose an Option...",
+            "value": ""
+          },
+          {
+            "disabled": false,
+            "label": "No",
+            "value": "602"
+          },
+          {
+            "disabled": false,
+            "label": "Yes +$4.00",
+            "value": "603"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "bb67d0b540e54ea6e0d8",
+        "kind": "select",
+        "label": "H-STAKES"
+      },
+      {
+        "choices": [
+          {
+            "disabled": false,
+            "label": "Same Business Day",
+            "value": "S"
+          },
+          {
+            "disabled": false,
+            "label": "Next Business Day",
+            "value": "1"
+          }
+        ],
+        "configurable": true,
+        "disabled": false,
+        "key": "fd344d58c961e195a4d6",
+        "kind": "radio",
+        "label": "Same Business Day"
+      },
+      {
+        "choices": [],
+        "configurable": false,
+        "disabled": false,
+        "key": "content_title",
+        "kind": "content",
+        "label": "Product title"
+      }
+    ],
+    "id": "f2fa066ca0e0787aaceb9c62509957b4",
+    "revision": 3,
+    "session_status": "unknown",
+    "status": "ready",
+    "supplier_id": "fourover",
+    "url": "https://4over.com/4coro-coroplast-signs",
+    "warnings": [
+      "diagnosis_limits_reached"
+    ]
+  },
+  "fixture_provenance": {
+    "kind": "synthetic",
+    "notice": "Monetary values and capture identifiers are synthetic. Public product selectors, option IDs and failure structures are retained. This file is not supplier pricing evidence.",
+    "purpose": "Public parser and control-contract regression only"
+  },
+  "source_receipt_sha256": "eadaf9601632ed94be57967e520599506a9c4ee083fb44559538b28541866e46",
+  "storefront_inventory": {
+    "controls": [
+      {
+        "binding": "",
+        "binding_key": "name:print_option_paper_stock",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-0",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Paper Stock",
+        "multi_value": false,
+        "name": "print_option_paper_stock",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "stock",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "name:print_option_printing",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-1",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Printing",
+        "multi_value": false,
+        "name": "print_option_printing",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "colorspec",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "name:print_option_width",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-2",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Width",
+        "multi_value": false,
+        "name": "print_option_width",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "width",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "name:print_option_height",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-3",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Height",
+        "multi_value": false,
+        "name": "print_option_height",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "height",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "name:print_option_quantity",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-4",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Quantity",
+        "multi_value": false,
+        "name": "print_option_quantity",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "quantity",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": false
+      },
+      {
+        "binding": "pigf_run_size",
+        "binding_key": "declared:pigf_run_size",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-5",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Quantity",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "quantity",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "input",
+        "type": "number",
+        "visible": true
+      },
+      {
+        "binding": "pigf_flute",
+        "binding_key": "declared:pigf_flute",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-6",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Flute directionVerticalHorizontal",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "pigf_flute",
+        "purpose_basis": "named_axis_identity",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": true
+      },
+      {
+        "binding": "pigf_stakes_per_sign",
+        "binding_key": "declared:pigf_stakes_per_sign",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-7",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "H-stakesNo H-stakes1 standard H-stake per sign2 standard H-stakes per sign",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "pigf_stakes_per_sign",
+        "purpose_basis": "named_axis_identity",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "name:quantity",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-8",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "quantity_6ae320b9b953f",
+        "label": "Product quantity",
+        "multi_value": false,
+        "name": "quantity",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "quantity",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "input",
+        "type": "number",
+        "visible": false
+      },
+      {
+        "binding": "",
+        "binding_key": "name:print_option_size",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/control-9",
+        "editable": true,
+        "enabled": true,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Finished product size for artwork",
+        "multi_value": false,
+        "name": "print_option_size",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "size",
+        "purpose_basis": "named_product_axis",
+        "scopes": [],
+        "tag": "select",
+        "type": "select-one",
+        "visible": true
+      }
+    ],
+    "headings": [
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-0",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Product Configuration",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "product_options",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h2",
+        "type": "",
+        "visible": false
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-1",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Paper Stock",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h3",
+        "type": "",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-2",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Printing",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h3",
+        "type": "",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-3",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Width",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h3",
+        "type": "",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-4",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Height",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h3",
+        "type": "",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-5",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Quantity",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h3",
+        "type": "",
+        "visible": false
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-6",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Choose H-stakes",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h2",
+        "type": "",
+        "visible": true
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-7",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Name each version and check delivery",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h2",
+        "type": "",
+        "visible": false
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-8",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Artwork sets",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h3",
+        "type": "",
+        "visible": false
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-9",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Shipping estimate",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h3",
+        "type": "",
+        "visible": false
+      },
+      {
+        "binding": "",
+        "binding_key": "",
+        "declared_purpose": "",
+        "dom_ref": "purchase-0/heading-10",
+        "editable": false,
+        "enabled": false,
+        "form_key": "purchase-0",
+        "id": "",
+        "label": "Upload and review your artwork",
+        "multi_value": false,
+        "name": "",
+        "product_owner": {
+          "basis": "explicit_product_region_or_form_id",
+          "primary": true,
+          "product_id": "6383",
+          "sources": [
+            "product_region:product-6383",
+            "public_woo_identifier:add-to-cart"
+          ],
+          "verified": true
+        },
+        "proxy_for": "",
+        "purpose": "",
+        "purpose_basis": "heading_text",
+        "scopes": [],
+        "tag": "h2",
+        "type": "",
+        "visible": true
+      }
+    ],
+    "observation_kind": "rendered_dom",
+    "observed_at": "2026-10-29T15:38:45.729Z",
+    "private_values_collected": false,
+    "product_id": "6383",
+    "projection_sha256": "c9cdb736ade46e44892627fb6b7d7342b511ca1a07b5be8312c96c4b7e860d8e",
+    "schema": "hermes-companion-field-inventory/v1",
+    "scope": "current_rendered_purchase_state_only",
+    "truncated": false,
+    "url": "https://printitprints.com/shop/grand-format/signs-banners/signs/rigid-signs/4mm-coroplast-signs/",
+    "viewport": {
+      "height": 720,
+      "width": 1280
+    }
+  }
+}

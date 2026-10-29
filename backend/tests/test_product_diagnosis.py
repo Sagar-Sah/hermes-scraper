@@ -520,6 +520,43 @@ def test_normalization_bounds_numeric_and_raw_identity():
     assert "Too long" not in json.dumps(normalized)
 
 
+def test_artwork_template_links_keep_source_binding_and_reject_external_or_tokenized_urls():
+    raw = {"fields": [], "content": {"source_host": "www.b2sign.com", "artwork_templates": [
+        {"url": "https://www.b2sign.com/downloadable/829b3bc88c2c290bc85fbc763b55cace9f83d290", "label": "Download", "choice_hint": "6ft 3 sided (Open-back) Download"},
+        {"url": "https://other.example/template.pdf", "label": "Template"},
+        {"url": "https://www.b2sign.com/private.pdf?token=secret", "label": "Template"},
+    ]}}
+    content = normalize_snapshot(raw)["content"]
+    assert content["artwork_template_status"] == "source_links_observed"
+    assert content["artwork_templates"] == [{
+        "url": "https://www.b2sign.com/downloadable/829b3bc88c2c290bc85fbc763b55cace9f83d290",
+        "label": "Download", "choice_hint": "6ft 3 sided (Open-back) Download"}]
+    assert "secret" not in json.dumps(content)
+
+
+def test_missing_template_requires_explicit_to_size_and_no_bleed_evidence():
+    base = {"fields": [], "content": {"artwork_templates": []}}
+    assert normalize_snapshot(base)["content"]["artwork_template_status"] == "unresolved"
+    base["content"]["artwork_setup"] = "Submit artwork built to ordered size."
+    assert normalize_snapshot(base)["content"]["artwork_template_status"] == "unresolved"
+    base["content"]["artwork_setup"] += " Do not include crop marks or bleeds."
+    assert normalize_snapshot(base)["content"]["artwork_template_status"] == "to_size_no_bleed_exception"
+    base["content"]["artwork_templates"] = [{"url":"https://vendor.example/template.pdf","label":"Template"}]
+    base["content"]["source_host"] = "vendor.example"
+    assert normalize_snapshot(base)["content"]["artwork_template_status"] == "source_links_observed"
+
+
+def test_wsdisplay_legacy_s3_template_path_is_allowed_without_opening_other_bucket_paths():
+    raw = {"fields": [], "content": {"source_host": "www.wsdisplay.com", "artwork_templates": [
+        {"url":"https://s3-us-west-2.amazonaws.com/display-templates/PDF/10ftx24in_Circle.pdf","label":"Template","choice_hint":"24 in"},
+        {"url":"https://s3-us-west-2.amazonaws.com/display-templates/PSB/HB-Wave10ft_36in.tif.zip","label":"Template","choice_hint":"36 in"},
+        {"url":"https://s3-us-west-2.amazonaws.com/private/PDF/other.pdf","label":"Template"},
+    ]}}
+    templates = normalize_snapshot(raw)["content"]["artwork_templates"]
+    assert len(templates) == 2
+    assert templates[0]["choice_hint"] == "24 in"
+
+
 @pytest.mark.asyncio
 async def test_initial_scan_waits_for_delayed_controls_and_preserves_multiselect(manager):
     m, pool = manager

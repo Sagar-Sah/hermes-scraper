@@ -8,7 +8,7 @@ from test_fourover_native_proceed_transition import browser_fixture,bind,method
 F=Path(__file__).resolve().parent/'fixtures/fourover_native_quantity_expand'
 Q=[250,500,1000,2500,5000,10000,15000,30000,35000]
 
-async def install_collapsed(page):
+async def install_collapsed(page, quantities=Q):
  source=(F/'product-run-size.js').read_text();methods={n:method(source,n) for n in ['isCollapsable','isExpanded','collapsibleToggle','showMore','showLess']}
  await page.evaluate('''({methods,quantities})=>{
   const old=document.querySelector('ul');old.remove();const ul=document.createElement('ul');ul.className='runsizes-table';document.querySelector('#options').prepend(ul);
@@ -23,7 +23,7 @@ async def install_collapsed(page):
    span.addEventListener('click',()=>{fixture.expandClicks++;view.collapsibleToggle();});li.append(span);ul.append(li);};
   view.lineLimit=(...args)=>{if(args.length){limit=args[0];render();}return limit;};
   Object.assign(view,Object.fromEntries(Object.entries(methods).map(([k,v])=>[k,eval('('+v+')')])));fixture.expandClicks=0;fixture.quantityView=view;render();
- }''',{'methods':methods,'quantities':Q})
+ }''',{'methods':methods,'quantities':quantities})
 
 def prepare(m,s,page):
  selection=bind(m,s,page);s.stage='child';selection['run_size']=30000
@@ -52,6 +52,33 @@ async def test_actual_native_ShowMore_reveals_eighth_source_quantity_without_sel
   assert await page.evaluate('fixture.expandClicks')==1 and await page.evaluate('fixture.requests')==0 and await page.evaluate('privateReads')==0
   assert not s.cursor['receipts'] and s.cursor['inflight'] is None and s.counts['summary']==0
   assert not (tmp_path/'fourover-native-observation-selections').exists() and len(seen)==1
+
+@pytest.mark.asyncio
+async def test_ShowMore_keeps_every_returned_tier_through_100000_without_quote_or_quantity_change(tmp_path):
+ m=load_driver();s,_,_=session_fixture(m,tmp_path)
+ quantities=[100,250,500,1000,2500,5000,7500,10000,15000,20000,25000,30000,35000,40000,45000,50000,55000,60000,65000,70000,75000,80000,85000,90000,95000,100000]
+ async with browser_fixture(m) as (page,seen):
+  selection,table=prepare(m,s,page);selection['run_size']=100000
+  table['rows']=[{'quantity':q,'price':'10.006'} for q in quantities]
+  await install_collapsed(page,quantities)
+  assert (await s.state())['available_run_sizes']==[str(q) for q in quantities[:7]]
+  await s.reveal_quantity(selection,table)
+  assert (await s.state())['available_run_sizes']==[str(q) for q in quantities]
+  assert await page.evaluate('fixture.expandClicks')==1
+  assert await page.evaluate('fixture.quantity.peek()')==250
+  assert await page.evaluate('fixture.requests')==0 and not s.cursor['receipts']
+
+@pytest.mark.asyncio
+async def test_ShowMore_waits_for_last_tier_even_when_requested_eighth_row_is_already_visible(tmp_path):
+ m=load_driver();s,_,_=session_fixture(m,tmp_path)
+ async with browser_fixture(m) as (page,seen):
+  selection,table=prepare(m,s,page);await install_collapsed(page)
+  await page.evaluate('''()=>{const original=fixture.quantityView.collapsibleToggle;
+   fixture.quantityView.collapsibleToggle=function(){original.call(this);document.querySelectorAll('.runsizes_row')[8].remove();
+    setTimeout(()=>fixture.quantityView.lineLimit(99),150);};}''')
+  await s.reveal_quantity(selection,table)
+  assert (await s.state())['available_run_sizes']==[str(q) for q in Q]
+  assert await page.evaluate('fixture.expandClicks')==1 and await page.evaluate('fixture.requests')==0
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('mode',[
