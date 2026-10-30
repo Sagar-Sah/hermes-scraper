@@ -4,7 +4,8 @@ from decimal import Decimal
 
 import pytest
 
-from crawler.companion_director import DirectorBudget, MuseDirector, compact_digest, validate_decision
+from crawler.companion_director import (DirectorBudget, DirectorResponseError, MuseDirector,
+    compact_digest, parse_director_response, validate_decision)
 
 
 class Store:
@@ -72,6 +73,7 @@ def transport_fixture(*, limit="25", limit_reset="monthly", cost="0.0003", bad_r
         if path == "/models":
             return {"data": [{"id": profile["model"], "pricing": {"prompt": "0.0000001", "completion": "0.0000002"}}]}
         assert payload["max_tokens"] == 1024
+        assert payload["reasoning"] == {"effort": "minimal", "exclude": True}
         assert payload["tools"] == [] and payload["plugins"] == []
         assert "fixture-private-key" not in json.dumps(payload)
         if timeout:
@@ -126,6 +128,127 @@ async def test_invalid_decision_records_actual_billing_and_cannot_apply(tmp_path
     assert result["status"] == "held"
     assert Decimal(director.status(CONFIG)["spent_usd"]) == Decimal("0.0003")
     assert director.status(CONFIG)["uncertain_calls"] == 0
+
+
+@pytest.mark.asyncio
+async def test_director_prompt_supplies_schema_even_when_provider_does_not_forward_response_format(tmp_path):
+    transport, calls = transport_fixture()
+    director = MuseDirector(Store(tmp_path), transport=transport)
+    result = await director.review({"id": "c"}, {"id": "b"}, config=CONFIG,
+                                   proposals=[{"id": "p", "eligible": True}])
+    assert result["status"] == "reviewed"
+    payload = next(payload for _, path, payload in calls if path == "/chat/completions")
+    prompt = payload["messages"][0]["content"]
+    schema = json.loads(prompt.split("\nSCHEMA:\n", 1)[1].split("\nDIGEST:\n", 1)[0])
+    assert schema == payload["response_format"]["json_schema"]["schema"]
+    assert "no Markdown or surrounding prose" in prompt
+    assert "Summary must be at most 500 characters" in prompt
+    assert "fixture-private-key" not in prompt
+
+
+def completion(content, *, finish="stop", **message):
+    return {"usage": {"cost": "0.0002289", "prompt_tokens": 100, "completion_tokens": 40, "total_tokens": 140},
+            "choices": [{"finish_reason": finish, "message": {"content": content, **message}}]}
+
+
+VALID_DECISION = '{"decisions":[{"proposal_id":"p","action":"defer"}],"summary":"Review the source."}'
+
+
+@pytest.mark.parametrize("data,stage,code", [
+    (completion("bad private-payload-text"), "json", "director_json_invalid"),
+    (completion("```json\n" + VALID_DECISION + "\n```"), "json", "director_json_invalid"),
+    (completion('{"decisions":[],"summary":"first","summary":"second"}'), "json", "director_json_duplicate_fields"),
+    (completion('{"decisions":[],"summary":NaN}'), "json", "director_json_nonfinite_value"),
+    (completion(VALID_DECISION, finish="length"), "completion", "director_completion_truncated"),
+    (completion(VALID_DECISION, finish="private-finish-text"), "completion", "director_completion_not_complete"),
+    (completion(VALID_DECISION, finish={"private-finish-field": "private-finish-text"}), "completion", "director_completion_not_complete"),
+    (completion(VALID_DECISION, refusal="private-refusal-text"), "content", "director_refusal_or_tool_response"),
+    (completion(VALID_DECISION, tool_calls=[{"private-tool-field": "private-tool-text"}]), "content", "director_refusal_or_tool_response"),
+    (completion(None), "content", "director_content_type_invalid"),
+    (completion([{"type": "text", "text": "private-list-text"}]), "content", "director_content_type_invalid"),
+    (completion(""), "content", "director_content_empty"),
+    (completion("private-oversize" * 2000), "content", "director_content_too_large"),
+    (completion(json.dumps({"decisions": [], "summary": "s" * 501})), "decision", "director_decision_schema_invalid"),
+    (completion('{"decisions":[{"proposal_id":"other","action":"defer"}],"summary":""}'), "decision", "director_action_not_permitted"),
+    (completion('{"decisions":[{"proposal_id":"p","action":"stage_repair"}],"summary":""}'), "decision", "director_cannot_authorize_unverified_repair"),
+    ({"usage": {"cost": "0.0002289"}, "choices": []}, "completion", "director_completion_missing"),
+    ({"usage": {"cost": "0.0002289"}, "choices": [{}, {}]}, "completion", "director_completion_ambiguous"),
+])
+@pytest.mark.asyncio
+async def test_response_contract_failures_keep_actual_cost_and_only_bounded_shape_diagnostics(tmp_path, data, stage, code):
+    base, calls = transport_fixture()
+    async def transport(profile, method, path, payload=None):
+        if path == "/chat/completions":
+            calls.append((method, path, payload))
+            return data
+        return await base(profile, method, path, payload)
+    director = MuseDirector(Store(tmp_path), transport=transport)
+    args = ({"id": "cycle"}, {"id": "batch"})
+    result = await director.review(*args, config=CONFIG, proposals=[{"id": "p", "eligible": False}])
+    assert result["status"] == "held" and "decision" not in result
+    diagnostic = result["diagnostic"]
+    assert diagnostic["schema"] == "hermes-director-response-diagnostic/v1"
+    assert diagnostic["stage"] == stage and diagnostic["code"] == code
+    assert set(diagnostic) <= {"schema", "stage", "code", "choice_count", "finish_reason", "content_kind",
+                              "content_bytes", "prompt_tokens", "completion_tokens", "total_tokens"}
+    assert len(json.dumps(diagnostic)) < 700
+    assert not any(value in json.dumps(result) for value in ("private-", "fixture-private-key"))
+    assert result["cost_usd"] == "0.0002289"
+    assert director.status(CONFIG)["spent_usd"] == "0.0002289"
+    assert director.status(CONFIG)["uncertain_calls"] == 0
+    assert director.status(CONFIG)["reserved_usd"] == "0"
+    stored = director.budget.get(result["review_id"])
+    assert stored["state"] == "settled" and json.loads(stored["result"])["diagnostic"] == diagnostic
+    reopened = MuseDirector(Store(tmp_path), transport=transport)
+    assert result == await reopened.review(*args, config=CONFIG, proposals=[{"id": "p", "eligible": False}])
+    assert len([call for call in calls if call[1] == "/chat/completions"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_invalid_billing_cost_stays_uncertain_and_diagnostics_never_echo_usage_text(tmp_path):
+    base, calls = transport_fixture()
+    async def transport(profile, method, path, payload=None):
+        if path == "/chat/completions":
+            calls.append((method, path, payload))
+            return {**completion(VALID_DECISION), "usage": {"cost": "private-usage-text", "completion_tokens": "private-token-text"}}
+        return await base(profile, method, path, payload)
+    director = MuseDirector(Store(tmp_path), transport=transport)
+    result = await director.review({"id": "c"}, {"id": "b"}, config=CONFIG, proposals=[{"id": "p", "eligible": False}])
+    assert result["diagnostic"]["stage"] == "usage"
+    assert result["diagnostic"]["code"] == "director_usage_cost_invalid"
+    assert "cost_usd" not in result
+    assert director.status(CONFIG)["uncertain_calls"] == 1
+    assert Decimal(director.status(CONFIG)["reserved_usd"]) > 0
+    assert "private-" not in json.dumps(result)
+
+
+@pytest.mark.asyncio
+async def test_reasoning_exhaustion_retains_only_numeric_usage_and_never_retries(tmp_path):
+    base, calls = transport_fixture()
+    async def transport(profile, method, path, payload=None):
+        if path == "/chat/completions":
+            calls.append((method, path, payload))
+            return {**completion(None, finish="length", reasoning="private-reasoning"),
+                    "usage": {"cost": "0.0002", "completion_tokens": 1071,
+                              "completion_tokens_details": {"reasoning_tokens": 1071,
+                                                            "private-detail": "private-value"}}}
+        return await base(profile, method, path, payload)
+    director = MuseDirector(Store(tmp_path), transport=transport)
+    args = ({"id": "reasoning-cycle"}, {"id": "reasoning-batch"})
+    result = await director.review(*args, config=CONFIG)
+    assert result["diagnostic"]["code"] == "director_completion_truncated"
+    assert result["diagnostic"]["reasoning_tokens"] == 1071
+    assert "private-" not in json.dumps(result)
+    assert result == await director.review(*args, config=CONFIG)
+    assert len([call for call in calls if call[1] == "/chat/completions"]) == 1
+
+
+def test_response_parser_rejects_ambiguous_action_keys_without_coercing_or_dropping_fields():
+    with pytest.raises(DirectorResponseError, match="director_json_duplicate_fields"):
+        parse_director_response(completion('{"decisions":[{"proposal_id":"p","action":"publish","action":"defer"}],"summary":""}'),
+                                [{"id": "p", "eligible": False}])
+    assert parse_director_response(completion(VALID_DECISION), [{"id": "p", "eligible": False}])["decisions"] == [
+        {"proposal_id": "p", "action": "defer"}]
 
 
 @pytest.mark.asyncio
