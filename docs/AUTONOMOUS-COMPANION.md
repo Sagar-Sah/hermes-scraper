@@ -138,6 +138,15 @@ remain below it.
 3. Leave monthly scheduling off during the first pilot. Choose **Create Standard Print pilot** (or explicitly create a full-catalog manual cycle),
    read its complete catalog inventory and review its baseline, mappings and
    capability holds. Start only the admitted, supported work.
+   Leave **Allow supported repairs on protected staging** off for a read-only
+   pilot. Collection, comparison and Muse reviews can run before staging alignment;
+   they cannot create repair previews or change products in this mode. Enabling
+   repairs applies to new cycles and still requires the approved baseline. Turning
+   it off also fences pending repairs in an already enabled cycle.
+   For a smaller test, enter exact WooCommerce IDs in **Targeted pilot product IDs**
+   and choose **Create targeted pilot**. This uses the same inventory and worker
+   workflow but admits only the selected published products. It does not silently
+   replace another active cycle or reuse its supplier observations as fresh data.
 4. Inspect **Current window**, **Next window** and **Load saved product results**.
    Results are paginated in groups of 99 and show active/elapsed timing, missing
    evidence, held work and staging repair state. Refresh saved results to read a

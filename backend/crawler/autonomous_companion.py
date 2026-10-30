@@ -45,6 +45,7 @@ DEFAULTS = {
     "timezone": "America/Phoenix", "worker_capacity": 4, "batch_size": 99,
     "handler_timeout_seconds": 900,
     "director_enabled": False, "director_provider_id": None,
+    "staging_repairs_enabled": False,
     "director_budget_usd": "25.00", "director_max_input_tokens": 8192,
     "director_max_output_tokens": 1024, "director_max_calls": 512,
 }
@@ -226,7 +227,7 @@ class AutonomousCompanion:
         if set(value) != set(DEFAULTS):
             raise ValueError("unknown_autonomy_setting")
         out = deepcopy(value)
-        for key in ("enabled", "schedule_enabled", "director_enabled"):
+        for key in ("enabled", "schedule_enabled", "director_enabled", "staging_repairs_enabled"):
             if type(out[key]) is not bool:
                 raise ValueError("invalid_autonomy_boolean")
         for key in ("site_url", "staging_url"):

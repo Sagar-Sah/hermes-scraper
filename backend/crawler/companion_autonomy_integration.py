@@ -265,29 +265,61 @@ class IntegratedAutonomousCompanion(AutonomousCompanion):
         self._maintenance = False
 
     async def _review_batch(self, cycle, batch):
+        """Source/Muse audits can run before staging is ready.
+
+        Staging writes require their own explicit, cycle-pinned opt-in as well
+        as the existing evidence, baseline and provider guards. Legacy cycles
+        without that flag are review-only; baseline readiness is never used as
+        an implicit permission to write.
+        """
         if self._maintenance:
             return {"status": "held", "reason": "autonomy_paused_for_maintenance"}
+        def staging_enabled():
+            # A pinned read-only cycle cannot be escalated by changing global
+            # settings; turning the live setting off stops pending writes too.
+            return (cycle["config"].get("staging_repairs_enabled", False) is True
+                    and self.config.get("staging_repairs_enabled", False) is True)
         ids = {str(item["product_id"]) for item in batch.get("products", [])}
         proposals = [p for p in self.pipeline.proposals_for_cycle(cycle["id"]) if str(p["product_id"]) in ids]
         chunks = [proposals[i:i + 20] for i in range(0, len(proposals), 20)] or [[]]
         results = []
         for index, chunk in enumerate(chunks):
             scoped = {**batch, "id": str(batch["batch_index"]) + "/" + str(index)}
-            result = await self.director.review(cycle, scoped, config=cycle["config"], proposals=chunk)
+            repairs_enabled = staging_enabled()
+            # Do not mutate retained proposal evidence merely to alter what
+            # actions the director is allowed to select in this review.
+            advisory_chunk = chunk if repairs_enabled else [{**deepcopy(p), "eligible": False} for p in chunk]
+            result = await self.director.review(cycle, scoped, config=cycle["config"], proposals=advisory_chunk)
             if self._maintenance:
                 return {"status": "held", "reason": "autonomy_paused_for_maintenance"}
-            if result.get("status") == "reviewed":
+            if not repairs_enabled or not staging_enabled():
+                # Also fence invalid or historical model output: no review-only
+                # path may reach even a staging preview or decision dispatcher.
+                decision = result.get("decision") or {}
+                choices = decision.get("decisions", []) if isinstance(decision, dict) else []
+                choices = choices if isinstance(choices, list) else []
+                result.update(advisory_only=True, staging_mode="review_only",
+                              staging_repair_hold_reason="review_only_mode",
+                              staging_repairs=[{"proposal_id": item.get("proposal_id"), "status": "held",
+                                                "reason": "review_only_mode"}
+                                               for item in choices if isinstance(item, dict)
+                                               and item.get("action") == "stage_repair"])
+            elif result.get("status") == "reviewed":
                 try:
                     # The provider may be suspended, removed or edited while a
                     # preview/baseline check awaits I/O. Fence every proposal and
                     # the final write using the exact settled review identity.
-                    guard = lambda: self.director.require_review_current(result.get("review_id"), cycle["config"])
+                    def guard():
+                        if not staging_enabled():
+                            raise ValueError("review_only_mode")
+                        return self.director.require_review_current(result.get("review_id"), cycle["config"])
                     guard()
                     result["staging_repairs"] = await self.pipeline.apply_decisions(
                         cycle["id"], result["decision"]["decisions"], authorization_guard=guard)
                 except Exception as exc:
-                    result.update(status="held", reason=safe_error(exc))
-                    result["staging_repairs"] = [{"status": "held", "reason": safe_error(exc)}]
+                    reason = "review_only_mode" if isinstance(exc, ValueError) and str(exc) == "review_only_mode" else safe_error(exc)
+                    result.update(status="held", reason=reason)
+                    result["staging_repairs"] = [{"status": "held", "reason": reason}]
             results.append(result)
         return {"status": "reviewed" if all(r.get("status") == "reviewed" for r in results) else "held",
                 "reviews": results, "production_changes": 0, "budget": self.director.status(cycle["config"])}

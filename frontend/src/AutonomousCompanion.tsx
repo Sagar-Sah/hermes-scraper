@@ -9,7 +9,7 @@ const POLL_MS = 10000;
 export interface AutonomyConfig {
   enabled: boolean; schedule_enabled: boolean; site_url: string; staging_url: string; timezone: string;
   worker_capacity: number; batch_size: number; director_enabled: boolean; director_provider_id: string | null;
-  director_budget_usd: string;
+  director_budget_usd: string; staging_repairs_enabled: boolean;
 }
 export interface AutonomousProduct {
   id: string; product_id: string; title: string; supplier?: string | null; source_url?: string | null;
@@ -25,6 +25,7 @@ export interface AutonomousCycle {
   working_window?: AutonomousProduct[]; next_window?: AutonomousProduct[]; products?: AutonomousProduct[];
   supplier_blocks?: Record<string, unknown> | unknown[]; progress?: unknown; timing?: Record<string, unknown>;
   director?: Record<string, unknown>;
+  config?: Partial<AutonomyConfig>;
   revision_sha256?: string; inventory_baseline_sha256?: string | null; can_supersede?: boolean;
 }
 interface AutonomyStatus {
@@ -56,12 +57,19 @@ interface EnvironmentInput { base_url: string; token?: string; role: 'read' | 'w
 const EMPTY_CONFIG: AutonomyConfig = {
   enabled: false, schedule_enabled: false, site_url: 'https://printitprints.com',
   staging_url: 'https://staging3.tonyl36.sg-host.com', timezone: 'America/Phoenix', worker_capacity: 4,
-  batch_size: 99, director_enabled: false, director_provider_id: null, director_budget_usd: '25.00',
+  batch_size: 99, director_enabled: false, director_provider_id: null, director_budget_usd: '25.00', staging_repairs_enabled: false,
 };
 
 export function autonomyMoney(value: unknown): string {
   if ((typeof value !== 'string' && typeof value !== 'number') || value === '' || !Number.isFinite(Number(value)) || Number(value) < 0) return 'Not measured';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value));
+}
+export function targetedPilotRequest(value: string): { kind: 'manual'; product_ids: string[] } {
+  const ids = [...new Set(value.trim().split(/[\s,]+/).filter(Boolean))];
+  if (!ids.length || ids.length > 99 || ids.some(id => !/^[1-9][0-9]{0,18}$/.test(id))) {
+    throw new Error('Enter 1–99 product IDs, separated by commas or spaces.');
+  }
+  return { kind: 'manual', product_ids: ids };
 }
 export function autonomyDuration(value: unknown): string {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return 'Not measured';
@@ -272,6 +280,7 @@ export default function AutonomousCompanion() {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [pilotIds, setPilotIds] = useState('');
   const dirty = useRef(false);
   const alive = useRef(true);
   const readSerial = useRef(0);
@@ -346,12 +355,19 @@ export default function AutonomousCompanion() {
     await api(`${PREFIX}/config`, { method: 'PUT', body: JSON.stringify({
       enabled: draft.enabled, schedule_enabled: draft.schedule_enabled, worker_capacity: draft.worker_capacity,
       director_enabled: draft.director_enabled, director_provider_id: draft.director_provider_id,
+      staging_repairs_enabled: draft.staging_repairs_enabled,
     }) });
     dirty.current = false; setNotice('Autonomous audit settings saved. Production changes still require your release approval.');
   });
   const create = (standardPrint = false) => void act(standardPrint ? 'pilot' : 'create', async () => {
     const value = await api<AutonomousCycle>(`${PREFIX}/cycles`, { method: 'POST', body: JSON.stringify({ kind: 'manual', ...(standardPrint ? { category_slugs: ['standard-print'] } : {}) }) });
     setSelectedId(value.id); setHistorical(value); setNotice('Audit cycle created. Inventory its products before starting workers.');
+  });
+  const createTargeted = () => void act('targeted-pilot', async () => {
+    const request = targetedPilotRequest(pilotIds);
+    const value = await api<AutonomousCycle>(`${PREFIX}/cycles`, { method: 'POST', body: JSON.stringify(request) });
+    setSelectedId(value.id); setHistorical(value);
+    setNotice(`Targeted pilot created for ${request.product_ids.length} product${request.product_ids.length === 1 ? '' : 's'}. Read its inventory, then start it.`);
   });
   const operate = (action: 'inventory' | 'start' | 'pause' | 'resume') => void act(action, async () => {
     if (!cycle) return;
@@ -429,21 +445,24 @@ export default function AutonomousCompanion() {
       <label className="autonomy-checkbox"><input type="checkbox" checked={draft.schedule_enabled} disabled={!status || !!busy} onChange={event => change('schedule_enabled', event.target.checked)} /><span>Run calendar-month audits automatically<small>Disabled by default. Missed cycles are recovered by the coordinator after service recovery.</small></span></label>
       <label>Browser worker capacity<input type="number" min="1" max="8" required value={draft.worker_capacity} disabled={!status || !!busy} onChange={event => change('worker_capacity', Number(event.target.value))} /><small>Start with four; this coordinator allows one through eight. A 99-product window is a work queue, not 99 supplier pages at full speed.</small></label>
       <label className="autonomy-checkbox"><input type="checkbox" checked={draft.director_enabled} disabled={!status || !!busy} onChange={event => change('director_enabled', event.target.checked)} /><span>Let the Muse director review summaries and exceptions<small>Normal collection and queue refills require no AI calls.</small></span></label>
+      <label className="autonomy-checkbox"><input type="checkbox" checked={draft.staging_repairs_enabled} disabled={!status || !!busy} onChange={event => change('staging_repairs_enabled', event.target.checked)} /><span>Allow supported repairs on protected staging<small>Off means review only: collect, compare and propose without changing products. Enabling applies to newly created cycles; disabling stops pending repairs. Verified source evidence and an approved staging baseline are still required.</small></span></label>
       <label>Existing Muse provider<select value={draft.director_provider_id || ''} disabled={!status || !!busy} onChange={event => change('director_provider_id', event.target.value || null)}><option value="">Choose a saved Muse profile</option>{draft.director_provider_id && !hasProvider && <option value={draft.director_provider_id} disabled>Configured profile unavailable</option>}{museProviders.map(provider => <option key={provider.id} value={provider.id} disabled={provider.status === 'suspended' || provider.status === 'deleted'}>{provider.name} · {provider.model}{provider.status === 'suspended' ? ' · Suspended' : provider.status === 'deleted' ? ' · Deleted' : ''}</option>)}</select><small>{museProviders.length ? 'Credentials stay in Sources & AI and are never sent in audit summaries. Suspended profiles must be resumed there before use.' : 'No saved Muse profile is available. Configure it in Sources & AI before enabling AI review.'}</small></label>
       <button className="button button-primary" type="submit" disabled={!status || !!busy || (draft.director_enabled && !hasProvider)}>{busy === 'save' ? <LoaderCircle className="spin" size={15} /> : <Settings2 size={15} />}Save audit settings</button>
     </form></details>
     <div className="autonomy-budget" aria-label="AI director monthly budget"><div><strong>Muse director · {director?.month || 'month not loaded'}</strong><small>{director?.ready === true ? 'Ready for bounded summary reviews' : humanize(director?.reason || 'not_ready')}</small></div><dl>{[['Monthly cap', director?.cap_usd ?? status?.config?.director_budget_usd], ['Spent', director?.spent_usd], ['Reserved', director?.reserved_usd], ['Remaining', director?.remaining_usd]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{autonomyMoney(value)}</dd></div>)}</dl><p>Hard cap: $25 per month. At the cap, Hermes keeps collecting; additional AI reviews wait. AI cannot certify missing evidence or approve a live release.</p><button className="button button-secondary" onClick={checkDirector} disabled={!!busy || !status?.config?.director_provider_id}>{busy === 'director-preflight' ? <LoaderCircle className="spin" size={15} /> : <ShieldCheck size={15} />}Check director readiness</button><DirectorReadinessDetails saved={director} checked={directorCheck} busy={busy === 'director-preflight'} /></div>
     <details className="autonomy-environments"><summary><ShieldCheck size={16} /> Environment baseline and release readiness</summary><p>Staging must have a reviewed production baseline, its intended pending changes, authenticated automation access and working rate checks. A matching version label alone is not a completed baseline.</p><div className="autonomy-environment-grid"><EnvironmentConnection environment="production" profile={environments?.production} busy={!!busy} onSave={saveEnvironment} /><EnvironmentConnection environment="staging" profile={environments?.staging} busy={!!busy} onSave={saveEnvironment} /></div><AutonomyBaselineDetails baseline={status?.baseline || baseline} capture={baselineCapture} alignment={baselineAlignment} connected={environments?.production?.connected === true && environments?.staging?.connected === true} busy={!!busy} onCapture={captureBaseline} onRefresh={refreshBaseline} />{cycle?.baseline && <details className="autonomy-cycle-context"><summary>Baseline recorded when this cycle was created</summary><pre>{JSON.stringify(cycle.baseline, null, 2)}</pre></details>}{environments?.production_release && <pre>{JSON.stringify(environments.production_release, null, 2)}</pre>}<p>Only the approved product and file differences are promoted. Live orders, customers and transactions are not replaced with the staging database.</p></details>
     <div className="autonomy-cycle-header"><div><h3>Audit cycles</h3><p>A finished collection step is not a verified product. Unknown checks remain visible.</p></div><div className="autonomy-actions"><button className="button button-primary" onClick={() => create(true)} disabled={!status || !!busy}>{busy === 'pilot' ? <LoaderCircle className="spin" size={15} /> : <CalendarClock size={15} />}Create Standard Print pilot</button><button className="button button-secondary" onClick={() => create(false)} disabled={!status || !!busy}>{busy === 'create' ? <LoaderCircle className="spin" size={15} /> : <CalendarClock size={15} />}Create full-catalog manual cycle</button></div></div>
+    <div className="autonomy-targeted-pilot"><label>Targeted pilot product IDs<input value={pilotIds} maxLength={2000} placeholder="Product IDs, separated by commas" disabled={!!busy} onChange={event => setPilotIds(event.target.value)} /><small>Limit a test to 1–99 products. The existing inventory stays in history; retire an unstarted cycle before creating a different scope.</small></label><button className="button button-secondary" onClick={createTargeted} disabled={!status || !!busy || !pilotIds.trim()}>{busy === 'targeted-pilot' ? <LoaderCircle className="spin" size={15} /> : <Play size={15} />}Create targeted pilot</button></div>
     {cycles.length > 0 && <label className="autonomy-cycle-select">Cycle<select value={selectedId} onChange={event => setSelectedId(event.target.value)} disabled={!!busy}><option value="">Choose a cycle</option>{cycles.map(item => <option key={item.id} value={item.id}>{item.scheduled_month || autonomyDate(item.created_at)} · {humanize(item.status)} · {item.id.slice(0, 8)}</option>)}</select></label>}
     {cycle ? <><div className="autonomy-cycle-state"><strong>{humanize(cycle.status)}</strong><span>Inventory: {cycle.inventory?.complete === true ? `${count(cycle.inventory.count || 0)} products · complete` : `${humanize(cycle.inventory?.status || 'unknown')} · not complete`}</span><code>{cycle.id}</code></div><div className="autonomy-actions"><button className="button button-secondary" onClick={() => operate('inventory')} disabled={!!busy || maintenance || !['created', 'inventory_failed'].includes(cycle.status)}>{busy === 'inventory' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Read catalog inventory</button>{paused ? <button className="button button-primary" onClick={() => operate('resume')} disabled={!!busy || maintenance}><Play size={15} />Resume saved work</button> : cycle.status === 'running' ? <button className="button button-secondary" onClick={() => operate('pause')} disabled={!!busy}><Pause size={15} />Pause after checkpoint</button> : <button className="button button-primary" onClick={() => operate('start')} disabled={!!busy || !canStart}><Play size={15} />Start this cycle</button>}<button className="button button-secondary" onClick={loadResults} disabled={!!busy}>{busy === 'results' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Load saved product results</button>{cycle.can_supersede === true && <button className="button button-secondary" onClick={supersede} disabled={!!busy || maintenance}>{busy === 'supersede' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Retire unstarted inventory</button>}</div>
-      {cycle.can_supersede === true && <p className="autonomy-source-note">If reviewed supplier mappings changed, retire this unstarted inventory and create a new cycle. This snapshot and its evidence stay in history; supplier work does not run.</p>}
+      <p className="autonomy-source-note">{cycle.config?.staging_repairs_enabled !== true ? 'Review-only cycle: Hermes collects, compares and proposes. It cannot change products.' : status?.config?.staging_repairs_enabled !== true ? 'Staging repairs are currently disabled. Pending product changes are held.' : 'Supported staging repairs require verified source evidence and the approved baseline. Production release approval is separate.'}</p>
+      {cycle.can_supersede === true && <p className="autonomy-source-note">For a different pilot scope or reviewed supplier mappings, retire this unstarted inventory and create a new cycle. This snapshot and its evidence stay in history; supplier work does not run.</p>}
       {cycle.status === 'superseded' && <p className="autonomy-source-note">Retired before product work started. The original catalog and mappings are retained. Create a new audit cycle to collect a fresh inventory.</p>}
       <div className="autonomy-counts">{['queued', 'running', 'verified', 'mismatch', 'needs_attention', 'access_required', 'failed', 'held'].map(key => <div key={key}><strong>{cycle.summary?.[key] === undefined ? '—' : count(cycle.summary[key])}</strong><small>{humanize(key)}</small></div>)}</div>
       <h4>Current window · up to 99 products</h4><AutonomousProductTable products={cycle.working_window || []} /><details className="autonomy-next"><summary>Next window · {count(cycle.next_window?.length || 0)} products</summary><AutonomousProductTable products={cycle.next_window || []} next /></details>
       {savedProducts && <details className="autonomy-next" open><summary>Saved product results · {count(savedProducts.length)}</summary><p className="autonomy-source-note">Saved snapshot. Use Load saved product results to refresh completed, held and unknown checks.</p><AutonomousProductTable products={savedProducts.slice(resultsPage * 99, (resultsPage + 1) * 99)} /><div className="autonomy-actions"><button className="button button-secondary" disabled={resultsPage === 0} onClick={() => setResultsPage(previous => previous - 1)}>Previous results</button><span>Page {resultsPage + 1} of {Math.max(1, Math.ceil(savedProducts.length / 99))}</span><button className="button button-secondary" disabled={(resultsPage + 1) * 99 >= savedProducts.length} onClick={() => setResultsPage(previous => previous + 1)}>Next results</button></div></details>}
       {cycle.supplier_blocks && Object.keys(cycle.supplier_blocks).length > 0 && <details className="autonomy-blocks" open><summary><TriangleAlert size={15} /> Supplier access or collection holds</summary><pre>{JSON.stringify(cycle.supplier_blocks, null, 2)}</pre><p>Sign in through Hermes’s own supplier browser when access is required. Other eligible suppliers continue.</p></details>}
-    </> : <p className="autonomy-empty"><CircleHelp size={16} /> No audit cycle is selected. Create a manual pilot after the environment baseline is ready.</p>}
+    </> : <p className="autonomy-empty"><CircleHelp size={16} /> No audit cycle is selected. Create a review-only pilot to collect and compare; an approved environment baseline is required before staging repairs.</p>}
     <AutonomousRepairs releaseConnection={environments?.production_release} />
   </section>;
 }

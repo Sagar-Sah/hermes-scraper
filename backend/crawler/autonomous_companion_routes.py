@@ -14,6 +14,7 @@ class ConfigureRequest(BaseModel):
     batch_size: StrictInt | None = None
     handler_timeout_seconds: StrictInt | None = None
     director_enabled: StrictBool | None = None
+    staging_repairs_enabled: StrictBool | None = None
     director_provider_id: StrictStr | None = None
     director_budget_usd: StrictStr | None = None
     director_max_input_tokens: StrictInt | None = None

@@ -781,7 +781,9 @@ async def test_private_owner_and_strict_configuration_and_authenticated_routes(m
                 {"director_budget_usd": "NaN"}, {"site_url": "https://127.0.0.1"},
                 {"director_budget_usd": "25.01"}, {"director_max_input_tokens": 8193},
                 {"director_max_output_tokens": 2049}, {"director_max_calls": 513},
-                {"unknown": 1}, {"director_enabled": True}, {"schedule_enabled": 1}):
+                {"unknown": 1}, {"director_enabled": True}, {"schedule_enabled": 1},
+                {"staging_repairs_enabled": 1}, {"staging_repairs_enabled": "false"},
+                {"staging_repairs_enabled": None}):
             with pytest.raises(ValueError):
                 manager.configure(**settings)
         client = TestClient(app)
@@ -789,12 +791,58 @@ async def test_private_owner_and_strict_configuration_and_authenticated_routes(m
         headers = {"Authorization": "Bearer fixture-token"}
         assert client.get("/api/v1/companion/autonomy/status", headers=headers).json()["enabled"] is False
         assert client.put("/api/v1/companion/autonomy/config", headers=headers, json={"enabled": "yes"}).status_code == 422
+        assert client.get("/api/v1/companion/autonomy/config", headers=headers).json()["staging_repairs_enabled"] is False
+        for value in ("true", "false", 0, 1):
+            assert client.put("/api/v1/companion/autonomy/config", headers=headers,
+                              json={"staging_repairs_enabled": value}).status_code == 422
+        assert client.put("/api/v1/companion/autonomy/config", headers=headers,
+                          json={"staging_repairs_enabled": None}).status_code == 409
+        assert client.put("/api/v1/companion/autonomy/config", headers=headers,
+                          json={"staging_repairs_enabled": True}).json()["staging_repairs_enabled"] is True
         assert client.put("/api/v1/companion/autonomy/config", headers=headers, json={"worker_capacity": 99}).status_code == 409
         created = client.post("/api/v1/companion/autonomy/cycles", headers=headers, json={})
         assert created.status_code == 200
         assert client.post("/api/v1/companion/autonomy/cycles", headers=headers, json={}).status_code == 409
         assert client.get("/api/v1/companion/autonomy/cycles", headers=headers).json()["items"]
         assert client.get("/api/v1/companion/autonomy/cycles/not-an-id", headers=headers).status_code == 404
+    finally:
+        await manager.close()
+
+
+@pytest.mark.asyncio
+async def test_staging_repair_mode_is_persisted_and_pinned_without_escalating_legacy_cycles(managers):
+    make, _ = managers
+    manager, _ = make()
+    try:
+        assert manager.config["staging_repairs_enabled"] is False
+        manager.configure(staging_repairs_enabled=True)
+        assert json.loads(manager.config_path.read_text())["staging_repairs_enabled"] is True
+        cycle = manager.create_cycle()
+        pinned = json.loads(json.dumps(manager.cycles[cycle["id"]]))
+        manager.configure(staging_repairs_enabled=False)
+        assert manager.cycles[cycle["id"]]["config"]["staging_repairs_enabled"] is True
+        assert manager.cycles[cycle["id"]]["config_sha256"] == pinned["config_sha256"]
+        manager._check_pins(manager.cycles[cycle["id"]])
+        # Simulate a real pre-feature file, preserving its old configuration
+        # pin. Loading must default the live setting off without rewriting the
+        # historical cycle into a different permission mode.
+        legacy = manager.cycles[cycle["id"]]
+        legacy["config"].pop("staging_repairs_enabled")
+        legacy["config_sha256"] = hashlib.sha256(json.dumps(legacy["config"],
+            sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+        manager._save_cycle(legacy)
+        legacy_pin = legacy["config_sha256"]
+        old_config = {key: value for key, value in manager.config.items() if key != "staging_repairs_enabled"}
+        manager._atomic(manager.config_path, old_config)
+        await manager.close()
+        reopened, _ = make()
+        try:
+            assert reopened.config["staging_repairs_enabled"] is False
+            assert "staging_repairs_enabled" not in reopened.cycles[cycle["id"]]["config"]
+            assert reopened.cycles[cycle["id"]]["config_sha256"] == legacy_pin
+            reopened._check_pins(reopened.cycles[cycle["id"]])
+        finally:
+            await reopened.close()
     finally:
         await manager.close()
 

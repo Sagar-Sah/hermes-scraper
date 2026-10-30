@@ -154,6 +154,7 @@ async def test_api_status_auth_and_separate_release_credentials_are_role_bound(t
 @pytest.mark.asyncio
 async def test_batch_review_filters_product_scope_and_chunks_twenty_with_distinct_ids(tmp_path):
     service = make(tmp_path)
+    service.configure(staging_repairs_enabled=True)
     proposals = [{"id": "p" + str(i), "product_id": "9532", "eligible": False, "kind": "source_options"} for i in range(45)]
     proposals += [{"id": "other", "product_id": "6862", "eligible": True, "kind": "set_cost"}]
     calls, decisions = [], []
@@ -188,6 +189,7 @@ async def test_batch_review_filters_product_scope_and_chunks_twenty_with_distinc
 @pytest.mark.asyncio
 async def test_provider_suspended_after_review_cannot_stage_its_decisions(tmp_path):
     service = make(tmp_path)
+    service.configure(staging_repairs_enabled=True)
     service.pipeline.proposals_for_cycle = lambda cid: [{"id": "p1", "product_id": "9532", "eligible": True}]
     calls = []
     async def review(cycle, batch, **kwargs):
@@ -206,6 +208,106 @@ async def test_provider_suspended_after_review_cannot_stage_its_decisions(tmp_pa
             {"batch_index": 0, "products": [{"product_id": "9532"}]})
         assert result["status"] == "held"
         assert result["reviews"][0]["staging_repairs"][0]["status"] == "held"
+        assert calls == []
+    finally:
+        await service.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("pinned,live", [(False, False), (None, True), (False, True), (True, False)])
+async def test_review_only_mode_never_dispatches_staging_even_with_ready_baseline_and_eligible_source(tmp_path, pinned, live):
+    service = make(tmp_path)
+    service.configure(staging_repairs_enabled=live)
+    proposal = {"id": "p1", "product_id": "9532", "eligible": True, "evidence": {"verified": True}}
+    service.pipeline.proposals_for_cycle = lambda cid: [proposal]
+    service.baseline.status = lambda: {"ready": True}
+    calls, observed = [], []
+    async def review(cycle, batch, *, proposals, **kwargs):
+        observed.extend(deepcopy(proposals))
+        assert proposals[0]["eligible"] is False
+        proposals[0]["evidence"]["verified"] = False
+        # Deliberately invalid model output must not cross the mode boundary.
+        return {"status": "reviewed", "review_id": "fixture-review", "decision": {
+            "decisions": [{"proposal_id": "p1", "action": "stage_repair"}]}}
+    async def forbidden(*args, **kwargs):
+        calls.append("write")
+        raise AssertionError("review-only mode reached a staging dispatcher")
+    service.director.review = review
+    service.pipeline.apply_decisions = forbidden
+    service.repairs.preview = service.repairs.apply = forbidden
+    config = deepcopy(service.config)
+    if pinned is None:
+        config.pop("staging_repairs_enabled")
+    else:
+        config["staging_repairs_enabled"] = pinned
+    try:
+        result = await service._review_batch({"id": CID, "config": config},
+            {"batch_index": 0, "products": [{"product_id": "9532"}]})
+        review_result = result["reviews"][0]
+        assert result["status"] == "reviewed" and result["production_changes"] == 0
+        assert review_result["advisory_only"] is True
+        assert review_result["staging_mode"] == "review_only"
+        assert review_result["staging_repair_hold_reason"] == "review_only_mode"
+        assert review_result["staging_repairs"] == [{"proposal_id": "p1", "status": "held", "reason": "review_only_mode"}]
+        assert proposal["eligible"] is True and proposal["evidence"]["verified"] is True
+        assert observed[0]["eligible"] is False and calls == []
+    finally:
+        await service.close()
+
+
+@pytest.mark.asyncio
+async def test_turning_staging_repairs_off_during_preparation_stops_final_write_guard(tmp_path):
+    service = make(tmp_path)
+    service.configure(staging_repairs_enabled=True)
+    service.pipeline.proposals_for_cycle = lambda cid: [{"id": "p1", "product_id": "9532", "eligible": True}]
+    calls = []
+    async def review(cycle, batch, *, proposals, **kwargs):
+        assert proposals[0]["eligible"] is True
+        return {"status": "reviewed", "review_id": "fixture-review", "decision": {
+            "decisions": [{"proposal_id": "p1", "action": "stage_repair"}]}}
+    def current(review_id, config):
+        calls.append("provider_guard")
+    async def apply(cid, choices, *, authorization_guard):
+        calls.append("prepared")
+        service.configure(staging_repairs_enabled=False)
+        authorization_guard()
+        calls.append("write")
+        raise AssertionError("staging repair continued after opt-out")
+    service.director.review = review
+    service.director.require_review_current = current
+    service.pipeline.apply_decisions = apply
+    config = deepcopy(service.config)
+    try:
+        result = await service._review_batch({"id": CID, "config": config},
+            {"batch_index": 0, "products": [{"product_id": "9532"}]})
+        assert result["status"] == "held"
+        assert result["reviews"][0]["staging_repairs"] == [{"status": "held", "reason": "review_only_mode"}]
+        assert calls == ["provider_guard", "prepared"]
+        assert config["staging_repairs_enabled"] is True
+    finally:
+        await service.close()
+
+
+@pytest.mark.asyncio
+async def test_enabling_global_repairs_during_advisory_review_cannot_escalate_that_review(tmp_path):
+    service = make(tmp_path)
+    proposal = {"id": "p1", "product_id": "9532", "eligible": True}
+    service.pipeline.proposals_for_cycle = lambda cid: [proposal]
+    calls = []
+    async def review(cycle, batch, *, proposals, **kwargs):
+        assert proposals[0]["eligible"] is False
+        service.configure(staging_repairs_enabled=True)
+        return {"status": "reviewed", "review_id": "fixture-review", "decision": {
+            "decisions": [{"proposal_id": "p1", "action": "stage_repair"}]}}
+    async def forbidden(*args, **kwargs):
+        calls.append("write")
+    service.director.review = review
+    service.pipeline.apply_decisions = forbidden
+    config = {**service.config, "staging_repairs_enabled": True}
+    try:
+        result = await service._review_batch({"id": CID, "config": config},
+            {"batch_index": 0, "products": [{"product_id": "9532"}]})
+        assert result["reviews"][0]["advisory_only"] is True
         assert calls == []
     finally:
         await service.close()
