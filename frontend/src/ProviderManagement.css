@@ -18,6 +18,13 @@
 .provider-form fieldset:disabled{opacity:.72}
 .provider-edit-status{font-size:11px;line-height:1.6;color:#63765a;margin:0 0 18px}
 .provider-delete .modal-intro{line-height:1.7}
+.provider-budget{margin:0 0 20px;padding:13px;border:1px solid #dce7d3;border-radius:7px;background:#f8fbf4;font-size:11px;color:#52684c;min-width:0}
+.provider-budget-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.provider-budget-heading>strong{font-size:12px;color:#365634}.provider-budget-heading>.text-link{font-size:10px;min-height:28px}
+.provider-budget-period{font-size:10px;margin:8px 0 10px;line-height:1.6}.provider-budget p{font-size:10px;line-height:1.6;margin:8px 0 0;overflow-wrap:anywhere}
+.provider-budget-values{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:0 0 12px}.provider-budget-values>div{background:#fff;border:1px solid #e2eadb;border-radius:5px;padding:8px 6px;min-width:0}.provider-budget-values dt{font-size:9px;color:#62725a;margin-bottom:5px}.provider-budget-values dd{margin:0;color:#365634;font-size:12px;font-weight:600;overflow-wrap:anywhere}
+.provider-key-limit{display:flex;align-items:center;gap:5px 12px;flex-wrap:wrap;line-height:1.6;border-top:1px solid #e2eadb;padding-top:10px;font-size:10px}.provider-key-limit>span{flex-basis:100%}.provider-key-limit>a{color:#476e36;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}.provider-budget-warning{padding:8px;border:1px solid #e7d7ac;background:#fffbef;border-radius:5px;color:#78601e}.provider-budget .provider-budget-scope{color:#62725a;border-top:1px solid #e2eadb;padding-top:8px}
 .provider-management button:focus-visible,.provider-management input:focus-visible{outline:2px solid #587c44;outline-offset:3px}
 @media(max-width:1100px){.provider-management .provider-actions{flex-basis:100%;justify-content:flex-start;margin-left:53px}}
 @media(max-width:740px){.provider-management .provider-list-tools{padding:14px 17px 5px}.provider-feedback{padding:0 17px}.provider-management .provider-managed{gap:10px}.provider-management .provider-actions{margin-left:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.provider-management .provider-actions .button{justify-content:center;margin:0;min-height:42px;white-space:normal;font-size:11px;padding:9px 8px}.provider-management .provider-details{flex-basis:calc(100% - 46px);min-width:0}.provider-management .panel-top{flex-wrap:wrap;gap:12px}.provider-form .modal-footer,.provider-delete .modal-footer{justify-content:flex-end}.provider-state{font-size:10px}}
+@media(max-width:380px){.provider-budget-values{grid-template-columns:repeat(2,minmax(0,1fr))}}

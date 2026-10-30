@@ -101,6 +101,12 @@ connection, enter the key in its protected field and save. The director readines
 check reports the limit observed for that exact saved key; account credit is
 separate from its monthly key limit.
 
+The configured Muse connection's editor shows the director's monthly cap, spent,
+reserved and remaining amounts, plus the last observed OpenRouter limit for the
+saved key. Use its **Manage key limit in OpenRouter** link to change the provider
+limit. Recheck director readiness after saving a replacement key. This director
+budget does not cover **Test connection** or general instruction-interpreter calls.
+
 The saved [real-source sample exports](examples/README.md) include five direct quotes across the three supplied product URLs and the separate 26-tier Business Cards table pilot.
 
 ### Automatic campaign collection

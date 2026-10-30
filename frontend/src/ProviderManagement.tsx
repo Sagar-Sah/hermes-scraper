@@ -8,6 +8,60 @@ const mappingFields = ['path', 'body_template', 'prompt_field', 'model_field', '
 const defaultMapping = { path: '/generate', prompt_field: 'prompt', response_path: 'text', auth_header: 'Authorization', auth_prefix: 'Bearer ', body_template: {} };
 type ProviderAction = 'test' | 'suspend' | 'resume' | 'delete' | 'restore';
 export interface ProviderEditorValues { name: string; baseUrl: string; model: string; kind: string; key: string; custom: string }
+interface ProviderBudgetStatus {
+  config?: { director_provider_id?: string | null };
+  director?: {
+    provider_id?: string | null; cap_usd?: unknown; spent_usd?: unknown; reserved_usd?: unknown; remaining_usd?: unknown;
+    month?: string; observed_limit_usd?: unknown; observed_reset?: string | null; required_cap_usd?: unknown;
+    checked_at?: number | null; preflight_checked_at?: number | null;
+  };
+}
+
+export function providerBudgetMoney(value: unknown): string {
+  if ((typeof value !== 'string' && typeof value !== 'number') || String(value).trim() === '') return 'Unknown';
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount >= 0 && amount <= 1e9 ? `$${amount.toFixed(2)}` : 'Unknown';
+}
+
+export function ProviderBudgetSummary({ providerId, status, loading, failed, keyChanged, onRefresh }: { providerId?: string; status: ProviderBudgetStatus | null; loading: boolean; failed: boolean; keyChanged: boolean; onRefresh: () => void }) {
+  const configured = !!providerId && status?.config?.director_provider_id === providerId;
+  const director = configured ? status.director : undefined;
+  const observation = director?.provider_id === providerId ? director : undefined;
+  const observed = providerBudgetMoney(observation?.observed_limit_usd);
+  const required = providerBudgetMoney(observation?.required_cap_usd);
+  const limitMismatch = observed !== 'Unknown' && required !== 'Unknown' && (Number(observation?.observed_limit_usd) > Number(observation?.required_cap_usd) || observation?.observed_reset !== 'monthly');
+  const reset = observation?.observed_reset === 'monthly' ? '/month' : observation?.observed_reset === 'weekly' ? '/week' : observation?.observed_reset === 'daily' ? '/day' : ' · reset unknown';
+  const checked = observation?.checked_at ?? observation?.preflight_checked_at;
+  const checkedText = typeof checked === 'number' && Number.isFinite(checked) && checked > 0 && checked <= 8640000000000 ? new Date(checked * 1000).toLocaleString() : null;
+  return <section className="provider-budget" aria-label="Muse director budget" aria-busy={loading}>
+    <div className="provider-budget-heading"><strong>Muse director budget</strong>{providerId && <button type="button" className="text-link" disabled={loading} onClick={onRefresh}>{loading ? <LoaderCircle size={12} className="spin" /> : <RefreshCw size={12} />}Refresh</button>}</div>
+    {loading ? <p role="status">Loading saved budget status…</p> : failed ? <p role="status">Budget status could not load. Refresh to try again; you can still save this provider.</p> : !providerId ? <p>No director budget configured. Save this provider, then select it in Product Companion.</p> : !status?.config ? <p>Director budget status is unknown.</p> : !configured ? <p>No director budget configured for this provider. Select it in Product Companion to use it as the director.</p> : <>
+      <div className="provider-budget-period">Hermes director totals · UTC month · hard maximum $25/month{director?.month && /^\d{4}-\d{2}$/.test(director.month) ? ` · ${director.month}` : ''}</div>
+      <dl className="provider-budget-values">{[['Monthly cap', director?.cap_usd], ['Spent', director?.spent_usd], ['Reserved', director?.reserved_usd], ['Remaining', director?.remaining_usd]].map(([label, value]) => <div key={String(label)}><dt>{String(label)}</dt><dd>{providerBudgetMoney(value)}</dd></div>)}</dl>
+      <div className="provider-key-limit"><span>OpenRouter limit · <strong>saved key</strong></span><strong>{observed === 'Unknown' ? 'Not checked for this saved key' : `${observed}${reset}`}</strong><a href="https://openrouter.ai/settings/keys" target="_blank" rel="noreferrer">Manage key limit in OpenRouter</a></div>
+      {checkedText && <p className="provider-budget-checked">Saved-key observation: {checkedText}</p>}
+      {limitMismatch && <p className="provider-budget-warning">The saved key needs a monthly limit of {required} or less for director readiness.</p>}
+      {keyChanged ? <p className="provider-budget-warning" role="status">A replacement key is entered. The limit above belongs to the saved key. After Save, use Product Companion → Check director readiness to verify the new key.</p> : <p>Change the provider limit in OpenRouter, then use Product Companion → Check director readiness. Account credit is separate.</p>}
+      <p className="provider-budget-scope">The Hermes cap covers director reviews; Test connection and general instruction calls are outside this budget.</p>
+    </>}
+  </section>;
+}
+
+export function ProviderDirectorBudget({ providerId, keyChanged }: { providerId?: string; keyChanged: boolean }) {
+  const [status, setStatus] = useState<ProviderBudgetStatus | null>(null);
+  const [loading, setLoading] = useState(!!providerId);
+  const [failed, setFailed] = useState(false);
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    if (!providerId) return;
+    let alive = true;
+    setLoading(true); setFailed(false); setStatus(null);
+    // Read saved status only. Opening this form never performs a provider preflight or model call.
+    void api<ProviderBudgetStatus>('/companion/autonomy/status').then(value => { if (alive) setStatus(value); }).catch(() => { if (alive) setFailed(true); }).finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [providerId, revision]);
+  return <ProviderBudgetSummary providerId={providerId} status={status} loading={loading} failed={failed} keyChanged={keyChanged} onRefresh={() => setRevision(value => value + 1)} />;
+}
 
 export function providerStatus(provider: Provider): string { return provider.status || 'active'; }
 
@@ -63,6 +117,7 @@ export function ProviderForm({ provider, onClose, onSaved }: { provider?: Provid
         <Field label="API base URL"><input type="url" required value={values.baseUrl} onChange={event => update('baseUrl', event.target.value)} placeholder="https://api.example.com/v1" /></Field>
         <Field label="Model ID"><input required value={values.model} onChange={event => update('model', event.target.value)} placeholder="Your provider’s exact model ID" /></Field>
         <Field label="API key" hint={provider ? 'Leave blank to keep the saved key. The current key is never displayed.' : 'Optional for endpoints without authentication. Keys are never returned in the provider list.'}><input type="password" autoComplete="new-password" spellCheck={false} value={values.key} onChange={event => update('key', event.target.value)} placeholder={provider ? 'Leave blank to keep saved key' : 'Enter your API key'} /></Field>
+        <ProviderDirectorBudget providerId={provider?.id} keyChanged={!!values.key.trim()} />
         {values.kind === 'custom' && <Field label="Request / response mapping · JSON" hint="Configure the endpoint path, prompt field, model field, response path, authentication header and static body. Keep credentials in the API key field."><textarea className="code-input" rows={9} required value={values.custom} onChange={event => update('custom', event.target.value)} /></Field>}
       </fieldset>
       <ErrorBox message={error} />

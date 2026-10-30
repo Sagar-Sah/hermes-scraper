@@ -20,11 +20,11 @@ const ts=req('typescript'),React=req('react'),render=req('react-dom/server').ren
 let checks=0;function check(value){assert.ok(value);checks++;}
 let runner=null;
 const mockReact={...React,
- useState(init){const self=runner,i=self.index++;if(!(i in self.slots))self.slots[i]=typeof init==='function'?init():init;return [self.slots[i],v=>{self.slots[i]=typeof v==='function'?v(self.slots[i]):v}];},
- useRef(init){const self=runner,i=self.index++;return self.slots[i]??(self.slots[i]={current:init});},
- useCallback(fn){runner.index++;return fn;},
- useEffect(fn,deps){const self=runner,i=self.index++,old=self.slots[i];if(!old||deps.some((v,n)=>v!==old[n])){self.effects.push(fn);self.slots[i]=deps;}},
- useId(){runner.index++;return 'fixture-dialog-title';}
+ useState(init){if(!runner)return React.useState(init);const self=runner,i=self.index++;if(!(i in self.slots))self.slots[i]=typeof init==='function'?init():init;return [self.slots[i],v=>{self.slots[i]=typeof v==='function'?v(self.slots[i]):v}];},
+ useRef(init){if(!runner)return React.useRef(init);const self=runner,i=self.index++;return self.slots[i]??(self.slots[i]={current:init});},
+ useCallback(fn,deps){if(!runner)return React.useCallback(fn,deps);runner.index++;return fn;},
+ useEffect(fn,deps){if(!runner)return React.useEffect(fn,deps);const self=runner,i=self.index++,old=self.slots[i];if(!old||deps.some((v,n)=>v!==old[n])){self.effects.push(fn);self.slots[i]=deps;}},
+ useId(){if(!runner)return React.useId();runner.index++;return 'fixture-dialog-title';}
 };
 function harness(component,props={}){return {slots:[],effects:[],index:0,render(){this.index=0;runner=this;try{return component(props)}finally{runner=null}},async effectsNow(){const pending=this.effects.splice(0);for(const fn of pending)await fn();await tick();}};}
 function nodes(node,result=[]){if(!node||typeof node!=='object')return result;if(Array.isArray(node)){node.forEach(n=>nodes(n,result));return result;}result.push(node);nodes(node.props?.children,result);return result;}
@@ -43,7 +43,7 @@ const scope={exports:{},require(name){
 }};
 const compile=file=>ts.transpileModule(fs.readFileSync(path.join(process.argv[1],'src',file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 vm.runInNewContext(compile('ProviderManagement.tsx'),scope);
-const {providerStatus,providerEditorValues,providerSaveRequest,providerActionRequest,ProviderForm,ProviderCard}=scope.exports;
+const {providerStatus,providerEditorValues,providerSaveRequest,providerActionRequest,ProviderForm,ProviderCard,ProviderBudgetSummary,ProviderDirectorBudget,providerBudgetMoney}=scope.exports;
 const fixture={id:'fixture /provider',name:'Fixture Muse',base_url:'https://fixture.invalid/v1',model:'fixture-model',kind:'openai_compatible',has_credentials:true};
 check(providerStatus(fixture)==='active');
 const values=providerEditorValues({...fixture,api_key:'must-never-prefill',encrypted_api_key:'never-show'});
@@ -75,7 +75,37 @@ for(const status of ['active','suspended','deleted']){
  check(nodes(ProviderCard({provider:{...fixture,status},busy:'refresh',onEdit(){},onAction(){}})).filter(n=>n.type==='button').every(n=>n.props.disabled));
 }
 check(calls.length===0); // Building UI and request contracts never calls a model or an API.
+const budgetStatus={config:{director_provider_id:fixture.id},director:{provider_id:fixture.id,cap_usd:'25.00',spent_usd:'1.25',reserved_usd:'0.75',remaining_usd:'23.00',month:'2026-10',observed_limit_usd:'100.00',observed_reset:'monthly',required_cap_usd:'25.00',checked_at:1793300000}};
+const budgetProps={providerId:fixture.id,status:budgetStatus,loading:false,failed:false,keyChanged:false,onRefresh(){}};
+let budgetHtml=render(React.createElement(ProviderBudgetSummary,budgetProps));
+for(const expected of ['$25.00','$1.25','$0.75','$23.00','$100.00/month','saved key','hard maximum $25/month','2026-10','Account credit is separate','Test connection and general instruction calls are outside this budget'])check(budgetHtml.includes(expected));
+check(budgetHtml.includes('https://openrouter.ai/settings/keys'));check(!budgetHtml.includes('<input'));check(budgetHtml.includes('Manage key limit in OpenRouter'));check(budgetHtml.includes('monthly limit of $25.00 or less'));
+check(budgetHtml.includes('Saved-key observation:'));
+budgetHtml=render(React.createElement(ProviderBudgetSummary,{...budgetProps,keyChanged:true}));
+check(budgetHtml.includes('A replacement key is entered'));check(budgetHtml.includes('limit above belongs to the saved key'));check(budgetHtml.includes('After Save'));
+budgetHtml=render(React.createElement(ProviderBudgetSummary,{...budgetProps,status:{config:{director_provider_id:'other'},director:budgetStatus.director}}));
+check(budgetHtml.includes('No director budget configured for this provider'));check(!budgetHtml.includes('$100.00')&&!budgetHtml.includes('$1.25'));
+budgetHtml=render(React.createElement(ProviderBudgetSummary,{...budgetProps,status:{config:budgetStatus.config,director:{...budgetStatus.director,provider_id:'stale-profile'}}}));
+check(budgetHtml.includes('Not checked for this saved key'));check(!budgetHtml.includes('$100.00'));
+budgetHtml=render(React.createElement(ProviderBudgetSummary,{...budgetProps,status:{config:budgetStatus.config,director:{...budgetStatus.director,provider_id:undefined}}}));
+check(budgetHtml.includes('Not checked for this saved key'));check(!budgetHtml.includes('$100.00')&&!budgetHtml.includes('Saved-key observation:'));check(budgetHtml.includes('Hermes director totals · UTC month')&&budgetHtml.includes('$25.00'));
+budgetHtml=render(React.createElement(ProviderBudgetSummary,{...budgetProps,status:{config:budgetStatus.config,director:{cap_usd:null,spent_usd:-1,reserved_usd:'bad',remaining_usd:'',observed_limit_usd:null}}}));
+check((budgetHtml.match(/Unknown/g)||[]).length===4);check(budgetHtml.includes('Not checked for this saved key'));check(!budgetHtml.includes('$0.00'));
+for(const reset of ['daily','weekly']){budgetHtml=render(React.createElement(ProviderBudgetSummary,{...budgetProps,status:{...budgetStatus,director:{...budgetStatus.director,observed_reset:reset}}}));check(budgetHtml.includes(reset==='daily'?'$100.00/day':'$100.00/week'));}
+check(render(React.createElement(ProviderBudgetSummary,{...budgetProps,loading:true})).includes('Loading saved budget status'));
+check(render(React.createElement(ProviderBudgetSummary,{...budgetProps,failed:true})).includes('Budget status could not load'));
+check(render(React.createElement(ProviderBudgetSummary,{...budgetProps,status:null})).includes('Director budget status is unknown'));
+check(render(React.createElement(ProviderBudgetSummary,{...budgetProps,providerId:undefined,status:null})).includes('Save this provider'));
+for(const invalid of [null,undefined,'',NaN,-1,Infinity,'1e12',{},true])check(providerBudgetMoney(invalid)==='Unknown');
 (async()=>{
+ const budget=harness(ProviderDirectorBudget,{providerId:fixture.id,keyChanged:false});
+ let budgetTree=budget.render();check(calls.length===0&&budgetTree.props.loading===true);
+ responder=async(p,o)=>{check(p==='/companion/autonomy/status'&&!o);return budgetStatus};
+ await budget.effectsNow();budgetTree=budget.render();check(calls.length===1&&budgetTree.props.status===budgetStatus&&budgetTree.props.loading===false);
+ budgetTree.props.onRefresh();budget.render();await budget.effectsNow();check(calls.length===2&&calls.every(([p,o])=>p==='/companion/autonomy/status'&&!o));
+ responder=async()=>{throw Error('status fixture unavailable')};budgetTree.props.onRefresh();budget.render();await budget.effectsNow();budgetTree=budget.render();check(budgetTree.props.failed===true&&budgetTree.props.status===null);
+ calls.length=0;
+ const newBudget=harness(ProviderDirectorBudget,{keyChanged:false});newBudget.render();await newBudget.effectsNow();check(calls.length===0);
  let saved=null,closed=0,finish;
  const editor=harness(ProviderForm,{provider:fixture,onClose:()=>closed++,onSaved:p=>saved=p});
  let tree=editor.render();check(field(tree,'password').props.value==='');check(render(tree).includes('Leave blank to keep the saved key'));
