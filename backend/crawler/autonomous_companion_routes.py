@@ -1,6 +1,6 @@
 """Authenticated monthly Companion control; no production approval route."""
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 
 
 class ConfigureRequest(BaseModel):
@@ -28,6 +28,8 @@ class CycleRequest(BaseModel):
     baseline: dict | None = None
     category_slugs: list[StrictStr] | None = Field(default=None, min_length=1, max_length=10)
     product_ids: list[StrictStr] | None = Field(default=None, min_length=1, max_length=99)
+    exclude_product_ids: list[StrictStr] | None = Field(default=None, min_length=1, max_length=99)
+    stop_at: StrictFloat | StrictInt | None = Field(default=None, allow_inf_nan=False)
 
 
 class EmptyRequest(BaseModel):

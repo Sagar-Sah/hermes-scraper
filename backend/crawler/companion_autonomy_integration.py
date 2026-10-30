@@ -171,13 +171,15 @@ class IntegratedAutonomousCompanion(AutonomousCompanion):
                 category_ids.add(category["id"])
         return value
 
-    async def _pages(self, base, resource, *, evidence=None, evidence_dir=None):
+    async def _pages(self, base, resource, *, evidence=None, evidence_dir=None, cycle=None):
         # Select once. A broken/expired selected connector aborts this inventory;
         # it never falls back to a different data source halfway through a scan.
         if resource != "products" or self.environments.published_catalog_connection(base) is None:
-            return await super()._pages(base, resource, evidence=evidence, evidence_dir=evidence_dir)
+            return await super()._pages(base, resource, evidence=evidence, evidence_dir=evidence_dir, cycle=cycle)
         products, expected_total, expected_pages, previous_id = [], None, None, 0
         for page in range(1, MAX_PAGES + 1):
+            if cycle is not None and self._pause_at_cutoff(cycle):
+                raise ValueError("operator_time_window_ended")
             url = base + "/wp-json/hermes-companion/v1/catalog?page=" + str(page)
             result = await self.environments.published_catalog_page(base, page)
             if not isinstance(result, (tuple, list)) or len(result) != 4:

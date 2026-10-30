@@ -38,6 +38,7 @@ SAFE_REASON = re.compile(r"^[a-z][a-z0-9_]{0,99}$")
 ID = re.compile(r"^[a-f0-9]{32}$")
 MAX_PAGES = 1000
 MAX_PRODUCTS = 100000
+OPERATOR_WINDOW_ENDED = "operator_time_window_ended"
 DEFAULTS = {
     "enabled": False, "schedule_enabled": False,
     "site_url": "https://printitprints.com",
@@ -184,6 +185,9 @@ class AutonomousCompanion:
                 if review["status"] == "running":
                     review.update(status="held", reason="director_interrupted", updated_at=self.clock())
                     changed = True
+            if record["status"] in ACTIVE_CYCLE and self._stop_at_expired(record):
+                self._pause_at_cutoff(record)
+                changed = True
             if changed:
                 self._save_cycle(record)
 
@@ -267,18 +271,82 @@ class AutonomousCompanion:
 
     @staticmethod
     def _inventory_pin(record):
-        return _hash({"baseline": record["baseline"], "scope": record.get("scope"), "inventory": record["inventory"],
+        snapshot = {"baseline": record["baseline"], "scope": record.get("scope"), "inventory": record["inventory"],
             "products": [{k: p[k] for k in ("product_id", "storefront_url", "categories", "supplier", "source_url")}
-                for p in record["products"]]})
+                for p in record["products"]]}
+        if "stop_at" in record:
+            snapshot["stop_at"] = record["stop_at"]
+        return _hash(snapshot)
+
+    @staticmethod
+    def _request_pin(record):
+        return _hash({"kind": record["kind"], "created_at": record["created_at"],
+            "scope": record.get("scope"), "stop_at": record.get("stop_at")})
 
     @classmethod
     def _check_pins(cls, record):
+        if ("request_sha256" in record or "stop_at" in record
+                or "exclude_product_ids" in (record.get("scope") or {})):
+            if cls._request_pin(record) != record.get("request_sha256"):
+                raise ValueError("cycle_request_changed")
         if _hash(record["baseline"]) != record["baseline_sha256"]:
             raise ValueError("cycle_baseline_changed")
         if _hash(record["config"]) != record.get("config_sha256"):
             raise ValueError("cycle_config_changed")
         if record["inventory"].get("complete") and cls._inventory_pin(record) != record.get("inventory_baseline_sha256"):
             raise ValueError("cycle_inventory_mapping_changed")
+
+    def _stop_at_expired(self, record):
+        stop = record.get("stop_at")
+        return type(stop) in (int, float) and math.isfinite(stop) and self.clock() >= stop
+
+    def _bounded_timeout(self, record, seconds):
+        stop = record.get("stop_at")
+        return min(seconds, max(0, stop - self.clock())) if type(stop) in (int, float) and math.isfinite(stop) else seconds
+
+    def _pause_at_cutoff(self, record):
+        """Fence admission before cancelling only this cycle's owned work.
+
+        An owned coroutine may not have entered its try/finally yet. Persist
+        its unknown-outcome hold here as well as retaining the normal worker
+        cancellation handlers. Never cancel the caller (inventory/worker/tick).
+        """
+        if not self._stop_at_expired(record):
+            return False
+        identifier = record["id"]
+        owned = [task for (cid, _), task in self._active.items() if cid == identifier]
+        owned += [task for (cid, _), task in self._review_tasks.items() if cid == identifier]
+        if identifier in self._inventory_tasks:
+            owned.append(self._inventory_tasks[identifier])
+        if (record["status"] == "paused" and record.get("pause_reason") == OPERATOR_WINDOW_ENDED
+                and record.get("fault") == OPERATOR_WINDOW_ENDED and not any(not task.done() for task in owned)):
+            return True
+        changed = record["status"] != "paused" or record.get("pause_reason") != OPERATOR_WINDOW_ENDED
+        if record["status"] == "inventorying" or identifier in self._inventory_tasks:
+            record["inventory_pause_requested"] = True
+        record.update(status="paused", fault=OPERATOR_WINDOW_ENDED, pause_reason=OPERATOR_WINDOW_ENDED)
+        record.setdefault("cutoff_reached_at", self.clock())
+        record.pop("scheduled_inventory_pending", None)
+        for job in record.get("products", []):
+            if job["status"] == "running":
+                job.update(status="held", reason="handler_interrupted_unknown_effect", ended_at=self.clock(), updated_at=self.clock())
+                changed = True
+            self._sync_timing(record, job)
+        for review in record.get("director_reviews", {}).values():
+            if review["status"] == "running":
+                review.update(status="held", reason="director_interrupted", updated_at=self.clock())
+                changed = True
+        try:
+            caller = asyncio.current_task()
+        except RuntimeError:
+            caller = None
+        # Persist the fence and holds before delivering cancellation.
+        if changed:
+            self._save_cycle(record)
+        for task in set(owned):
+            if task is not caller and not task.done() and not task.cancelling():
+                task.cancel()
+        return True
 
     def _cycle(self, cycle_id):
         if not isinstance(cycle_id, str) or not ID.fullmatch(cycle_id) or cycle_id not in self.cycles:
@@ -362,17 +430,24 @@ class AutonomousCompanion:
             self.cycles[cycle_id] = updated
             return self.get_cycle(cycle_id)
 
-    def create_cycle(self, *, kind="manual", baseline=None, scheduled_month=None, category_slugs=None, product_ids=None):
+    def create_cycle(self, *, kind="manual", baseline=None, scheduled_month=None, category_slugs=None, product_ids=None,
+            exclude_product_ids=None, stop_at=None):
         if kind not in {"manual", "scheduled"}:
             raise ValueError("invalid_cycle_kind")
-        if kind == "scheduled" and (category_slugs is not None or product_ids is not None):
+        if kind == "scheduled" and (category_slugs is not None or product_ids is not None or exclude_product_ids is not None):
             raise ValueError("scheduled_scope_must_cover_all_catalog")
+        now = self.clock()
+        if stop_at is not None and (kind != "manual" or type(stop_at) not in (int, float)
+                or not math.isfinite(stop_at) or not now < stop_at <= now + 86400):
+            raise ValueError("invalid_manual_cycle_stop_at")
         for values, limit, pattern in ((category_slugs, 10, r"[a-z0-9][a-z0-9-]{0,99}"),
-                (product_ids, 99, r"[1-9][0-9]{0,18}")):
+                (product_ids, 99, r"[1-9][0-9]{0,18}"), (exclude_product_ids, 99, r"[1-9][0-9]{0,18}")):
             if values is not None and (not isinstance(values, list) or not 1 <= len(values) <= limit
                     or any(not isinstance(v, str) or not re.fullmatch(pattern, v) for v in values)
                     or len(values) != len(set(values))):
                 raise ValueError("invalid_manual_catalog_scope")
+        if set(product_ids or []) & set(exclude_product_ids or []):
+            raise ValueError("manual_catalog_scope_overlap")
         if self._active_cycle() is not None:
             raise ValueError("autonomy_cycle_already_active")
         if kind == "scheduled":
@@ -400,6 +475,12 @@ class AutonomousCompanion:
             "inventory": {"status": "pending", "count": 0, "pages": 0, "category_pages": 0, "complete": False},
             "products": [], "supplier_blocks": {}, "supplier_not_before": {},
             "dispatch_sequence": 0, "director_reviews": {}, "fault": None}
+        if exclude_product_ids is not None:
+            record["scope"]["exclude_product_ids"] = deepcopy(exclude_product_ids)
+        if stop_at is not None:
+            record["stop_at"] = stop_at
+        if stop_at is not None or exclude_product_ids is not None:
+            record["request_sha256"] = self._request_pin(record)
         self.cycles[identifier] = record
         self._save_cycle(record)
         return self.get_cycle(identifier)
@@ -412,10 +493,12 @@ class AutonomousCompanion:
             response = await client.get(url)
         return response.status_code, str(response.url), response.content, dict(response.headers)
 
-    async def _pages(self, base, resource, *, evidence=None, evidence_dir=None):
+    async def _pages(self, base, resource, *, evidence=None, evidence_dir=None, cycle=None):
         items, seen_pages, observed_pages, duplicate_ids = {}, set(), 0, 0
         expected_total = None
         for page in range(1, MAX_PAGES + 1):
+            if cycle is not None and self._pause_at_cutoff(cycle):
+                raise ValueError(OPERATOR_WINDOW_ENDED)
             query = {"per_page": 100, "page": page, "orderby": "id", "order": "asc"}
             if resource == "products/categories":
                 query["hide_empty"] = "false"
@@ -498,6 +581,9 @@ class AutonomousCompanion:
     async def inventory(self, cycle_id):
         async with self._lock:
             record = self._cycle(cycle_id)
+            self._check_pins(record)
+            if self._pause_at_cutoff(record):
+                return self.get_cycle(cycle_id)
             if record["inventory"].get("complete"):
                 return self.get_cycle(cycle_id)
             if record["status"] not in {"created", "inventory_failed", "paused"}:
@@ -512,8 +598,8 @@ class AutonomousCompanion:
             base = record["config"]["site_url"]
             evidence_dir = self.root / "inventory-pages" / cycle_id / uuid.uuid4().hex
             evidence_dir.mkdir(mode=0o700, parents=True, exist_ok=False)
-            categories, category_pages, category_duplicates = await self._pages(base, "products/categories", evidence=evidence, evidence_dir=evidence_dir)
-            products, product_pages, product_duplicates = await self._pages(base, "products", evidence=evidence, evidence_dir=evidence_dir)
+            categories, category_pages, category_duplicates = await self._pages(base, "products/categories", evidence=evidence, evidence_dir=evidence_dir, cycle=record)
+            products, product_pages, product_duplicates = await self._pages(base, "products", evidence=evidence, evidence_dir=evidence_dir, cycle=record)
             category_map = {str(c["id"]): c for c in categories}
             for category in categories:
                 if (type(category.get("parent")) is not int or category["parent"] < 0
@@ -549,8 +635,13 @@ class AutonomousCompanion:
             selected_ids = set(scope["product_ids"]) if scope.get("product_ids") else None
             if selected_ids is not None and not selected_ids.issubset({str(p["id"]) for p in products}):
                 raise ValueError("catalog_requested_product_missing")
+            excluded_ids = set(scope.get("exclude_product_ids") or [])
+            if not excluded_ids.issubset({str(p["id"]) for p in products}):
+                raise ValueError("catalog_excluded_product_missing")
             rows, now = [], self.clock()
             for product in products:
+                if self._pause_at_cutoff(record):
+                    raise ValueError(OPERATOR_WINDOW_ENDED)
                 pid = str(product["id"])
                 url = _public_url(product.get("permalink"), base)
                 if url is None:
@@ -561,6 +652,8 @@ class AutonomousCompanion:
                 if any(str(c["id"]) not in category_map for c in cats):
                     raise ValueError("catalog_category_coverage_incomplete")
                 if selected_ids is not None and pid not in selected_ids:
+                    continue
+                if pid in excluded_ids:
                     continue
                 if selected_categories is not None and not any(str(c["id"]) in selected_categories for c in cats):
                     continue
@@ -603,17 +696,22 @@ class AutonomousCompanion:
                 "selected_category_ids": sorted(selected_categories, key=int) if selected_categories is not None else None,
                 "evidence_pages": evidence}
             async with self._lock:
+                if self._pause_at_cutoff(record):
+                    raise ValueError(OPERATOR_WINDOW_ENDED)
                 record["products"], record["inventory"], record["status"] = rows, inventory, "ready"
                 record["inventory_baseline_sha256"] = self._inventory_pin(record)
                 self._save_cycle(record)
         except BaseException as exc:
             async with self._lock:
                 interrupted = isinstance(exc, asyncio.CancelledError)
-                paused = record.get("inventory_pause_requested") is True
+                cutoff = self._stop_at_expired(record)
+                if cutoff:
+                    self._pause_at_cutoff(record)
+                paused = record.get("inventory_pause_requested") is True or cutoff
                 record["status"] = "paused" if paused else "created" if interrupted and record["kind"] == "scheduled" else "inventory_failed"
                 record["inventory"].update(status="failed", complete=False,
                     evidence_pages=evidence, response_pages=len(evidence),
-                    reason="inventory_paused" if paused else "inventory_interrupted" if interrupted else
+                    reason=OPERATOR_WINDOW_ENDED if cutoff else "inventory_paused" if paused else "inventory_interrupted" if interrupted else
                         _reason(str(exc), "catalog_inventory_failed") if isinstance(exc, ValueError) else "catalog_inventory_failed")
                 if interrupted and record["kind"] == "scheduled" and not paused:
                     record["scheduled_inventory_pending"] = True
@@ -691,7 +789,8 @@ class AutonomousCompanion:
 
     def list_cycles(self):
         return [{**{key: deepcopy(c[key]) for key in ("id", "kind", "scheduled_month", "status", "created_at", "updated_at",
-                "started_at", "finished_at", "baseline_sha256", "inventory", "fault")}, "summary": self._summary(c)}
+                "started_at", "finished_at", "baseline_sha256", "inventory", "fault")},
+                **({"stop_at": c["stop_at"]} if "stop_at" in c else {}), "summary": self._summary(c)}
             for c in sorted(self.cycles.values(), key=lambda c: c["created_at"], reverse=True)]
 
     def status(self):
@@ -708,6 +807,10 @@ class AutonomousCompanion:
     async def start(self, cycle_id):
         async with self._lock:
             record = self._cycle(cycle_id)
+            if self._stop_at_expired(record):
+                self._check_pins(record)
+                self._pause_at_cutoff(record)
+                return self.get_cycle(cycle_id)
             if not record["inventory"].get("complete") or record["status"] not in {"ready", "paused"}:
                 raise ValueError("complete_inventory_required")
             if not callable(self.product_handler):
@@ -744,6 +847,10 @@ class AutonomousCompanion:
     async def resume(self, cycle_id, *, supplier=None):
         async with self._lock:
             record = self._cycle(cycle_id)
+            if self._stop_at_expired(record):
+                self._check_pins(record)
+                self._pause_at_cutoff(record)
+                return self.get_cycle(cycle_id)
             if supplier is not None:
                 if not isinstance(supplier, str) or supplier not in record["supplier_blocks"]:
                     raise ValueError("unknown_supplier_hold")
@@ -797,8 +904,12 @@ class AutonomousCompanion:
     async def _execute(self, record, job):
         try:
             self._check_pins(record)
+            if self._pause_at_cutoff(record):
+                return
             raw = await asyncio.wait_for(self.product_handler(self.get_cycle(record["id"], compact=True), deepcopy(job)),
-                timeout=record["config"]["handler_timeout_seconds"])
+                timeout=self._bounded_timeout(record, record["config"]["handler_timeout_seconds"]))
+            if self._pause_at_cutoff(record):
+                return
             result = self._result(raw)
             status = result["status"]
             if status == "continue":
@@ -826,7 +937,8 @@ class AutonomousCompanion:
         except asyncio.CancelledError:
             job.update(status="held", reason="handler_interrupted_unknown_effect", ended_at=self.clock())
         except TimeoutError:
-            job.update(status="held", reason="handler_timeout_unknown_effect", ended_at=self.clock())
+            if not self._pause_at_cutoff(record):
+                job.update(status="held", reason="handler_timeout_unknown_effect", ended_at=self.clock())
         except Exception:
             job.update(status="held", reason="handler_failed_unknown_effect", ended_at=self.clock())
         finally:
@@ -837,27 +949,38 @@ class AutonomousCompanion:
     async def _review(self, record, batch_index, jobs):
         review = record["director_reviews"][str(batch_index)]
         try:
+            self._check_pins(record)
+            if self._pause_at_cutoff(record):
+                return
             digest = {"cycle_id": record["id"], "batch_index": batch_index, "products": [
                 {k: p[k] for k in ("product_id", "supplier", "status", "reason", "repair_status")} for p in jobs],
                 "counts": {s: sum(p["status"] == s for p in jobs) for s in TERMINAL},
                 "advisory_only": True}
-            raw = await asyncio.wait_for(self.director_review({"id": record["id"], "config": deepcopy(record["config"]),
-                "baseline_sha256": record["baseline_sha256"], "evidence_namespace": record["evidence_namespace"]}, digest), timeout=90)
+            context = {"id": record["id"], "config": deepcopy(record["config"]),
+                "baseline_sha256": record["baseline_sha256"], "evidence_namespace": record["evidence_namespace"]}
+            if "stop_at" in record:
+                context["stop_at"] = record["stop_at"]
+            raw = await asyncio.wait_for(self.director_review(context, digest), timeout=self._bounded_timeout(record, 90))
+            if self._pause_at_cutoff(record):
+                return
             if not isinstance(raw, dict) or len(_canonical(raw)) > 50000:
                 raise ValueError("invalid_director_review")
             review.update(status="completed", result=deepcopy(raw), updated_at=self.clock())
         except asyncio.CancelledError:
             review.update(status="held", reason="director_interrupted", updated_at=self.clock())
         except Exception:
-            review.update(status="failed", reason="director_unavailable", updated_at=self.clock())
+            if not self._pause_at_cutoff(record):
+                review.update(status="failed", reason="director_unavailable", updated_at=self.clock())
         finally:
             self._save_cycle(record)
 
     def _maybe_reviews(self, record):
-        if not record["config"]["director_enabled"] or not callable(self.director_review):
+        if self._pause_at_cutoff(record) or not record["config"]["director_enabled"] or not callable(self.director_review):
             return
         batches = sorted({p["batch_index"] for p in record["products"]})
         for index in batches:
+            if self._pause_at_cutoff(record):
+                break
             jobs = [p for p in record["products"] if p["batch_index"] == index]
             if str(index) in record["director_reviews"] or not jobs or any(p["status"] not in TERMINAL for p in jobs):
                 continue
@@ -873,13 +996,20 @@ class AutonomousCompanion:
             active_cycle = self._active_cycle()
             if requested is not None and active_cycle is not None and requested["id"] != active_cycle["id"]:
                 raise ValueError("autonomy_cycle_not_active")
+            for record in self.cycles.values():
+                identifier = record["id"]
+                owned = (identifier in self._inventory_tasks or any(cid == identifier for cid, _ in self._active)
+                    or any(cid == identifier for cid, _ in self._review_tasks))
+                if record["status"] in ACTIVE_CYCLE or owned:
+                    self._pause_at_cutoff(record)
             for key, task in list(self._active.items()):
                 if task.done():
                     try:
                         task.result()
                     except BaseException:
                         record = self._cycle(key[0])
-                        record["status"], record["fault"] = "paused", "autonomy_persistence_or_worker_failure"
+                        record["status"], record["fault"] = "paused", (OPERATOR_WINDOW_ENDED
+                            if record.get("pause_reason") == OPERATOR_WINDOW_ENDED else "autonomy_persistence_or_worker_failure")
                         self._save_cycle(record)
                     del self._active[key]
             for key, task in list(self._review_tasks.items()):
@@ -903,6 +1033,8 @@ class AutonomousCompanion:
                     self._save_cycle(record)
             if record is None:
                 return self.status()
+            if self._pause_at_cutoff(record):
+                return self.status()
             if record.get("scheduled_inventory_pending"):
                 record.pop("scheduled_inventory_pending")
                 self._save_cycle(record)
@@ -921,6 +1053,8 @@ class AutonomousCompanion:
             window = self._ordered_pending(record)[:99]
             candidates = sorted((p for p in window if p["status"] == "queued"), key=lambda p: (p["last_dispatch_sequence"], p["ordinal"]))
             for job in candidates:
+                if self._pause_at_cutoff(record):
+                    break
                 if len(self._active) >= record["config"]["worker_capacity"]:
                     break
                 supplier = job["supplier"] or "unmapped"
@@ -937,7 +1071,11 @@ class AutonomousCompanion:
                 occupied.add(supplier)
             # Blocked products are explicit access-required outcomes, permitting
             # later batches/other suppliers to proceed without repeating a login.
+            if self._pause_at_cutoff(record):
+                return self.status()
             self._maybe_reviews(record)
+            if self._pause_at_cutoff(record):
+                return self.status()
             if record["inventory"].get("complete") and all(p["status"] in TERMINAL for p in record["products"]):
                 record["status"] = "completed" if all(p["status"] == "verified" for p in record["products"]) and record["products"] else "completed_with_attention"
                 record["finished_at"] = self.clock()
