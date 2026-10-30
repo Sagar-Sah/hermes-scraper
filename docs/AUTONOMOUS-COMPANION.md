@@ -23,6 +23,15 @@ eligible suppliers can continue. An uncertain in-flight operation is held after
 interruption rather than blindly sent again. Saved progress and timing survive
 safe pauses and service restarts.
 
+An inventoried cycle pins its supplier mappings. After reviewing additional
+mapping evidence, use **Retire unstarted inventory**, then explicitly create and
+inventory a new cycle. The old cycle becomes `superseded`; its catalog pages,
+mapping snapshot and history remain intact. This action is available only before
+any product dispatch, result, repair, paid review or uncertain operation. It
+uses the displayed revision and inventory hash and rejects stale requests. It
+does not start a replacement or reset an interrupted supplier request. Scheduled
+cycles also retain their month identity, preventing an automatic duplicate run.
+
 Collection completion is different from product verification. Quantities,
 conditional choices, exact costs, retail calculations, documents, production,
 artwork and shipping are checked only where the registered capability can prove

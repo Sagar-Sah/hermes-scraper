@@ -87,6 +87,198 @@ async def settle(manager, iterations=50):
     await manager.tick()
 
 
+def supersede_request(cycle):
+    return {"expected_revision_sha256": cycle["revision_sha256"],
+        "expected_inventory_sha256": cycle.get("inventory_baseline_sha256"),
+        "reason": "reviewed_mapping_inventory_refresh"}
+
+
+@pytest.mark.asyncio
+async def test_supersede_retains_pinned_inventory_and_allows_new_mapping_cycle_without_dispatch(managers):
+    make, _ = managers
+    calls = []
+    async def handler(*args):
+        calls.append("source")
+        return verified()
+    async def director(*args):
+        calls.append("director")
+    manager, catalog = make([product(1), product(2)], handler=handler, director=director)
+    try:
+        original = await manager.inventory(manager.create_cycle()["id"])
+        saved = json.loads((manager.cycles_dir / (original["id"] + ".json")).read_text())
+        inventory_calls = len(catalog.calls)
+        assert original["can_supersede"] is True
+        assert len(original["revision_sha256"]) == 64
+        result = await manager.supersede(original["id"], **supersede_request(original))
+        assert result["status"] == "superseded" and result["can_supersede"] is False
+        assert manager.status()["active_cycle_id"] is None
+        for key in ("baseline", "baseline_sha256", "config", "config_sha256", "inventory", "products", "inventory_baseline_sha256"):
+            assert manager.cycles[original["id"]][key] == saved[key]
+        assert result["working_window"] == result["next_window"] == []
+        assert result["supersession"]["previous_revision_sha256"] == original["revision_sha256"]
+        assert result["supersession"]["replacement_created"] is False
+        assert len(catalog.calls) == inventory_calls and calls == []
+        assert manager.list_cycles()[0]["status"] == "superseded"
+        # The old mapping is not rewritten when the reviewed resolver changes.
+        manager.mapping_resolver = lambda p: {"supplier": "4over", "source_url": "https://4over.com/reviewed-" + p["product_id"]}
+        replacement = await manager.inventory(manager.create_cycle()["id"])
+        assert replacement["evidence_namespace"] != original["evidence_namespace"]
+        assert replacement["products"][0]["source_url"] != original["products"][0]["source_url"]
+        assert manager.get_cycle(original["id"])["inventory_baseline_sha256"] == original["inventory_baseline_sha256"]
+        with pytest.raises(ValueError, match="complete_inventory_required"):
+            await manager.start(original["id"])
+        with pytest.raises(ValueError, match="cycle_not_resumable"):
+            await manager.resume(original["id"])
+        assert calls == []
+    finally:
+        await manager.close()
+
+
+@pytest.mark.asyncio
+async def test_failed_inventory_can_be_retired_without_losing_failure_pages(managers):
+    make, _ = managers
+    catalog = Catalog([product(1)])
+    catalog.fail_page = 1
+    manager, _ = make(fetch=catalog)
+    try:
+        failed = await manager.inventory(manager.create_cycle()["id"])
+        assert failed["status"] == "inventory_failed" and failed["can_supersede"] is True
+        assert failed.get("inventory_baseline_sha256") is None
+        retired = await manager.supersede(failed["id"], **supersede_request(failed))
+        assert retired["inventory"] == failed["inventory"]
+        for page in retired["inventory"]["evidence_pages"]:
+            assert hashlib.sha256((manager.root / page["path"]).read_bytes()).hexdigest() == page["sha256"]
+    finally:
+        await manager.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("history", ["running", "paused", "started_at", "dispatch_sequence", "director_reviews",
+    "supplier_blocks", "attempts", "progress_count", "progress_token", "last_dispatch_sequence", "result",
+    "repair_status", "held", "not_before", "product_work", "shipping_journal", "source_uncertain",
+    "inventory_owner", "review_owner", "handler_owner", "symbolic_product_directory"])
+async def test_work_or_uncertain_history_cannot_be_superseded(managers, history):
+    make, _ = managers
+    manager, _ = make()
+    try:
+        ready = await manager.inventory(manager.create_cycle()["id"])
+        record = manager.cycles[ready["id"]]
+        if history in {"running", "paused"}:
+            record["status"] = history
+        elif history in {"started_at", "dispatch_sequence"}:
+            record[history] = 1
+        elif history == "director_reviews":
+            record[history] = {"0": {"status": "held", "reason": "director_interrupted"}}
+        elif history == "supplier_blocks":
+            record[history] = {"4over": {"reason": "supplier_login_required"}}
+        elif history in {"product_work", "shipping_journal"}:
+            folder = manager.root / ("product-work" if history == "product_work" else "shipping-models") / ready["id"]
+            folder.mkdir(parents=True)
+            (folder / "uncertain.json").write_text('{"state":"dispatching"}')
+        elif history == "symbolic_product_directory":
+            destination = manager.root / "external"
+            destination.mkdir()
+            (manager.root / "product-work").symlink_to(destination, target_is_directory=True)
+        elif history in {"inventory_owner", "review_owner", "handler_owner"}:
+            task = asyncio.create_task(asyncio.sleep(60))
+            if history == "inventory_owner":
+                manager._inventory_tasks[ready["id"]] = task
+            elif history == "review_owner":
+                manager._review_tasks[(ready["id"], 0)] = task
+            else:
+                manager._active[(ready["id"], "1")] = task
+        elif history == "source_uncertain":
+            record["products"][0].update(status="held", reason="source_dispatch_outcome_uncertain")
+        elif history == "held":
+            record["products"][0]["status"] = "held"
+        else:
+            record["products"][0][history] = {"status": "unknown"} if history == "result" else "previewed" if history == "repair_status" else "a" * 64 if history == "progress_token" else 1
+        manager._save_cycle(record)
+        current = manager.get_cycle(ready["id"])
+        assert current["can_supersede"] is False
+        with pytest.raises(ValueError, match="prevents_supersession|can_be_superseded|prevent_supersession"):
+            await manager.supersede(ready["id"], **supersede_request(current))
+        assert manager.get_cycle(ready["id"])["status"] == record["status"]
+    finally:
+        await manager.close()
+
+
+@pytest.mark.asyncio
+async def test_supersede_compare_and_swap_pins_disk_and_inventory_and_does_not_mutate_on_failed_save(managers, monkeypatch):
+    make, _ = managers
+    manager, _ = make()
+    try:
+        ready = await manager.inventory(manager.create_cycle()["id"])
+        with pytest.raises(ValueError, match="cycle_revision_changed"):
+            await manager.supersede(ready["id"], **{**supersede_request(ready), "expected_revision_sha256": "0" * 64})
+        with pytest.raises(ValueError, match="cycle_inventory_revision_changed"):
+            await manager.supersede(ready["id"], **{**supersede_request(ready), "expected_inventory_sha256": "0" * 64})
+        path = manager.cycles_dir / (ready["id"] + ".json")
+        before = path.read_bytes()
+        changed = json.loads(before)
+        changed["fault"] = "changed_on_disk"
+        manager._atomic(path, changed)
+        with pytest.raises(ValueError, match="cycle_revision_changed"):
+            await manager.supersede(ready["id"], **supersede_request(ready))
+        manager._atomic(path, before)
+        def fail_save(record):
+            raise OSError("test_disk_full")
+        monkeypatch.setattr(manager, "_save_cycle", fail_save)
+        with pytest.raises(OSError, match="test_disk_full"):
+            await manager.supersede(ready["id"], **supersede_request(ready))
+        assert manager.get_cycle(ready["id"])["revision_sha256"] == ready["revision_sha256"]
+        assert path.read_bytes() == before
+    finally:
+        await manager.close()
+
+
+@pytest.mark.asyncio
+async def test_superseded_cycle_survives_restart_without_scheduled_duplicate_or_workers(managers):
+    make, _ = managers
+    wall = datetime(2026, 10, 29, 12, tzinfo=ZoneInfo("America/Phoenix")).timestamp()
+    manager, _ = make(clock=lambda: wall)
+    ready = await manager.inventory(manager.create_cycle(kind="scheduled")["id"])
+    await manager.supersede(ready["id"], **supersede_request(ready))
+    await manager.close()
+    restored, _ = make(clock=lambda: wall)
+    try:
+        restored.configure(enabled=True, schedule_enabled=True)
+        await restored.tick()
+        assert len(restored.list_cycles()) == 1
+        assert restored.get_cycle(ready["id"])["status"] == "superseded"
+        assert restored.status()["active_cycle_id"] is None
+        assert not restored._active and not restored._inventory_tasks
+        assert restored.create_cycle()["status"] == "created"
+    finally:
+        await restored.close()
+
+
+@pytest.mark.asyncio
+async def test_supersede_route_requires_auth_and_exact_revision_without_extra_actions(managers):
+    make, _ = managers
+    manager, _ = make()
+    async def authenticated(authorization: str | None = Header(default=None)):
+        if authorization != "Bearer fixture-token":
+            raise HTTPException(401, "authentication_required")
+    app = FastAPI()
+    app.include_router(autonomous_router(lambda: manager, authenticated))
+    try:
+        ready = await manager.inventory(manager.create_cycle()["id"])
+        route = "/api/v1/companion/autonomy/cycles/" + ready["id"] + "/supersede"
+        client, payload = TestClient(app), supersede_request(ready)
+        headers = {"Authorization": "Bearer fixture-token"}
+        assert client.post(route, json=payload).status_code == 401
+        assert client.post(route, headers=headers, json={**payload, "start_replacement": True}).status_code == 422
+        assert client.post(route, headers=headers, json={**payload, "reason": "untrusted reason"}).status_code == 422
+        assert client.post(route, headers=headers, json={**payload, "expected_revision_sha256": "0" * 64}).status_code == 409
+        result = client.post(route, headers=headers, json=payload)
+        assert result.status_code == 200 and result.json()["status"] == "superseded"
+        assert client.post(route, headers=headers, json=payload).status_code == 409
+        assert len(manager.list_cycles()) == 1
+    finally:
+        await manager.close()
+
+
 @pytest.mark.asyncio
 async def test_default_off_has_no_network_model_or_product_work(managers):
     make, _ = managers

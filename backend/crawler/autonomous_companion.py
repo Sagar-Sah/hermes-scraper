@@ -287,6 +287,80 @@ class AutonomousCompanion:
     def _active_cycle(self):
         return next((c for c in self.cycles.values() if c["status"] in ACTIVE_CYCLE), None)
 
+    def _supersession_block(self, record):
+        """Only a never-started inventory may be retired for a fresh plan.
+
+        Inventory response pages are historical evidence and are retained. Any
+        handler intent, result, paid review or product-work artifact fences this
+        operation; retiring an inventory must never become a retry mechanism.
+        """
+        identifier = record["id"]
+        if record["status"] not in {"ready", "inventory_failed"}:
+            return "only_unstarted_inventory_can_be_superseded"
+        try:
+            self._check_pins(record)
+        except ValueError:
+            return "cycle_snapshot_requires_review"
+        if (record.get("started_at") is not None or record.get("finished_at") is not None
+                or record.get("dispatch_sequence") != 0 or record.get("director_reviews")
+                or record.get("supplier_blocks") or record.get("supplier_not_before")):
+            return "cycle_work_history_prevents_supersession"
+        if (identifier in self._inventory_tasks
+                or any(cid == identifier for cid, _ in self._active)
+                or any(cid == identifier for cid, _ in self._review_tasks)):
+            return "cycle_worker_ownership_prevents_supersession"
+        for job in record.get("products", []):
+            if (job.get("status") != "queued" or job.get("attempts") != 0
+                    or job.get("last_dispatch_sequence") != 0 or job.get("progress_count") != 0
+                    or job.get("progress_token") is not None or job.get("started_at") is not None
+                    or job.get("ended_at") is not None or job.get("result") is not None
+                    or job.get("repair_status") is not None or job.get("reason") is not None
+                    or job.get("not_before") != 0):
+                return "cycle_work_history_prevents_supersession"
+        for kind in ("product-work", "shipping-models"):
+            path = self.root / kind / identifier
+            # Read-only result inspection can create an empty product-work
+            # directory. Files or symlinks, including uncertain dispatch
+            # journals, must remain attached to a held cycle instead.
+            if path.parent.is_symlink() or path.is_symlink() or (path.exists() and (not path.is_dir() or any(path.iterdir()))):
+                return "cycle_operation_artifacts_prevent_supersession"
+        return None
+
+    async def supersede(self, cycle_id, *, expected_revision_sha256, expected_inventory_sha256, reason):
+        """Retain the pinned inventory and free a separate, explicit replan.
+
+        No replacement is dispatched or even created here. The caller must
+        create/inventory a new cycle, obtaining a new evidence namespace and
+        the then-current reviewed mappings and environment baseline.
+        """
+        if (not isinstance(expected_revision_sha256, str)
+                or not re.fullmatch(r"[a-f0-9]{64}", expected_revision_sha256)
+                or (expected_inventory_sha256 is not None and (not isinstance(expected_inventory_sha256, str)
+                    or not re.fullmatch(r"[a-f0-9]{64}", expected_inventory_sha256)))
+                or not isinstance(reason, str) or not SAFE_REASON.fullmatch(reason)):
+            raise ValueError("invalid_cycle_supersession_request")
+        async with self._lock:
+            record = self._cycle(cycle_id)
+            if (_hash(record) != expected_revision_sha256
+                    or _hash(self._read(self.cycles_dir / (cycle_id + ".json"))) != expected_revision_sha256):
+                raise ValueError("cycle_revision_changed")
+            if record.get("inventory_baseline_sha256") != expected_inventory_sha256:
+                raise ValueError("cycle_inventory_revision_changed")
+            self._check_pins(record)
+            blocked = self._supersession_block(record)
+            if blocked:
+                raise ValueError(blocked)
+            now = self.clock()
+            updated = deepcopy(record)
+            updated["supersession"] = {"reason": reason, "actor": "operator", "superseded_at": now,
+                "previous_status": record["status"], "previous_revision_sha256": expected_revision_sha256,
+                "inventory_sha256": expected_inventory_sha256, "replacement_created": False}
+            updated["status"], updated["finished_at"] = "superseded", now
+            updated.pop("scheduled_inventory_pending", None)
+            self._save_cycle(updated)
+            self.cycles[cycle_id] = updated
+            return self.get_cycle(cycle_id)
+
     def create_cycle(self, *, kind="manual", baseline=None, scheduled_month=None, category_slugs=None, product_ids=None):
         if kind not in {"manual", "scheduled"}:
             raise ValueError("invalid_cycle_kind")
@@ -590,6 +664,8 @@ class AutonomousCompanion:
 
     def get_cycle(self, cycle_id, *, compact=False):
         record = deepcopy(self._cycle(cycle_id))
+        record["revision_sha256"] = _hash(record)
+        record["can_supersede"] = self._supersession_block(record) is None
         for job in record["products"]:
             task = self._active.get((cycle_id, job["product_id"]))
             owned = task is not None and not task.done() and job["status"] == "running"
@@ -597,7 +673,7 @@ class AutonomousCompanion:
             job["timing"] = timing.snapshot(job.get("timing"), state, self.clock(), time.monotonic(), self._session,
                 live=owned, created_at=job["created_at"], ended_at=job.get("ended_at"), scope="monthly_audit_product")
         record["summary"] = self._summary(record)
-        pending = self._ordered_pending(record)
+        pending = [] if record["status"] == "superseded" else self._ordered_pending(record)
         record["working_window"] = deepcopy(pending[:99])
         record["next_window"] = deepcopy(pending[99:198])
         record["progress"] = {"completed": record["summary"]["terminal"], "total": len(record["products"]),

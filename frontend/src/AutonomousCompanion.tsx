@@ -25,6 +25,7 @@ export interface AutonomousCycle {
   working_window?: AutonomousProduct[]; next_window?: AutonomousProduct[]; products?: AutonomousProduct[];
   supplier_blocks?: Record<string, unknown> | unknown[]; progress?: unknown; timing?: Record<string, unknown>;
   director?: Record<string, unknown>;
+  revision_sha256?: string; inventory_baseline_sha256?: string | null; can_supersede?: boolean;
 }
 interface AutonomyStatus {
   enabled?: boolean; schedule_enabled?: boolean; next_run_at?: string | number | null;
@@ -38,6 +39,14 @@ interface BaselineCapture {
   id: string; manifest_sha256: string; captured_at?: number; ready?: boolean;
   production?: Record<string, unknown>; staging?: Record<string, unknown>;
   backups_verified?: boolean; runtime_parity_verified?: boolean; isolation_verified?: boolean;
+}
+interface BaselineAlignment {
+  capture_id: string; capture_manifest_sha256: string; ready: false; read_only: true;
+  summary: { mismatch: number; unknown: number; preserve_staging_records: number; unknown_domains: number };
+  records: { id: string; domain: string; key: string; name?: string; status: string; reason: string;
+    production?: { version?: string | null }; staging?: { version?: string | null };
+    proposed_action: string; preserve_staging_before_alignment: boolean }[];
+  required_order: string[];
 }
 interface DirectorReadiness { ready?: boolean; reason?: string; preflight_ready?: boolean; preflight_checked_at?: number }
 interface EnvironmentProfile { configured?: boolean; connected?: boolean; base_url?: string; role?: string; reason?: string; protected_preview_credentials_present?: boolean }
@@ -87,6 +96,20 @@ export function autonomyRecoveryRequest(maintenance: boolean, acknowledged: bool
   return { path: `${PREFIX}/maintenance/end`, method: 'POST', body: '{}' };
 }
 
+/** Retire only the exact unstarted inventory that the operator reviewed. */
+export function autonomySupersedeRequest(cycle: AutonomousCycle) {
+  if (cycle.can_supersede !== true || !['ready', 'inventory_failed'].includes(cycle.status)
+    || !/^[a-f0-9]{64}$/.test(cycle.revision_sha256 || '')
+    || (cycle.inventory_baseline_sha256 != null && !/^[a-f0-9]{64}$/.test(cycle.inventory_baseline_sha256))) {
+    throw new Error('unstarted_inventory_revision_required');
+  }
+  return { path: `${PREFIX}/cycles/${encodeURIComponent(cycle.id)}/supersede`, method: 'POST', body: JSON.stringify({
+    expected_revision_sha256: cycle.revision_sha256,
+    expected_inventory_sha256: cycle.inventory_baseline_sha256 ?? null,
+    reason: 'reviewed_mapping_inventory_refresh',
+  }) };
+}
+
 export function AutonomyMaintenanceNotice({ maintenance, acknowledged, busy, onAcknowledge, onRecover }:
   { maintenance: boolean; acknowledged: boolean; busy: boolean; onAcknowledge: (value: boolean) => void; onRecover: () => void }) {
   if (!maintenance) return null;
@@ -115,8 +138,8 @@ export function DirectorReadinessDetails({ saved, checked, busy }: { saved?: Dir
   </div>;
 }
 
-export function AutonomyBaselineDetails({ baseline, capture, connected, busy, onCapture, onRefresh }:
-  { baseline?: BaselineStatus | null; capture: BaselineCapture | null; connected: boolean; busy: boolean; onCapture: () => void; onRefresh: () => void }) {
+export function AutonomyBaselineDetails({ baseline, capture, alignment, connected, busy, onCapture, onRefresh }:
+  { baseline?: BaselineStatus | null; capture: BaselineCapture | null; alignment?: BaselineAlignment | null; connected: boolean; busy: boolean; onCapture: () => void; onRefresh: () => void }) {
   return <div className="autonomy-setup-card" aria-label="Staging baseline status">
     <h4>{baseline?.ready === true ? <ShieldCheck size={16} /> : <TriangleAlert size={16} />}{baseline?.ready === true ? 'Approved staging baseline' : 'Staging repairs held'}</h4>
     <p>{humanize(baseline?.reason || 'staging_baseline_not_loaded')}</p>
@@ -125,6 +148,12 @@ export function AutonomyBaselineDetails({ baseline, capture, connected, busy, on
     <div className="autonomy-actions"><button type="button" className="button button-secondary" disabled={busy || !connected} onClick={onCapture}><Layers3 size={15} />Capture environment inventory</button><button type="button" className="button button-secondary" disabled={busy} onClick={onRefresh}><RefreshCw size={15} />Refresh baseline status</button></div>
     <p>Capture reads both environments. It does not copy data, create a backup, approve parity or enable writes.</p>
     {capture && <div className="autonomy-baseline-capture"><strong>Saved inventory · {autonomyDate(capture.captured_at)}</strong><dl><div><dt>Capture ID</dt><dd><code>{capture.id}</code></dd></div><div><dt>Manifest SHA-256</dt><dd><code>{capture.manifest_sha256}</code></dd></div></dl><details><summary>Captured environment details</summary><pre>{JSON.stringify({ production: capture.production, staging: capture.staging }, null, 2)}</pre></details></div>}
+    {capture && alignment?.capture_id === capture.id && alignment.capture_manifest_sha256 === capture.manifest_sha256 && <div aria-label="Saved environment comparison">
+      <p><strong>{count(alignment.summary.mismatch)} differences</strong> · {count(alignment.summary.unknown)} unverified records · {count(alignment.summary.preserve_staging_records)} staging records to preserve.</p>
+      <p>This comparison uses the saved capture. It does not install files, copy settings, or verify current runtime behavior.</p>
+      <details><summary>Review environment differences</summary><div className="table-scroll"><table className="data-table"><thead><tr><th>Component</th><th>Main</th><th>Staging</th><th>Required work</th></tr></thead><tbody>{alignment.records.map(row => <tr key={row.id}><td><strong>{row.name || row.key}</strong><small>{humanize(row.domain)} · {humanize(row.status)}</small></td><td>{row.production?.version || 'See evidence'}</td><td>{row.staging?.version || 'See evidence'}</td><td>{humanize(row.proposed_action)}<small>{humanize(row.reason)}</small>{row.preserve_staging_before_alignment && <strong>Preserve staging work first</strong>}</td></tr>)}</tbody></table></div></details>
+      <details><summary>Alignment order</summary><ol>{alignment.required_order.map(step => <li key={step}>{humanize(step)}</li>)}</ol></details>
+    </div>}
     {baseline?.id && <p className="autonomy-source-note">Approved capture: <code>{baseline.id}</code></p>}
     <p>Approval requires five verified receipts: production backup, staging backup, preserved unfinished staging work, functional runtime parity, and staging isolation. Missing or unknown evidence keeps repairs held. An inventory snapshot alone is insufficient.</p>
   </div>;
@@ -227,6 +256,7 @@ export default function AutonomousCompanion() {
   const [directorCheck, setDirectorCheck] = useState<DirectorReadiness | null>(null);
   const [baseline, setBaseline] = useState<BaselineStatus | null>(null);
   const [baselineCapture, setBaselineCapture] = useState<BaselineCapture | null>(null);
+  const [baselineAlignment, setBaselineAlignment] = useState<BaselineAlignment | null>(null);
   const [maintenanceAcknowledged, setMaintenanceAcknowledged] = useState(false);
   const [draft, setDraft] = useState<AutonomyConfig>(EMPTY_CONFIG);
   const [busy, setBusy] = useState('');
@@ -235,6 +265,7 @@ export default function AutonomousCompanion() {
   const dirty = useRef(false);
   const alive = useRef(true);
   const readSerial = useRef(0);
+  const baselineReadSerial = useRef(0);
   const providerReadSerial = useRef(0);
   const acting = useRef(false);
   const loadStatus = useCallback(async () => {
@@ -254,8 +285,13 @@ export default function AutonomousCompanion() {
     if (alive.current) setEnvironments(value);
   }, []);
   const loadBaseline = useCallback(async () => {
-    const value = await api<BaselineStatus>(`${PREFIX}/baseline`);
-    if (alive.current) setBaseline(value);
+    const serial = ++baselineReadSerial.current;
+    const [value, saved] = await Promise.all([
+      api<BaselineStatus>(`${PREFIX}/baseline`),
+      api<{ capture: BaselineCapture | null }>(`${PREFIX}/baseline/latest`),
+    ]);
+    const comparison = saved.capture ? await api<BaselineAlignment>(`${PREFIX}/baseline/alignment?capture_id=${encodeURIComponent(saved.capture.id)}`) : null;
+    if (alive.current && serial === baselineReadSerial.current) { setBaseline(value); setBaselineCapture(saved.capture); setBaselineAlignment(comparison); }
   }, []);
   const loadProviders = useCallback(async () => {
     const serial = ++providerReadSerial.current;
@@ -313,6 +349,13 @@ export default function AutonomousCompanion() {
     setHistorical(value);
     setNotice(action === 'inventory' ? 'Catalog inventory saved. Review completeness and environment checks before starting.' : action === 'pause' ? 'Pause requested. Saved work is retained; an uncertain source request remains held.' : 'Audit coordinator request accepted. Check the saved stages and blockers below.');
   });
+  const supersede = () => void act('supersede', async () => {
+    if (!cycle) return;
+    const request = autonomySupersedeRequest(cycle);
+    const value = await api<AutonomousCycle>(request.path, { method: request.method, body: request.body });
+    setHistorical(value);
+    setNotice('Unstarted inventory retired and retained in history. Create a new audit cycle to use the current reviewed mappings; no supplier work was started or repeated.');
+  });
   const refresh = () => void act('refresh', async () => {
     await Promise.all([loadProviders(), loadEnvironments(), loadBaseline()]);
     if (selectedId && selectedId !== status?.cycle?.id) setHistorical(await api<AutonomousCycle>(`${PREFIX}/cycles/${encodeURIComponent(selectedId)}`));
@@ -332,7 +375,9 @@ export default function AutonomousCompanion() {
     setNotice('Director readiness checked. This does not start a supplier audit or approve a release.');
   });
   const captureBaseline = () => void act('baseline-capture', async () => {
-    setBaselineCapture(await api<BaselineCapture>(`${PREFIX}/baseline/capture`, { method: 'POST', body: '{}' }));
+    baselineReadSerial.current++;
+    const capture = await api<BaselineCapture>(`${PREFIX}/baseline/capture`, { method: 'POST', body: '{}' });
+    if (alive.current) setBaselineCapture(capture);
     await loadBaseline();
     setNotice('Environment inventory captured. Backups, parity, isolation and human baseline approval are still required before staging repairs.');
   });
@@ -367,10 +412,12 @@ export default function AutonomousCompanion() {
       <button className="button button-primary" type="submit" disabled={!status || !!busy || (draft.director_enabled && !hasProvider)}>{busy === 'save' ? <LoaderCircle className="spin" size={15} /> : <Settings2 size={15} />}Save audit settings</button>
     </form></details>
     <div className="autonomy-budget" aria-label="AI director monthly budget"><div><strong>Muse director · {director?.month || 'month not loaded'}</strong><small>{director?.ready === true ? 'Ready for bounded summary reviews' : humanize(director?.reason || 'not_ready')}</small></div><dl>{[['Monthly cap', director?.cap_usd ?? status?.config?.director_budget_usd], ['Spent', director?.spent_usd], ['Reserved', director?.reserved_usd], ['Remaining', director?.remaining_usd]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{autonomyMoney(value)}</dd></div>)}</dl><p>Hard cap: $25 per month. At the cap, Hermes keeps collecting; additional AI reviews wait. AI cannot certify missing evidence or approve a live release.</p><button className="button button-secondary" onClick={checkDirector} disabled={!!busy || !status?.config?.director_provider_id}>{busy === 'director-preflight' ? <LoaderCircle className="spin" size={15} /> : <ShieldCheck size={15} />}Check director readiness</button><DirectorReadinessDetails saved={director} checked={directorCheck} busy={busy === 'director-preflight'} /></div>
-    <details className="autonomy-environments"><summary><ShieldCheck size={16} /> Environment baseline and release readiness</summary><p>Staging must have a reviewed production baseline, its intended pending changes, authenticated automation access and working rate checks. A matching version label alone is not a completed baseline.</p><div className="autonomy-environment-grid"><EnvironmentConnection environment="production" profile={environments?.production} busy={!!busy} onSave={saveEnvironment} /><EnvironmentConnection environment="staging" profile={environments?.staging} busy={!!busy} onSave={saveEnvironment} /></div><AutonomyBaselineDetails baseline={status?.baseline || baseline} capture={baselineCapture} connected={environments?.production?.connected === true && environments?.staging?.connected === true} busy={!!busy} onCapture={captureBaseline} onRefresh={refreshBaseline} />{cycle?.baseline && <details className="autonomy-cycle-context"><summary>Baseline recorded when this cycle was created</summary><pre>{JSON.stringify(cycle.baseline, null, 2)}</pre></details>}{environments?.production_release && <pre>{JSON.stringify(environments.production_release, null, 2)}</pre>}<p>Only the approved product and file differences are promoted. Live orders, customers and transactions are not replaced with the staging database.</p></details>
+    <details className="autonomy-environments"><summary><ShieldCheck size={16} /> Environment baseline and release readiness</summary><p>Staging must have a reviewed production baseline, its intended pending changes, authenticated automation access and working rate checks. A matching version label alone is not a completed baseline.</p><div className="autonomy-environment-grid"><EnvironmentConnection environment="production" profile={environments?.production} busy={!!busy} onSave={saveEnvironment} /><EnvironmentConnection environment="staging" profile={environments?.staging} busy={!!busy} onSave={saveEnvironment} /></div><AutonomyBaselineDetails baseline={status?.baseline || baseline} capture={baselineCapture} alignment={baselineAlignment} connected={environments?.production?.connected === true && environments?.staging?.connected === true} busy={!!busy} onCapture={captureBaseline} onRefresh={refreshBaseline} />{cycle?.baseline && <details className="autonomy-cycle-context"><summary>Baseline recorded when this cycle was created</summary><pre>{JSON.stringify(cycle.baseline, null, 2)}</pre></details>}{environments?.production_release && <pre>{JSON.stringify(environments.production_release, null, 2)}</pre>}<p>Only the approved product and file differences are promoted. Live orders, customers and transactions are not replaced with the staging database.</p></details>
     <div className="autonomy-cycle-header"><div><h3>Audit cycles</h3><p>A finished collection step is not a verified product. Unknown checks remain visible.</p></div><div className="autonomy-actions"><button className="button button-primary" onClick={() => create(true)} disabled={!status || !!busy}>{busy === 'pilot' ? <LoaderCircle className="spin" size={15} /> : <CalendarClock size={15} />}Create Standard Print pilot</button><button className="button button-secondary" onClick={() => create(false)} disabled={!status || !!busy}>{busy === 'create' ? <LoaderCircle className="spin" size={15} /> : <CalendarClock size={15} />}Create full-catalog manual cycle</button></div></div>
     {cycles.length > 0 && <label className="autonomy-cycle-select">Cycle<select value={selectedId} onChange={event => setSelectedId(event.target.value)} disabled={!!busy}><option value="">Choose a cycle</option>{cycles.map(item => <option key={item.id} value={item.id}>{item.scheduled_month || autonomyDate(item.created_at)} · {humanize(item.status)} · {item.id.slice(0, 8)}</option>)}</select></label>}
-    {cycle ? <><div className="autonomy-cycle-state"><strong>{humanize(cycle.status)}</strong><span>Inventory: {cycle.inventory?.complete === true ? `${count(cycle.inventory.count || 0)} products · complete` : `${humanize(cycle.inventory?.status || 'unknown')} · not complete`}</span><code>{cycle.id}</code></div><div className="autonomy-actions"><button className="button button-secondary" onClick={() => operate('inventory')} disabled={!!busy || maintenance || !['created', 'inventory_failed'].includes(cycle.status)}>{busy === 'inventory' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Read catalog inventory</button>{paused ? <button className="button button-primary" onClick={() => operate('resume')} disabled={!!busy || maintenance}><Play size={15} />Resume saved work</button> : cycle.status === 'running' ? <button className="button button-secondary" onClick={() => operate('pause')} disabled={!!busy}><Pause size={15} />Pause after checkpoint</button> : <button className="button button-primary" onClick={() => operate('start')} disabled={!!busy || !canStart}><Play size={15} />Start this cycle</button>}<button className="button button-secondary" onClick={loadResults} disabled={!!busy}>{busy === 'results' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Load saved product results</button></div>
+    {cycle ? <><div className="autonomy-cycle-state"><strong>{humanize(cycle.status)}</strong><span>Inventory: {cycle.inventory?.complete === true ? `${count(cycle.inventory.count || 0)} products · complete` : `${humanize(cycle.inventory?.status || 'unknown')} · not complete`}</span><code>{cycle.id}</code></div><div className="autonomy-actions"><button className="button button-secondary" onClick={() => operate('inventory')} disabled={!!busy || maintenance || !['created', 'inventory_failed'].includes(cycle.status)}>{busy === 'inventory' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Read catalog inventory</button>{paused ? <button className="button button-primary" onClick={() => operate('resume')} disabled={!!busy || maintenance}><Play size={15} />Resume saved work</button> : cycle.status === 'running' ? <button className="button button-secondary" onClick={() => operate('pause')} disabled={!!busy}><Pause size={15} />Pause after checkpoint</button> : <button className="button button-primary" onClick={() => operate('start')} disabled={!!busy || !canStart}><Play size={15} />Start this cycle</button>}<button className="button button-secondary" onClick={loadResults} disabled={!!busy}>{busy === 'results' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Load saved product results</button>{cycle.can_supersede === true && <button className="button button-secondary" onClick={supersede} disabled={!!busy || maintenance}>{busy === 'supersede' ? <LoaderCircle className="spin" size={15} /> : <RefreshCw size={15} />}Retire unstarted inventory</button>}</div>
+      {cycle.can_supersede === true && <p className="autonomy-source-note">If reviewed supplier mappings changed, retire this unstarted inventory and create a new cycle. This snapshot and its evidence stay in history; supplier work does not run.</p>}
+      {cycle.status === 'superseded' && <p className="autonomy-source-note">Retired before product work started. The original catalog and mappings are retained. Create a new audit cycle to collect a fresh inventory.</p>}
       <div className="autonomy-counts">{['queued', 'running', 'verified', 'mismatch', 'needs_attention', 'access_required', 'failed', 'held'].map(key => <div key={key}><strong>{cycle.summary?.[key] === undefined ? '—' : count(cycle.summary[key])}</strong><small>{humanize(key)}</small></div>)}</div>
       <h4>Current window · up to 99 products</h4><AutonomousProductTable products={cycle.working_window || []} /><details className="autonomy-next"><summary>Next window · {count(cycle.next_window?.length || 0)} products</summary><AutonomousProductTable products={cycle.next_window || []} next /></details>
       {savedProducts && <details className="autonomy-next" open><summary>Saved product results · {count(savedProducts.length)}</summary><p className="autonomy-source-note">Saved snapshot. Use Load saved product results to refresh completed, held and unknown checks.</p><AutonomousProductTable products={savedProducts.slice(resultsPage * 99, (resultsPage + 1) * 99)} /><div className="autonomy-actions"><button className="button button-secondary" disabled={resultsPage === 0} onClick={() => setResultsPage(previous => previous - 1)}>Previous results</button><span>Page {resultsPage + 1} of {Math.max(1, Math.ceil(savedProducts.length / 99))}</span><button className="button button-secondary" disabled={(resultsPage + 1) * 99 >= savedProducts.length} onClick={() => setResultsPage(previous => previous + 1)}>Next results</button></div></details>}

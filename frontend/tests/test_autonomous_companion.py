@@ -34,6 +34,15 @@ check(autonomyMoney('25.00')==='$25.00');check(autonomyMoney('0')==='$0.00');che
 check(autonomyDuration(null)==='Not measured');check(autonomyDuration(NaN)==='Not measured');check(autonomyDuration(-1)==='Not measured');
 check(autonomyDuration(0)==='0s');check(autonomyDuration(65)==='1m 5s');check(autonomyDuration(3600)==='1h 00m');
 check(isMuseProfile({name:'Office Muse',model:'muse-spark'}));check(!isMuseProfile({name:'Other',model:'unrelated'}));
+const readyCycle={id:'a'.repeat(32),status:'ready',can_supersede:true,revision_sha256:'b'.repeat(64),inventory_baseline_sha256:'c'.repeat(64)};
+const retire=scope.exports.autonomySupersedeRequest(readyCycle);
+check(retire.path==='/companion/autonomy/cycles/'+readyCycle.id+'/supersede'&&retire.method==='POST');
+const retireBody=JSON.parse(retire.body);
+check(retireBody.expected_revision_sha256===readyCycle.revision_sha256&&retireBody.expected_inventory_sha256===readyCycle.inventory_baseline_sha256);
+check(retireBody.reason==='reviewed_mapping_inventory_refresh');
+check(JSON.parse(scope.exports.autonomySupersedeRequest({...readyCycle,status:'inventory_failed',inventory_baseline_sha256:null}).body).expected_inventory_sha256===null);
+for(const change of [{status:'running'},{can_supersede:false},{revision_sha256:'stale'},{inventory_baseline_sha256:'invalid'}]){assert.throws(()=>scope.exports.autonomySupersedeRequest({...readyCycle,...change}),/unstarted_inventory_revision_required/);checks++;}
+check(!('start' in retireBody)&&!('create_replacement' in retireBody));
 const base={id:'p1',product_id:'6383',title:'Coroplast',supplier:'4over',status:'verified'};
 check(!autonomyProductVerdict(base).verified);
 check(!autonomyProductVerdict({...base,result:{evidence_complete:true}}).verified);
@@ -148,6 +157,13 @@ const inventory=AutonomyBaselineDetails({...base,connected:true,capture});
 check(nodes(inventory).filter(n=>n.type==='button')[0].props.disabled===false);
 nodes(inventory).filter(n=>n.type==='button')[0].props.onClick();check(captures===1);
 const html=render(inventory);check(html.includes('Staging repairs held'));check(!html.includes('Approved staging baseline'));
+const alignment={capture_id:capture.id,capture_manifest_sha256:capture.manifest_sha256,ready:false,read_only:true,
+ summary:{mismatch:1,unknown:2,preserve_staging_records:1,unknown_domains:3},records:[{id:'fixture-plugin',domain:'plugins',key:'fixture',name:'Fixture Studio',status:'mismatch',reason:'same_version_code_changed',production:{version:'1.0'},staging:{version:'1.0'},proposed_action:'review_and_preserve',preserve_staging_before_alignment:true}],required_order:['verify_backups_before_alignment']};
+const comparison=render(AutonomyBaselineDetails({...base,connected:true,capture,alignment}));
+check(comparison.includes('Saved environment comparison')&&comparison.includes('Fixture Studio'));
+check(comparison.includes('Preserve staging work first')&&comparison.includes('same version code changed'));
+check(comparison.includes('does not install files')&&!comparison.includes('Approved staging baseline'));
+check(!render(AutonomyBaselineDetails({...base,capture,alignment:{...alignment,capture_id:'c'.repeat(64)}})).includes('Fixture Studio'));
 check(html.includes(capture.id)&&html.includes(capture.manifest_sha256));
 check(html.includes('does not copy data, create a backup, approve parity or enable writes'));
 for(const phrase of ['production backup','staging backup','preserved unfinished staging work','functional runtime parity','staging isolation'])check(html.includes(phrase));
@@ -238,7 +254,7 @@ let server={config:{director_provider_id:'muse-one',director_enabled:false},dire
 hooks[0]=server;
 let profiles=[{id:'muse-one',name:'Office Muse',model:'meta/muse-spark'}];const calls=[];
 let connectionResult={configured:true,connected:false,reason:'companion_connector_http_401'};
-const responses={'/companion/autonomy/cycles':{items:[]},'/companion/autonomy/environments':{},'/companion/autonomy/baseline':{ready:false}};
+const responses={'/companion/autonomy/cycles':{items:[]},'/companion/autonomy/environments':{},'/companion/autonomy/baseline':{ready:false},'/companion/autonomy/baseline/latest':{capture:null}};
 const scope={exports:{},setTimeout,clearTimeout,Intl,Date,require(name){
  if(name==='react')return fakeReact;
  if(name.endsWith('.css'))return {};
@@ -270,7 +286,7 @@ let checks=0;function check(v){assert.ok(v);checks++;}
  // Its children include text alongside an icon, so match the direct string.
  const refreshButton=refresh||nodes(tree).find(n=>n.type==='button'&&Array.isArray(n.props.children)&&n.props.children.includes('Refresh'));
  check(!!refreshButton);refreshButton.props.onClick();await new Promise(setImmediate);await new Promise(setImmediate);
- for(const route of ['/providers','/companion/autonomy/environments','/companion/autonomy/baseline','/companion/autonomy/status','/companion/autonomy/cycles'])check(calls.includes(route));
+ for(const route of ['/providers','/companion/autonomy/environments','/companion/autonomy/baseline','/companion/autonomy/baseline/latest','/companion/autonomy/status','/companion/autonomy/cycles'])check(calls.includes(route));
  tree=draw();check(nodes(tree).find(n=>n.type==='input'&&n.props.type==='number').props.value===6);
  check(!calls.some(route=>route.includes('/start')||route.includes('/resume')||route.includes('/preflight')));
  function stagingForm(){return nodes(tree).find(n=>n.type===scope.exports.EnvironmentConnection&&n.props.environment==='staging');}
@@ -295,3 +311,77 @@ let checks=0;function check(v){assert.ok(v);checks++;}
     receipt = json.loads(result.stdout)
     assert receipt["status"] == "PASS" and receipt["assertions"] >= 15
     assert receipt["external_requests"] == 0
+
+
+def test_saved_baseline_loads_ignore_stale_completions_and_bind_exact_capture():
+    if not shutil.which("node") or not (FRONTEND / "node_modules/typescript").is_dir():
+        pytest.skip("Dashboard dependencies are required")
+    program = r'''
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
+const req=require('node:module').createRequire(path.join(process.argv[1],'package.json'));
+const ts=req('typescript');let checks=0;function check(value){assert.ok(value);checks++;}
+const states=[],writes=[],callbacks=[],requests=[];
+const hooks={
+ useState(initial){const slot=states.length;states.push(typeof initial==='function'?initial():initial);return [states[slot],value=>{states[slot]=typeof value==='function'?value(states[slot]):value;writes.push({slot,value:states[slot]});}];},
+ useRef(value){return {current:value};},useEffect(){},useCallback(fn){callbacks.push(fn);return fn;},
+};
+function deferred(path,options){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no});const value={path,options,resolve,reject,promise};requests.push(value);return promise;}
+const api=async(path,options)=>{
+ if(path==='/companion/autonomy/status'){requests.push({path,options});return {enabled:false,schedule_enabled:false,baseline:{ready:false}};}
+ if(path==='/companion/autonomy/cycles'){requests.push({path,options});return {items:[]};}
+ return deferred(path,options);
+};
+const scope={exports:{},setTimeout,clearTimeout,Intl,Date,require(name){
+ if(name==='react')return hooks;
+ if(name.endsWith('.css'))return {};
+ if(name==='./AutonomousRepairs')return {__esModule:true,default:()=>null};
+ if(name==='./api')return {api,count:v=>String(v),errorMessage:e=>e.message,humanize:v=>String(v).replace(/_/g,' ')};
+ return req(name);
+}};
+const source=ts.transpileModule(fs.readFileSync(path.join(process.argv[1],'src/AutonomousCompanion.tsx'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+vm.runInNewContext(source,scope);
+function nodes(node,result=[]){if(!node||typeof node!=='object')return result;if(Array.isArray(node)){node.forEach(n=>nodes(n,result));return result;}result.push(node);nodes(node.props?.children,result);return result;}
+const tree=scope.exports.default();check(requests.length===0); // Rendering does not read or mutate a site.
+const load=callbacks.find(fn=>fn.toString().includes('/baseline/latest'));check(typeof load==='function');
+const controls=nodes(tree).find(node=>node.type===scope.exports.AutonomyBaselineDetails);check(!!controls);
+const flush=()=>new Promise(setImmediate);
+const take=(path,index=0)=>requests.filter(request=>request.path===path)[index];
+const capture=letter=>({id:letter.repeat(64),manifest_sha256:letter.toUpperCase().repeat(64),captured_at:1720000000});
+const latest='/companion/autonomy/baseline/latest',baseline='/companion/autonomy/baseline';
+const alignment=id=>'/companion/autonomy/baseline/alignment?capture_id='+encodeURIComponent(id);
+(async()=>{
+ const old=load(),fresh=load();
+ take(baseline,1).resolve({ready:false,reason:'fresh_baseline'});take(latest,1).resolve({capture:capture('b')});
+ await flush();check(!!take(alignment(capture('b').id)));check(!requests.some(r=>r.path==='/companion/autonomy/baseline/alignment'));
+ take(alignment(capture('b').id)).resolve({capture_id:capture('b').id,capture_manifest_sha256:capture('b').manifest_sha256});
+ await fresh;
+ const captureSlot=writes.find(write=>write.value?.id===capture('b').id).slot;
+ check(states[captureSlot].id===capture('b').id);
+ const writesAfterFresh=writes.length;
+ take(baseline,0).resolve({ready:false,reason:'stale_baseline'});take(latest,0).resolve({capture:capture('a')});
+ await flush();check(!!take(alignment(capture('a').id)));
+ take(alignment(capture('a').id)).resolve({capture_id:capture('a').id,capture_manifest_sha256:capture('a').manifest_sha256});
+ await old;
+ check(states[captureSlot].id===capture('b').id);check(writes.length===writesAfterFresh);
+ // A capture POST invalidates a read already in flight before the POST finishes.
+ const prior=load();controls.props.onCapture();await flush();
+ const post=take('/companion/autonomy/baseline/capture');check(post.options.method==='POST'&&post.options.body==='{}');
+ take(baseline,2).resolve({ready:false,reason:'old_before_post'});take(latest,2).resolve({capture:capture('a')});
+ await flush();take(alignment(capture('a').id),1).resolve({capture_id:capture('a').id,capture_manifest_sha256:capture('a').manifest_sha256});
+ await prior;check(states[captureSlot].id===capture('b').id);
+ post.resolve(capture('c'));await flush();check(states[captureSlot].id===capture('c').id);
+ take(baseline,3).resolve({ready:false,reason:'captured_baseline'});take(latest,3).resolve({capture:capture('c')});
+ await flush();check(!!take(alignment(capture('c').id)));
+ take(alignment(capture('c').id)).resolve({capture_id:capture('c').id,capture_manifest_sha256:capture('c').manifest_sha256});
+ await flush();await flush();
+ check(states[captureSlot].id===capture('c').id);
+ check(!writes.some(write=>write.slot===captureSlot&&write.value?.id===capture('a').id));
+ check(requests.filter(r=>r.options?.method==='POST').length===1);
+ check(!requests.some(r=>/director|supplier|repair|approve|\/start|\/resume/.test(r.path)));
+ process.stdout.write(JSON.stringify({status:'PASS',assertions:checks,external_requests:0,source_requests:0}));
+})().catch(error=>{console.error(error);process.exit(1)});
+'''
+    result = subprocess.run(["node", "-e", program, str(FRONTEND)], capture_output=True, text=True, check=True)
+    receipt = json.loads(result.stdout)
+    assert receipt["status"] == "PASS" and receipt["assertions"] >= 15
+    assert receipt["external_requests"] == receipt["source_requests"] == 0

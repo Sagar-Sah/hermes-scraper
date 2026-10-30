@@ -38,6 +38,13 @@ class ResumeRequest(BaseModel):
     supplier: StrictStr | None = None
 
 
+class SupersedeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision_sha256: StrictStr = Field(pattern=r"^[a-f0-9]{64}$")
+    expected_inventory_sha256: StrictStr | None = Field(pattern=r"^[a-f0-9]{64}$")
+    reason: StrictStr = Field(pattern=r"^[a-z][a-z0-9_]{0,99}$")
+
+
 def autonomous_router(getservice, authenticated):
     router = APIRouter(prefix="/api/v1/companion/autonomy", dependencies=[Depends(authenticated)])
 
@@ -95,6 +102,13 @@ def autonomous_router(getservice, authenticated):
     async def pause(cycle_id: str, payload: EmptyRequest):
         try:
             return await getservice().pause(cycle_id)
+        except (ValueError, KeyError) as exc:
+            raise failure(exc) from None
+
+    @router.post("/cycles/{cycle_id}/supersede")
+    async def supersede(cycle_id: str, payload: SupersedeRequest):
+        try:
+            return await getservice().supersede(cycle_id, **payload.model_dump())
         except (ValueError, KeyError) as exc:
             raise failure(exc) from None
 

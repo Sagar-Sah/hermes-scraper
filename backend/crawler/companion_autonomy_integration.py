@@ -399,6 +399,25 @@ def autonomy_integration_router(getservice, authenticated):
         except ValueError as exc:
             raise fail(exc) from None
 
+    @router.get("/baseline/latest")
+    def latest_baseline():
+        try:
+            return {"capture": getservice().baseline.latest_capture()}
+        except (ValueError, OSError) as exc:
+            raise fail(exc) from None
+
+    @router.get("/baseline/alignment")
+    def baseline_alignment(capture_id: str | None = None):
+        from .companion_baseline_alignment import build_alignment_plan
+        try:
+            baseline = getservice().baseline
+            capture = baseline._capture(capture_id) if capture_id is not None else baseline.latest_capture()
+            if capture is None:
+                raise ValueError("baseline_environment_capture_required")
+            return build_alignment_plan(capture)
+        except (ValueError, OSError) as exc:
+            raise fail(exc) from None
+
     @router.post("/baseline/approve")
     def approve_baseline(payload: BaselineApproval):
         try:

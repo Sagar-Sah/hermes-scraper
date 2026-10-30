@@ -149,11 +149,30 @@ class StagingBaseline:
         if not path.is_file() or path.is_symlink():
             raise ValueError("baseline_capture_not_found")
         record = json.loads(path.read_text())
+        if (not isinstance(record, dict) or record.get("schema") != "hermes-staging-baseline/v1"
+                or record.get("id") != identifier
+                or digest({k: v for k, v in record.items() if k not in {"id", "manifest_sha256"}}) != identifier):
+            raise ValueError("baseline_capture_hash_changed")
         claimed = record.pop("manifest_sha256", None)
         if digest(record) != claimed:
             raise ValueError("baseline_capture_hash_changed")
         record["manifest_sha256"] = claimed
         return record
+
+    def latest_capture(self):
+        """Return saved observations without repeating remote environment scans.
+
+        A saved capture is historical inventory, never approval or proof of the
+        current runtime. A damaged newest record stays visible as an error; do
+        not quietly fall back to an older, apparently healthy environment.
+        """
+        paths = [p for p in self.root.glob("*.json") if re.fullmatch(r"[a-f0-9]{64}\.json", p.name)]
+        if not paths:
+            return None
+        if any(p.is_symlink() or not p.is_file() for p in paths):
+            raise ValueError("baseline_capture_storage_invalid")
+        newest = max(paths, key=lambda p: (p.stat().st_mtime_ns, p.name))
+        return self._capture(newest.stem)
 
     def _verify_receipts(self, capture_id, receipts):
         required = {"production_backup", "staging_backup", "unreleased_work_preserved", "runtime_parity", "isolation"}
