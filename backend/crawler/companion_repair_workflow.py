@@ -204,7 +204,7 @@ class CompanionRepairWorkflow:
             return None
         raise ValueError("interrupted_repair_requires_recovery_review")
 
-    async def apply(self, repair_id, expected_revision):
+    async def apply(self, repair_id, expected_revision, *, authorization_guard=None):
         async with self._locks.setdefault(repair_id, asyncio.Lock()):
             record = self.get(repair_id)
             if record["status"] == "staging_verified":
@@ -214,6 +214,8 @@ class CompanionRepairWorkflow:
             m = record["manifest"]
             if record["status"] not in ("preview", "staging_applying", "staging_applied") or expected_revision != m["staging_revision"]:
                 raise ValueError("staging_repair_revision_or_state_changed")
+            if authorization_guard is not None:
+                authorization_guard()
             receipt = await self._recover_receipt(record, "staging") if record["status"] != "preview" else None
             if receipt is None:
                 self._targets(record)
@@ -222,6 +224,8 @@ class CompanionRepairWorkflow:
                 production = await self.environments.snapshot("production", m["product_id"])
                 if production["revision"] != m["production_revision"]:
                     raise ValueError("production_changed_since_staging_baseline")
+                if authorization_guard is not None:
+                    authorization_guard()
                 record["status"] = "staging_applying"
                 self._save(record)
                 receipt = await self.environments.request("staging", "POST", "/apply/" + m["staging_preview_id"],

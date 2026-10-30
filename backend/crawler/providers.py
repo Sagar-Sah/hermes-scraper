@@ -54,6 +54,42 @@ SECRET_NAMES = {
 }
 
 
+class ProviderStateError(ValueError):
+    """Fixed lifecycle errors; never include profile or credential contents."""
+    MESSAGES = {"provider_not_found": "Provider not found", "provider_suspended": "Provider is suspended",
+                "provider_deleted": "Provider is deleted", "provider_state_invalid": "Provider state requires review",
+                "provider_changed": "Provider changed while the request was waiting; check it again"}
+
+    def __init__(self, code):
+        self.code = code if code in self.MESSAGES else "provider_state_invalid"
+        super().__init__(self.MESSAGES[self.code])
+
+
+def active_provider_profile(store, provider_id):
+    """Legacy profiles are active; managed lifecycle records fail closed."""
+    try:
+        stored = next((p for p in store.profiles("provider", True) if p["id"] == provider_id), None)
+    except Exception:
+        raise ProviderStateError("provider_state_invalid") from None
+    if stored is None:
+        raise ProviderStateError("provider_not_found")
+    state = stored.get("status", "active")
+    if state != "active":
+        raise ProviderStateError("provider_suspended" if state == "suspended" else
+                                 "provider_deleted" if state == "deleted" else "provider_state_invalid")
+    if "revision" in stored and (type(stored["revision"]) is not int or stored["revision"] < 0):
+        raise ProviderStateError("provider_state_invalid")
+    return copy.deepcopy(stored)
+
+
+def require_provider_current(store, provider_id, expected):
+    """Recheck the key, metadata and monotonic revision at dispatch/use boundaries."""
+    current = active_provider_profile(store, provider_id)
+    if current != expected:
+        raise ProviderStateError("provider_changed")
+    return current
+
+
 def _json_value(value):
     """Check types without coercing tuples, non-string keys, or nonfinite floats."""
     if value is None or isinstance(value, (str, bool, int)):
@@ -207,14 +243,10 @@ def _template(value, replacements):
 async def complete(store, provider_id, prompt):
     if not isinstance(prompt, str) or not prompt:
         raise ValueError("Provider prompt must be a nonempty string")
-    stored = next(
-        (p for p in store.profiles("provider", True) if p["id"] == provider_id), None
-    )
-    if not stored:
-        raise ValueError("Provider not found")
+    stored = active_provider_profile(store, provider_id)
     credentials = stored.get("credentials", {})
     profile = validate_provider_profile(
-        {key: value for key, value in stored.items() if key != "credentials"}
+        {key: value for key, value in stored.items() if key not in {"credentials", "status", "revision"}}
     )
     api_key = credentials.get("api_key", "")
     if not isinstance(api_key, str) or any(
@@ -274,10 +306,12 @@ async def complete(store, provider_id, prompt):
         async with httpx.AsyncClient(
             verify=tls_context(), timeout=45, follow_redirects=False
         ) as client:
+            require_provider_current(store, provider_id, stored)
             # json=None means no body in httpx; explicit serialization preserves JSON null.
             response = await client.post(
                 url, headers=headers, content=json.dumps(body, allow_nan=False).encode()
             )
+        require_provider_current(store, provider_id, stored)
         if not response.is_success:
             raise ExtractionError(
                 f"Provider returned HTTP {response.status_code}", "provider_error"
@@ -291,6 +325,8 @@ async def complete(store, provider_id, prompt):
             "Provider response must contain text or JSON at response_path",
             "provider_response_invalid",
         )
+    except ProviderStateError:
+        raise
     except httpx.HTTPError:
         raise ExtractionError(
             "Provider request failed; check endpoint and credentials", "provider_error"

@@ -222,6 +222,10 @@ class Profile(Base):
     secret = Column(Text, default="")
 
 
+class ProfileConflict(ValueError):
+    """A profile exists, but the requested mutation is not applicable."""
+
+
 class Permit(Base):
     __tablename__ = "permits"
     id = Column(String, primary_key=True, default=uid)
@@ -764,6 +768,67 @@ class Store:
             p.data = data
             if secret is not None:
                 p.secret = self.cipher.encrypt(canonical(secret).encode()).decode()
+        return profile_id
+
+    def save_provider_profile(self, data, secret=None, *, profile_id=None, require_existing=False):
+        """Atomically replace public metadata without overwriting a retained key.
+
+        Lifecycle and revision are server-owned. The write lock is acquired before
+        reading them so simultaneous metadata, credential and lifecycle edits do
+        not restore stale state or lose a newly encrypted credential.
+        """
+        data = dict(data)
+        supplied_id = data.pop("id", None)
+        if profile_id and supplied_id and supplied_id != profile_id:
+            raise ProfileConflict("Provider ID does not match the requested profile")
+        profile_id = profile_id or supplied_id or uid()
+        if {"status", "revision", "credentials", "secret"}.intersection(data):
+            raise ValueError("Provider lifecycle and credentials are server-managed")
+        data.pop("has_credentials", None)
+        with self.session(immediate=True) as s:
+            p = s.scalar(select(Profile).where(Profile.id == profile_id).with_for_update())
+            if p is not None and p.kind != "provider":
+                raise ProfileConflict("Profile ID belongs to a different profile kind")
+            if p is None:
+                if require_existing:
+                    raise LookupError("Provider not found")
+                p = Profile(id=profile_id, kind="provider", data={"status": "active", "revision": 0})
+                s.add(p)
+            current = dict(p.data or {})
+            status = current.get("status", "active")
+            if status == "deleted":
+                raise ProfileConflict("Restore the deleted provider before editing it")
+            if status not in {"active", "suspended"}:
+                raise ProfileConflict("Provider lifecycle state is not supported")
+            public_current = {k: v for k, v in current.items() if k not in {"status", "revision"}}
+            revision = int(current.get("revision", 0))
+            changed = public_current != data or secret is not None or not revision
+            p.data = {**data, "status": status, "revision": revision + int(changed)}
+            if secret is not None:
+                p.secret = self.cipher.encrypt(canonical(secret).encode()).decode()
+        return profile_id
+
+    def provider_lifecycle(self, profile_id, action):
+        """Keep provider IDs and encrypted credentials recoverable for history."""
+        if action not in {"suspend", "resume", "delete", "restore"}:
+            raise ValueError("Unsupported provider action")
+        with self.session(immediate=True) as s:
+            p = s.scalar(select(Profile).where(Profile.id == profile_id).with_for_update())
+            if p is None:
+                raise LookupError("Provider not found")
+            if p.kind != "provider":
+                raise ProfileConflict("Profile ID belongs to a different profile kind")
+            data = dict(p.data or {})
+            current = data.get("status", "active")
+            if current not in {"active", "suspended", "deleted"}:
+                raise ProfileConflict("Provider lifecycle state is not supported")
+            if current == "deleted" and action not in {"restore", "delete"}:
+                raise ProfileConflict("Restore the deleted provider first")
+            if action == "restore" and current != "deleted":
+                raise ProfileConflict("Only deleted providers can be restored")
+            target = {"suspend": "suspended", "resume": "active", "delete": "deleted", "restore": "suspended"}[action]
+            if target != current:
+                p.data = {**data, "status": target, "revision": int(data.get("revision", 0)) + 1}
         return profile_id
 
     def profiles(self, kind, secrets=False):

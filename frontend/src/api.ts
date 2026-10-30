@@ -147,7 +147,14 @@ export interface ExportFile {
   record_scope?: string; legacy_row_count?: number | null; scoped_row_count?: number | null;
 }
 export interface Source { id: string; name?: string; domain?: string; base_url?: string; url?: string; adapter?: string; concurrency?: number; requests_per_second?: number; status?: string; [key: string]: unknown }
-export interface Provider { id: string; name: string; base_url: string; model: string; has_api_key?: boolean }
+export type ProviderStatus = 'active' | 'suspended' | 'deleted';
+export interface Provider {
+  id: string; name: string; base_url: string; model: string;
+  kind?: 'openai_compatible' | 'anthropic' | 'custom'; status?: ProviderStatus;
+  has_api_key?: boolean; has_credentials?: boolean;
+  path?: string; body_template?: Record<string, unknown>; prompt_field?: string; model_field?: string;
+  response_path?: string; auth_header?: string; auth_prefix?: string;
+}
 export interface NewRun {
   name: string; urls: string[]; titles?: string[]; source_url?: string; instructions?: string;
   adapter: 'auto' | 'browser' | 'printograph' | 'printitprints' | 'woocommerce' | 'fixture'; image_mode: 'urls' | 'download' | 'both';

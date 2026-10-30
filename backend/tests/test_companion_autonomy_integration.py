@@ -160,11 +160,16 @@ async def test_batch_review_filters_product_scope_and_chunks_twenty_with_distinc
     service.pipeline.proposals_for_cycle = lambda cid: proposals
     async def review(cycle, batch, *, config, proposals):
         calls.append((deepcopy(batch), deepcopy(proposals)))
-        return {"status": "reviewed", "decision": {"decisions": [], "summary": "Unknown source remains unknown"}}
-    async def apply(cid, values):
+        return {"status": "reviewed", "review_id": batch["id"], "decision": {"decisions": [], "summary": "Unknown source remains unknown"}}
+    guarded = []
+    def guard(review_id, config):
+        guarded.append(review_id)
+    async def apply(cid, values, *, authorization_guard):
+        authorization_guard()
         decisions.append(values)
         return []
     service.director.review = review
+    service.director.require_review_current = guard
     service.pipeline.apply_decisions = apply
     try:
         result = await service._review_batch({"id": CID, "config": deepcopy(service.config)},
@@ -174,7 +179,34 @@ async def test_batch_review_filters_product_scope_and_chunks_twenty_with_distinc
         assert all(p["id"] != "other" for _, chunk in calls for p in chunk)
         assert result["production_changes"] == 0
         assert decisions == [[], [], []]
+        assert guarded == ["7/0", "7/0", "7/1", "7/1", "7/2", "7/2"]
         assert not any(name in inspect.getsource(service._review_batch) for name in ("approve_production", ".promote("))
+    finally:
+        await service.close()
+
+
+@pytest.mark.asyncio
+async def test_provider_suspended_after_review_cannot_stage_its_decisions(tmp_path):
+    service = make(tmp_path)
+    service.pipeline.proposals_for_cycle = lambda cid: [{"id": "p1", "product_id": "9532", "eligible": True}]
+    calls = []
+    async def review(cycle, batch, **kwargs):
+        return {"status": "reviewed", "review_id": "fixture-review", "decision": {"decisions": []}}
+    def guard(review_id, config):
+        assert review_id == "fixture-review"
+        raise ValueError("provider_suspended")
+    async def forbidden(*args, **kwargs):
+        calls.append("write")
+        raise AssertionError("suspended provider staged a decision")
+    service.director.review = review
+    service.director.require_review_current = guard
+    service.pipeline.apply_decisions = forbidden
+    try:
+        result = await service._review_batch({"id": CID, "config": deepcopy(service.config)},
+            {"batch_index": 0, "products": [{"product_id": "9532"}]})
+        assert result["status"] == "held"
+        assert result["reviews"][0]["staging_repairs"][0]["status"] == "held"
+        assert calls == []
     finally:
         await service.close()
 

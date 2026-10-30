@@ -77,6 +77,41 @@ def pipeline(tmp_path, *, source="https://www.b2sign.com/banner.html", failure=N
     return value, companion, diagnoses
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("suspend_during", ["baseline", "preview"])
+async def test_provider_lifecycle_guard_rechecked_after_awaited_repair_preparation(tmp_path, suspend_during):
+    value, _, _ = pipeline(tmp_path)
+    proposal = {"id": "c" * 32, "product_id": PID, "eligible": True,
+                "changes": [{"kind": "set_cost"}], "evidence": {}}
+    value.proposals_for_cycle = lambda cid: [proposal]
+    active = True
+    calls = []
+    def guard():
+        if not active:
+            raise ValueError("provider_suspended")
+    async def ensure_current():
+        nonlocal active
+        calls.append("baseline")
+        if suspend_during == "baseline":
+            active = False
+    async def preview(*args):
+        nonlocal active
+        calls.append("preview")
+        if suspend_during == "preview":
+            active = False
+        return {"id": "d" * 32, "status": "preview", "manifest": {"staging_revision": "before"}}
+    async def apply(*args, **kwargs):
+        calls.append("apply")
+        raise AssertionError("suspended review reached staging apply")
+    value.baseline = SimpleNamespace(status=lambda: {"ready": True}, ensure_current=ensure_current)
+    value.repairs = SimpleNamespace(preview=preview, apply=apply)
+    with pytest.raises(ValueError, match="provider_suspended"):
+        await value.apply_decisions(CID, [{"proposal_id": proposal["id"], "action": "stage_repair"}],
+                                    authorization_guard=guard)
+    assert "apply" not in calls
+    assert ("preview" in calls) == (suspend_during == "preview")
+
+
 def test_product_name_never_establishes_source_mapping():
     index = SourceMappingIndex(Companion([[mapped_product(stage="queued", supplier_url=None)]]))
     assert index.resolve({"product_id": PID, "title": "Brown Kraft Business Cards"})["mapping_status"] == "unknown"

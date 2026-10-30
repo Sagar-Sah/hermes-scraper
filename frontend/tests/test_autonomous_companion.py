@@ -179,6 +179,16 @@ const stale=render(React.createElement(DirectorReadinessDetails,{saved:{ready:fa
 check(stale.includes('Director held')&&!stale.includes('Director ready'));
 const budget=render(React.createElement(DirectorReadinessDetails,{checked:{ready:false,reason:'director_isolated_monthly_key_limit_required'},busy:false}));
 check(budget.includes('monthly limit of $25 or less'));check(budget.includes('does not change a shared key'));
+const keyFacts={ready:false,reason:'director_isolated_monthly_key_limit_required',observed_limit_usd:'100',observed_reset:'monthly',required_cap_usd:'25.00'};
+const observed=render(React.createElement(DirectorReadinessDetails,{saved:keyFacts,checked:{ready:false,reason:keyFacts.reason},busy:false}));
+check(observed.includes('OpenRouter currently reports a $100.00 key limit per month'));
+check(observed.includes('Hermes requires $25.00 per month or less')&&observed.includes('account credit is separate'));
+const rotatedFacts=render(React.createElement(DirectorReadinessDetails,{saved:{ready:false,reason:'director_preflight_required'},checked:keyFacts,busy:false}));
+check(!rotatedFacts.includes('$100.00')); // Current status cannot inherit the former credential's diagnostics.
+for(const invalid of [null,'NaN','Infinity','-1',true,{secret:'private'}]){
+ const invalidFacts=render(React.createElement(DirectorReadinessDetails,{saved:{...keyFacts,observed_limit_usd:invalid},checked:null,busy:false}));
+ check(!invalidFacts.includes('OpenRouter currently reports')&&!invalidFacts.includes('private'));
+}
 const checking=render(React.createElement(DirectorReadinessDetails,{saved:{ready:true,reason:'ready'},checked:null,busy:true}));
 check(checking.includes('no inference request is sent'));check(!checking.includes('Director ready'));
 const {environmentConnectionReady,environmentConnectionRequest,EnvironmentConnection}=scope.exports;
@@ -253,13 +263,13 @@ const fakeReact={...React,
 let server={config:{director_provider_id:'muse-one',director_enabled:false},director:{ready:false,reason:'director_disabled'}};
 hooks[0]=server;
 let profiles=[{id:'muse-one',name:'Office Muse',model:'meta/muse-spark'}];const calls=[];
-let connectionResult={configured:true,connected:false,reason:'companion_connector_http_401'};
+let connectionResult={configured:true,connected:false,reason:'companion_connector_http_401'},statusFails=false;
 const responses={'/companion/autonomy/cycles':{items:[]},'/companion/autonomy/environments':{},'/companion/autonomy/baseline':{ready:false},'/companion/autonomy/baseline/latest':{capture:null}};
 const scope={exports:{},setTimeout,clearTimeout,Intl,Date,require(name){
  if(name==='react')return fakeReact;
  if(name.endsWith('.css'))return {};
  if(name==='./AutonomousRepairs')return {__esModule:true,default:()=>null};
- if(name==='./api')return {api:async(route,options)=>{calls.push(route);if(route==='/companion/autonomy/environments/staging'&&options?.method==='PUT'){if(connectionResult instanceof Error)throw connectionResult;return connectionResult;}if(route==='/providers')return {items:profiles};if(route==='/companion/autonomy/status')return server;if(route in responses)return responses[route];throw Error('Unexpected route '+route);},count:String,errorMessage:e=>e.message,humanize:v=>String(v).replace(/_/g,' ')};
+ if(name==='./api')return {api:async(route,options)=>{calls.push(route);if(route==='/companion/autonomy/environments/staging'&&options?.method==='PUT'){if(connectionResult instanceof Error)throw connectionResult;return connectionResult;}if(route==='/providers')return {items:profiles};if(route==='/companion/autonomy/status'){if(statusFails)throw Error('Status unavailable');return server;}if(route==='/companion/autonomy/director/preflight')throw Error('director_isolated_monthly_key_limit_required');if(route in responses)return responses[route];throw Error('Unexpected route '+route);},count:String,errorMessage:e=>e.message,humanize:v=>String(v).replace(/_/g,' ')};
  return req(name);
 }};
 const source=ts.transpileModule(fs.readFileSync(path.join(process.argv[1],'src/AutonomousCompanion.tsx'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
@@ -304,6 +314,27 @@ let checks=0;function check(v){assert.ok(v);checks++;}
  alert=nodes(tree).find(n=>n.props?.role==='alert');check(!!alert);
  check(!JSON.stringify(alert.props.children).includes('Credentials saved'));
  check(!nodes(tree).some(n=>n.props?.role==='status'&&typeof n.props.children==='string'&&n.props.children.includes('connection verified')));
+ // A rejected preflight refreshes safe status facts instead of hiding the
+ // exact observed provider cap behind the generic409 error.
+ const facts={ready:false,preflight_ready:false,reason:'director_isolated_monthly_key_limit_required',observed_limit_usd:'100',observed_reset:'monthly',required_cap_usd:'25.00'};
+ server={...server,director:facts};hooks[0]=server;tree=draw();calls.length=0;
+ function checkDirector(){return nodes(tree).find(n=>n.type==='button'&&Array.isArray(n.props.children)&&n.props.children.includes('Check director readiness'));}
+ check(!!checkDirector()&&!checkDirector().props.disabled);checkDirector().props.onClick();await new Promise(setImmediate);await new Promise(setImmediate);tree=draw();
+ let readiness=nodes(tree).find(n=>n.type===scope.exports.DirectorReadinessDetails);
+ check(readiness.props.saved.observed_limit_usd==='100');
+ check(calls.includes('/companion/autonomy/director/preflight')&&calls.includes('/companion/autonomy/status'));
+ // Rotation/current backend unknown status clears the former key's facts.
+ server={...server,director:{ready:false,preflight_ready:false,reason:'director_disabled'}};
+ checkDirector().props.onClick();await new Promise(setImmediate);await new Promise(setImmediate);tree=draw();
+ readiness=nodes(tree).find(n=>n.type===scope.exports.DirectorReadinessDetails);
+ check(readiness.props.saved.observed_limit_usd===undefined&&!('observed_limit_usd' in readiness.props.checked));
+ // A failed status refresh also clears old observations rather than showing
+ // a former key's limit when the current credential cannot be established.
+ server={...server,director:facts};hooks[0]=server;statusFails=true;tree=draw();
+ checkDirector().props.onClick();await new Promise(setImmediate);await new Promise(setImmediate);tree=draw();
+ readiness=nodes(tree).find(n=>n.type===scope.exports.DirectorReadinessDetails);
+ check(readiness.props.saved.observed_limit_usd===undefined&&readiness.props.saved.observed_reset===undefined);
+ check(!calls.some(route=>route.includes('/start')||route.includes('/resume')||route.includes('/repairs/')));
  process.stdout.write(JSON.stringify({status:'PASS',assertions:checks,external_requests:0}));
 })().catch(error=>{console.error(error);process.exit(1)});
 '''

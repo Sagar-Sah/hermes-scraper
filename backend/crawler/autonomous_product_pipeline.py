@@ -495,7 +495,7 @@ class AutonomousProductPipeline:
         private_save(path, state)
         return result
 
-    async def apply_decisions(self, cycle_id, decisions):
+    async def apply_decisions(self, cycle_id, decisions, *, authorization_guard=None):
         proposals = {p["id"]: p for p in self.proposals_for_cycle(cycle_id)}
         results = []
         for item in decisions:
@@ -505,11 +505,15 @@ class AutonomousProductPipeline:
             if item.get("action") != "stage_repair":
                 results.append({"proposal_id": proposal["id"], "status": item.get("action", "held")})
                 continue
+            if authorization_guard is not None:
+                authorization_guard()
             if not proposal.get("eligible") or not self.baseline or not self.baseline.status().get("ready"):
                 results.append({"proposal_id": proposal["id"], "status": "held", "reason": "approved_staging_baseline_required"})
                 continue
             async with self._locks.setdefault(("repair", cycle_id, proposal["id"]), asyncio.Lock()):
                 await self.baseline.ensure_current()
+                if authorization_guard is not None:
+                    authorization_guard()
                 folder = self._path(cycle_id, proposal["product_id"]).parent / "proposal-decisions"
                 folder.mkdir(exist_ok=True, mode=0o700)
                 if folder.is_symlink() or not re.fullmatch(r"[a-f0-9]{32}", proposal["id"]):
@@ -541,7 +545,10 @@ class AutonomousProductPipeline:
                 # Its workflow reconciles interrupted remote outcomes using the
                 # same preview id and revision rather than creating a new one.
                 if preview.get("status") in {"preview", "staging_applying", "staging_applied"}:
-                    preview = await self.repairs.apply(preview["id"], preview["manifest"]["staging_revision"])
+                    if authorization_guard is not None:
+                        authorization_guard()
+                    preview = await self.repairs.apply(preview["id"], preview["manifest"]["staging_revision"],
+                                                       authorization_guard=authorization_guard)
                 result = {"proposal_id": proposal["id"], "repair_id": preview.get("id"), "status": preview["status"]}
                 receipt.update(result=result, status=preview["status"])
                 private_save(path, receipt)

@@ -81,6 +81,26 @@ In the dashboard:
 3. Use structured filters to bound a pilot when useful. Natural-language instructions require a selected model provider configured under **Sources & AI**.
 4. Follow product states, coverage, and activity; inspect rows and download exports as products finish. Partial coverage remains visible.
 
+### Manage AI providers
+
+Open **Sources & AI → AI providers**. Each saved connection has **Edit**,
+**Suspend/Resume**, and **Delete** controls. Edit keeps its ID and history; the
+API-key field is always blank, and leaving it blank preserves the saved key.
+Saving a connection does not call the model. **Test connection** sends a small
+model request and may incur a provider charge.
+
+Suspend blocks new and queued AI calls, including director reviews, while keeping
+the connection available for later use. A request already in flight may finish;
+its billed usage is recorded, but a suspended or changed provider cannot authorize
+a pending staging repair. Collection that does not require AI continues.
+
+Delete is recoverable: enable **Show deleted**, choose **Restore**, review the
+connection, then **Resume**. Restoration leaves it suspended. Audit history is
+retained. To replace Muse's dedicated director key, choose **Edit** on the Muse
+connection, enter the key in its protected field and save. The director readiness
+check reports the limit observed for that exact saved key; account credit is
+separate from its monthly key limit.
+
 The saved [real-source sample exports](examples/README.md) include five direct quotes across the three supplied product URLs and the separate 26-tier Business Cards table pilot.
 
 ### Automatic campaign collection
@@ -220,7 +240,10 @@ Interactive API documentation is available at `/docs`. Main interfaces:
 - `/api/v1/runs/{id}/{pause|resume|cancel}`: control persistent work.
 - `/api/v1/runs/{id}/rows`, `/events`, `/exports`, `/analytics`: inspect records, activity, artifacts, and bounded quantity-price analysis.
 - `/api/v1/evidence/{id}`: inspect the retained source response and fingerprint.
-- `/api/v1/sources`, `/providers`, `/providers/{id}/test`: configure connections.
+- `/api/v1/sources`, `/providers`: configure connections. Provider updates use
+  `PUT /providers/{id}`; lifecycle actions use `POST /providers/{id}/{suspend|resume|restore}`
+  and recoverable `DELETE /providers/{id}`. `GET /providers?include_deleted=true`
+  includes recoverable deleted profiles. `/providers/{id}/test` sends a model request.
 - `/api/v1/commerce/shipping`, `/commerce/production`: explicit rule-driven estimates.
 
 Use `Authorization: Bearer <ATLAS_API_TOKEN>` when authentication is enabled. Health checks remain public and do not reveal stored credentials. Supplier/model credentials are encrypted; returned profile lists expose metadata only.

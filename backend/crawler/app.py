@@ -173,7 +173,7 @@ app = FastAPI(title="Hermes Product Crawler", version="0.1.0", lifespan=lifespan
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_methods=["GET", "POST", "PUT"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Content-Type", "Authorization"],
 )
 
@@ -198,6 +198,9 @@ from .autonomous_companion_routes import autonomous_router
 app.include_router(autonomous_router(lambda: app.state.autonomous_companion, authenticated))
 from .companion_autonomy_integration import autonomy_integration_router
 app.include_router(autonomy_integration_router(lambda: app.state.autonomous_companion, authenticated))
+from .provider_management import provider_management_router
+app.include_router(provider_management_router(lambda: store, authenticated,
+    validate_provider_url=lambda url: validate_url(url)))
 
 
 @app.middleware("http")
@@ -4438,44 +4441,15 @@ async def save_source(data: dict):
     return {"id": store.save_profile("source", data, credentials)}
 
 
-@app.get("/api/v1/providers", dependencies=[Depends(authenticated)])
-def providers():
-    return {"items": store.profiles("provider")}
-
-
-@app.post("/api/v1/providers", dependencies=[Depends(authenticated)])
-async def save_provider(data: dict):
-    data = dict(data)
-    key = data.pop("api_key", None)
-    if key is not None and (
-        not isinstance(key, str) or any(ord(c) < 32 or ord(c) > 126 for c in key)
-    ):
-        raise HTTPException(422, "API key must be a single-line ASCII string")
-    from .providers import validate_provider_profile
-
-    try:
-        data = validate_provider_profile(data)
-    except ValueError as exc:
-        raise HTTPException(422, str(exc))
-    if not data.get("base_url") or not data.get("model"):
-        raise HTTPException(422, "Base URL and model are required")
-    try:
-        await validate_url(data["base_url"])
-    except ExtractionError as exc:
-        raise HTTPException(422, str(exc))
-    return {
-        "id": store.save_profile(
-            "provider", data, {"api_key": key} if key is not None else None
-        )
-    }
-
-
 @app.post("/api/v1/providers/{provider_id}/test", dependencies=[Depends(authenticated)])
 async def test_provider(provider_id: str):
-    from .providers import complete
+    from .providers import ProviderStateError, active_provider_profile, complete
 
     try:
+        active_provider_profile(store, provider_id)
         result = await complete(store, provider_id, "Reply with the word connected.")
+    except ProviderStateError as exc:
+        raise HTTPException(404 if exc.code == "provider_not_found" else 409, str(exc)) from exc
     except Exception:
         raise HTTPException(
             502, "Provider connection failed; check its URL, model, and credentials"

@@ -32,7 +32,7 @@ interface AutonomyStatus {
   active_cycle_id?: string | null; cycle?: AutonomousCycle | null; config?: Partial<AutonomyConfig>;
   capabilities?: Record<string, unknown>; environments?: Record<string, unknown>;
   maintenance?: boolean; baseline?: BaselineStatus;
-  director?: { provider_id?: string | null; cap_usd?: string; spent_usd?: string; reserved_usd?: string; remaining_usd?: string; month?: string; ready?: boolean; reason?: string; preflight_ready?: boolean; preflight_checked_at?: number };
+  director?: DirectorReadiness & { provider_id?: string | null; cap_usd?: string; spent_usd?: string; reserved_usd?: string; remaining_usd?: string; month?: string };
 }
 interface BaselineStatus { ready?: boolean; reason?: string; id?: string; manifest_sha256?: string; approved_at?: number }
 interface BaselineCapture {
@@ -48,7 +48,8 @@ interface BaselineAlignment {
     proposed_action: string; preserve_staging_before_alignment: boolean }[];
   required_order: string[];
 }
-interface DirectorReadiness { ready?: boolean; reason?: string; preflight_ready?: boolean; preflight_checked_at?: number }
+interface DirectorReadiness { ready?: boolean; reason?: string; preflight_ready?: boolean; preflight_checked_at?: number;
+  observed_limit_usd?: string | null; observed_reset?: 'daily' | 'weekly' | 'monthly' | null; required_cap_usd?: string | null }
 interface EnvironmentProfile { configured?: boolean; connected?: boolean; base_url?: string; role?: string; reason?: string; protected_preview_credentials_present?: boolean }
 interface EnvironmentProfiles { production?: EnvironmentProfile; staging?: EnvironmentProfile; production_release?: EnvironmentProfile }
 interface EnvironmentInput { base_url: string; token?: string; role: 'read' | 'write'; protection_auth?: { username: string; password: string } }
@@ -128,11 +129,20 @@ export function DirectorReadinessDetails({ saved, checked, busy }: { saved?: Dir
   const reason = effective?.reason || 'director_preflight_required';
   const preflightPassed = effective?.preflight_ready === true && saved?.preflight_ready !== false;
   const rejected = /request_rejected_401|credentials_unavailable/.test(reason);
+  // Current backend status owns credential-bound observations. A locally
+  // retained failure must not show the former key's limit after rotation.
+  const observation = saved || checked;
+  const observedLimit = observation?.observed_limit_usd;
+  const requiredCap = observation?.required_cap_usd;
+  const validAmount = (value: unknown) => typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 1e9;
+  const reset = observation?.observed_reset;
+  const resetText = reset === 'monthly' ? 'per month' : reset === 'weekly' ? 'per week' : reset === 'daily' ? 'per day' : 'with no verified reset period';
   return <div className="autonomy-director-readiness" role="status">
     <strong>{busy ? 'Checking saved Muse profile…' : effective?.ready === true ? 'Director ready' : preflightPassed ? `Provider check passed · Director ${reason === 'director_disabled' ? 'disabled' : 'held'}` : 'Director held'}</strong>
     <span>{busy ? 'Read-only provider check; no inference request is sent.' : humanize(reason)}</span>
     {!busy && rejected && <p>Update the saved Muse key in Sources &amp; AI, then check again. Enter it only in the protected provider field.</p>}
     {!busy && /isolated_monthly_key_limit/.test(reason) && <p>Use a dedicated OpenRouter director key with a monthly limit of $25 or less. Hermes does not change a shared key’s limits.</p>}
+    {!busy && /isolated_monthly_key_limit/.test(reason) && validAmount(observedLimit) && validAmount(requiredCap) && <p>OpenRouter currently reports a {autonomyMoney(observedLimit)} key limit {resetText}. Hermes requires {autonomyMoney(requiredCap)} per month or less on its dedicated key. This is the key’s spending limit; account credit is separate.</p>}
     {!busy && preflightPassed && reason === 'director_disabled' && <p>The saved key, model and provider spending limit passed. AI reviews remain off until you enable the Muse director and save audit settings.</p>}
     {!busy && effective?.ready !== true && <p>Collection and deterministic checks continue. AI decisions stay held; this check does not start a review or approve changes.</p>}
   </div>;
@@ -371,7 +381,18 @@ export default function AutonomousCompanion() {
   const checkDirector = () => void act('director-preflight', async () => {
     setDirectorCheck(null);
     try { setDirectorCheck(await api<DirectorReadiness>(`${PREFIX}/director/preflight`, { method: 'POST', body: '{}' })); }
-    catch (value) { setDirectorCheck({ ready: false, reason: errorMessage(value).slice(0, 500) }); throw value; }
+    catch (value) {
+      // Failed checks retain only the backend's whitelisted current-key facts.
+      // Do not repeat a paid request or infer them from the account balance.
+      if (alive.current) setDirectorCheck({ ready: false, reason: errorMessage(value).slice(0, 500) });
+      try {
+        await loadStatus();
+      } catch {
+        if (alive.current) setStatus(previous => previous ? { ...previous, director: { ...previous.director,
+          observed_limit_usd: undefined, observed_reset: undefined, required_cap_usd: undefined } } : previous);
+      }
+      throw value;
+    }
     setNotice('Director readiness checked. This does not start a supplier audit or approve a release.');
   });
   const captureBaseline = () => void act('baseline-capture', async () => {
@@ -408,7 +429,7 @@ export default function AutonomousCompanion() {
       <label className="autonomy-checkbox"><input type="checkbox" checked={draft.schedule_enabled} disabled={!status || !!busy} onChange={event => change('schedule_enabled', event.target.checked)} /><span>Run calendar-month audits automatically<small>Disabled by default. Missed cycles are recovered by the coordinator after service recovery.</small></span></label>
       <label>Browser worker capacity<input type="number" min="1" max="8" required value={draft.worker_capacity} disabled={!status || !!busy} onChange={event => change('worker_capacity', Number(event.target.value))} /><small>Start with four; this coordinator allows one through eight. A 99-product window is a work queue, not 99 supplier pages at full speed.</small></label>
       <label className="autonomy-checkbox"><input type="checkbox" checked={draft.director_enabled} disabled={!status || !!busy} onChange={event => change('director_enabled', event.target.checked)} /><span>Let the Muse director review summaries and exceptions<small>Normal collection and queue refills require no AI calls.</small></span></label>
-      <label>Existing Muse provider<select value={draft.director_provider_id || ''} disabled={!status || !!busy} onChange={event => change('director_provider_id', event.target.value || null)}><option value="">Choose a saved Muse profile</option>{draft.director_provider_id && !hasProvider && <option value={draft.director_provider_id}>Configured profile unavailable</option>}{museProviders.map(provider => <option key={provider.id} value={provider.id}>{provider.name} · {provider.model}</option>)}</select><small>{museProviders.length ? 'Credentials stay in Sources & AI and are never sent in audit summaries.' : 'No saved Muse profile is available. Configure it in Sources & AI before enabling AI review.'}</small></label>
+      <label>Existing Muse provider<select value={draft.director_provider_id || ''} disabled={!status || !!busy} onChange={event => change('director_provider_id', event.target.value || null)}><option value="">Choose a saved Muse profile</option>{draft.director_provider_id && !hasProvider && <option value={draft.director_provider_id} disabled>Configured profile unavailable</option>}{museProviders.map(provider => <option key={provider.id} value={provider.id} disabled={provider.status === 'suspended' || provider.status === 'deleted'}>{provider.name} · {provider.model}{provider.status === 'suspended' ? ' · Suspended' : provider.status === 'deleted' ? ' · Deleted' : ''}</option>)}</select><small>{museProviders.length ? 'Credentials stay in Sources & AI and are never sent in audit summaries. Suspended profiles must be resumed there before use.' : 'No saved Muse profile is available. Configure it in Sources & AI before enabling AI review.'}</small></label>
       <button className="button button-primary" type="submit" disabled={!status || !!busy || (draft.director_enabled && !hasProvider)}>{busy === 'save' ? <LoaderCircle className="spin" size={15} /> : <Settings2 size={15} />}Save audit settings</button>
     </form></details>
     <div className="autonomy-budget" aria-label="AI director monthly budget"><div><strong>Muse director · {director?.month || 'month not loaded'}</strong><small>{director?.ready === true ? 'Ready for bounded summary reviews' : humanize(director?.reason || 'not_ready')}</small></div><dl>{[['Monthly cap', director?.cap_usd ?? status?.config?.director_budget_usd], ['Spent', director?.spent_usd], ['Reserved', director?.reserved_usd], ['Remaining', director?.remaining_usd]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{autonomyMoney(value)}</dd></div>)}</dl><p>Hard cap: $25 per month. At the cap, Hermes keeps collecting; additional AI reviews wait. AI cannot certify missing evidence or approve a live release.</p><button className="button button-secondary" onClick={checkDirector} disabled={!!busy || !status?.config?.director_provider_id}>{busy === 'director-preflight' ? <LoaderCircle className="spin" size={15} /> : <ShieldCheck size={15} />}Check director readiness</button><DirectorReadinessDetails saved={director} checked={directorCheck} busy={busy === 'director-preflight'} /></div>

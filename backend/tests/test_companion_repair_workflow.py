@@ -86,6 +86,29 @@ async def verifier(env, product_id, manifest, snapshot, **kwargs):
         key: "match" for key in ("calculator_data", "rendered_prices", "artwork_dimensions", "shipping", "customer_flow")}}
 
 
+@pytest.mark.asyncio
+async def test_provider_suspension_during_revision_check_prevents_staging_write(tmp_path):
+    bridge = Bridge()
+    flow = CompanionRepairWorkflow(tmp_path, bridge, verifier=verifier, clock=lambda: NOW)
+    record = await flow.preview("9532", CHANGES, evidence())
+    active = True
+    snapshot = bridge.snapshot
+    async def delayed_snapshot(env, product_id):
+        nonlocal active
+        result = await snapshot(env, product_id)
+        active = False
+        return result
+    def guard():
+        if not active:
+            raise ValueError("provider_suspended")
+    bridge.snapshot = delayed_snapshot
+    with pytest.raises(ValueError, match="provider_suspended"):
+        await flow.apply(record["id"], "before", authorization_guard=guard)
+    assert not any(call[2].startswith("/apply/") for call in bridge.calls)
+    assert flow.get(record["id"])["status"] == "preview"
+    assert bridge.snapshots["staging"]["rows"][0]["cost"] == "15.00"
+
+
 def test_staging_preview_apply_and_explicit_human_production_release(tmp_path):
     async def exercise():
         bridge = Bridge()

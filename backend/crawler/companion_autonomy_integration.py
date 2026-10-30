@@ -278,8 +278,15 @@ class IntegratedAutonomousCompanion(AutonomousCompanion):
                 return {"status": "held", "reason": "autonomy_paused_for_maintenance"}
             if result.get("status") == "reviewed":
                 try:
-                    result["staging_repairs"] = await self.pipeline.apply_decisions(cycle["id"], result["decision"]["decisions"])
+                    # The provider may be suspended, removed or edited while a
+                    # preview/baseline check awaits I/O. Fence every proposal and
+                    # the final write using the exact settled review identity.
+                    guard = lambda: self.director.require_review_current(result.get("review_id"), cycle["config"])
+                    guard()
+                    result["staging_repairs"] = await self.pipeline.apply_decisions(
+                        cycle["id"], result["decision"]["decisions"], authorization_guard=guard)
                 except Exception as exc:
+                    result.update(status="held", reason=safe_error(exc))
                     result["staging_repairs"] = [{"status": "held", "reason": safe_error(exc)}]
             results.append(result)
         return {"status": "reviewed" if all(r.get("status") == "reviewed" for r in results) else "held",

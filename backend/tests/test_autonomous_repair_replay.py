@@ -35,8 +35,10 @@ class Repairs:
     def get(self, identifier):
         assert identifier == REPAIR
         return deepcopy(self.record)
-    async def apply(self, identifier, expected):
+    async def apply(self, identifier, expected, *, authorization_guard=None):
         assert identifier == REPAIR and expected == "r1"
+        if authorization_guard is not None:
+            authorization_guard()
         self.applies += 1
         if self.interrupt == "apply":
             self.record["status"] = "staging_applying"

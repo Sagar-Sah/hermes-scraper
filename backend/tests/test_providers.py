@@ -23,6 +23,90 @@ class Profiles:
         return [self.profile]
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize('status', ['suspended', 'deleted', None, 'unrecognized'])
+async def test_inactive_provider_never_reaches_url_or_http(monkeypatch, status):
+    async def forbidden(*args):
+        raise AssertionError('Inactive provider attempted network dispatch')
+    monkeypatch.setattr(providers, 'validate_url', forbidden)
+    with pytest.raises(providers.ProviderStateError) as error:
+        await providers.complete(Profiles(status=status), 'fixture', 'hello')
+    assert error.value.code in {'provider_suspended', 'provider_deleted', 'provider_state_invalid'}
+    assert 'fixture-secret' not in str(error.value)
+
+
+@pytest.mark.asyncio
+async def test_active_managed_provider_strips_lifecycle_fields_from_runtime_validation(monkeypatch):
+    calls = []
+    def respond(request):
+        calls.append(request)
+        assert 'status' not in json.loads(request.content)
+        return httpx.Response(200, json={'choices': [{'message': {'content': 'connected'}}]})
+    mock_http(monkeypatch, respond)
+    assert await providers.complete(Profiles(status='active', revision=4), 'fixture', 'hello') == 'connected'
+    assert len(calls) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('change', ['suspend', 'delete', 'edit_key', 'aba_revision'])
+async def test_provider_change_during_url_validation_blocks_http(monkeypatch, change):
+    saved = Profiles(status='active', revision=0)
+    calls = []
+    mock_http(monkeypatch, lambda request: calls.append(request))
+    async def validate(url):
+        if change == 'suspend':
+            saved.profile.update(status='suspended', revision=1)
+        elif change == 'delete':
+            saved.profile.update(status='deleted', revision=1)
+        elif change == 'edit_key':
+            saved.profile['credentials'] = {'api_key': 'new-private-key'}
+            saved.profile['revision'] = 1
+        else:
+            saved.profile.update(status='active', revision=2)
+    monkeypatch.setattr(providers, 'validate_url', validate)
+    with pytest.raises(providers.ProviderStateError):
+        await providers.complete(saved, 'fixture', 'hello')
+    assert calls == []
+
+
+@pytest.mark.asyncio
+async def test_provider_suspend_during_client_entry_blocks_before_http(monkeypatch):
+    saved = Profiles(status='active', revision=0)
+    async def validate(url):
+        return None
+    class Client:
+        async def __aenter__(self):
+            saved.profile.update(status='suspended', revision=1)
+            return self
+        async def __aexit__(self, *args):
+            return None
+        async def post(self, *args, **kwargs):
+            raise AssertionError('Suspended provider was sent a request')
+    monkeypatch.setattr(providers, 'validate_url', validate)
+    monkeypatch.setattr(providers.httpx, 'AsyncClient', lambda **kwargs: Client())
+    with pytest.raises(providers.ProviderStateError, match='suspended'):
+        await providers.complete(saved, 'fixture', 'hello')
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('change', ['suspended', 'deleted', 'key_changed'])
+async def test_inflight_provider_response_cannot_return_after_lifecycle_or_key_change(monkeypatch, change):
+    saved = Profiles(status='active', revision=0)
+    calls = []
+    def respond(request):
+        calls.append(request)
+        if change == 'key_changed':
+            saved.profile['credentials'] = {'api_key': 'new-private-key'}
+        else:
+            saved.profile['status'] = change
+        saved.profile['revision'] = 1
+        return httpx.Response(200, json={'choices': [{'message': {'content': 'must-not-be-returned'}}]})
+    mock_http(monkeypatch, respond)
+    with pytest.raises(providers.ProviderStateError):
+        await providers.complete(saved, 'fixture', 'hello')
+    assert len(calls) == 1
+
+
 def mock_http(monkeypatch, handler):
     original = httpx.AsyncClient
 

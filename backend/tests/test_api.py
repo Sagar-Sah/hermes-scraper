@@ -148,6 +148,34 @@ async def test_custom_null_body_configuration_round_trips(service):
 
 
 @pytest.mark.asyncio
+async def test_inactive_provider_connection_tests_never_dispatch(service, monkeypatch):
+    client, store = service
+    provider_id = store.save_provider_profile({
+        "name": "Fixture", "base_url": "https://provider.example/v1", "model": "m",
+    }, {"api_key": "synthetic-secret"})
+    calls = []
+
+    async def complete(*args):
+        calls.append(args)
+        return "connected"
+
+    monkeypatch.setattr(providers, "complete", complete)
+    endpoint = f"/api/v1/providers/{provider_id}/test"
+    store.provider_lifecycle(provider_id, "suspend")
+    result = await client.post(endpoint, headers=auth())
+    assert result.status_code == 409 and result.json()["detail"] == "Provider is suspended"
+    store.provider_lifecycle(provider_id, "delete")
+    result = await client.post(endpoint, headers=auth())
+    assert result.status_code == 409 and result.json()["detail"] == "Provider is deleted"
+    assert calls == []
+    assert (await client.post("/api/v1/providers/missing/test", headers=auth())).status_code == 404
+    store.provider_lifecycle(provider_id, "restore")
+    store.provider_lifecycle(provider_id, "resume")
+    assert (await client.post(endpoint, headers=auth())).status_code == 200
+    assert len(calls) == 1
+
+
+@pytest.mark.asyncio
 async def test_source_credentials_are_encrypted_and_never_listed(service):
     client, store = service
     payload = {
