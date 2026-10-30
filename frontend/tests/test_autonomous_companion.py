@@ -37,8 +37,8 @@ check(isMuseProfile({name:'Office Muse',model:'muse-spark'}));check(!isMuseProfi
 const pilot=scope.exports.targetedPilotRequest('9532, 6862\n9532');
 check(pilot.kind==='manual'&&pilot.product_ids.join(',')==='9532,6862');
 check(Object.keys(pilot).join(',')==='kind,product_ids');
-check(scope.exports.targetedPilotRequest(Array.from({length:99},(_,i)=>String(i+1)).join(',')).product_ids.length===99);
-for(const bad of ['', '0', '09532', '-1', '9532/x', '9532.0', Array.from({length:100},(_,i)=>String(i+1)).join(','), '1'.repeat(20)]){assert.throws(()=>scope.exports.targetedPilotRequest(bad),/Enter 1–99 product IDs/);checks++;}
+for(const size of [99,300,1000])check(scope.exports.targetedPilotRequest(Array.from({length:size},(_,i)=>String(i+1)).join(',')).product_ids.length===size);
+for(const bad of ['', '0', '09532', '-1', '9532/x', '9532.0', Array.from({length:1001},(_,i)=>String(i+1)).join(','), '1'.repeat(20)]){assert.throws(()=>scope.exports.targetedPilotRequest(bad),/Enter 1–1,000 product IDs/);checks++;}
 const readyCycle={id:'a'.repeat(32),status:'ready',can_supersede:true,revision_sha256:'b'.repeat(64),inventory_baseline_sha256:'c'.repeat(64)};
 const retire=scope.exports.autonomySupersedeRequest(readyCycle);
 check(retire.path==='/companion/autonomy/cycles/'+readyCycle.id+'/supersede'&&retire.method==='POST');

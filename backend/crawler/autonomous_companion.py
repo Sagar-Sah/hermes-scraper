@@ -441,7 +441,7 @@ class AutonomousCompanion:
                 or not math.isfinite(stop_at) or not now < stop_at <= now + 86400):
             raise ValueError("invalid_manual_cycle_stop_at")
         for values, limit, pattern in ((category_slugs, 10, r"[a-z0-9][a-z0-9-]{0,99}"),
-                (product_ids, 99, r"[1-9][0-9]{0,18}"), (exclude_product_ids, 99, r"[1-9][0-9]{0,18}")):
+                (product_ids, 1000, r"[1-9][0-9]{0,18}"), (exclude_product_ids, 99, r"[1-9][0-9]{0,18}")):
             if values is not None and (not isinstance(values, list) or not 1 <= len(values) <= limit
                     or any(not isinstance(v, str) or not re.fullmatch(pattern, v) for v in values)
                     or len(values) != len(set(values))):

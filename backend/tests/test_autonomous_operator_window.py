@@ -148,6 +148,42 @@ async def test_full_catalog_retains_99_working_99_next_without_requoting_exclude
     assert current["inventory_baseline_sha256"] == inventory["inventory_baseline_sha256"]
 
 
+async def test_bulk_manual_scope_keeps_99_windows_and_cutoff_without_collecting_unselected_products(make):
+    source_calls = []
+    async def source(cycle, product):
+        source_calls.append(product["product_id"])
+        await asyncio.Event().wait()
+    service, clock, _, _ = make(rows=[item(identifier) for identifier in range(1, 311)], handler=source)
+    identifiers = [str(identifier) for identifier in range(1, 301)]
+    inventory = await ready(service, clock, product_ids=identifiers)
+    assert inventory["scope"]["product_ids"] == identifiers
+    assert inventory["inventory"]["catalog_count"] == 310 and inventory["inventory"]["selected_count"] == 300
+    assert len(inventory["working_window"]) == len(inventory["next_window"]) == 99
+    assert [row["product_id"] for row in inventory["products"]] == identifiers
+    await service.start(inventory["id"])
+    await service.tick(inventory["id"])
+    await asyncio.sleep(0)
+    await asyncio.sleep(0)
+    assert len(source_calls) == 4
+    clock.now = inventory["stop_at"]
+    await service.tick(inventory["id"])
+    await asyncio.gather(*service._active.values(), return_exceptions=True)
+    await service.tick(inventory["id"])
+    current = service.get_cycle(inventory["id"])
+    assert current["status"] == "paused" and current["pause_reason"] == OPERATOR_WINDOW_ENDED
+    assert len(source_calls) == 4 and current["summary"]["queued"] == 296
+
+
+async def test_bulk_manual_scope_accepts_1000_but_not_1001_and_exclusions_stay_99(make):
+    service, _, _, _ = make()
+    with pytest.raises(ValueError, match="invalid_manual_catalog_scope"):
+        service.create_cycle(product_ids=[str(identifier) for identifier in range(1, 1002)])
+    with pytest.raises(ValueError, match="invalid_manual_catalog_scope"):
+        service.create_cycle(exclude_product_ids=[str(identifier) for identifier in range(1, 101)])
+    created = service.create_cycle(product_ids=[str(identifier) for identifier in range(1, 1001)])
+    assert len(created["scope"]["product_ids"]) == 1000
+
+
 async def test_expired_start_resume_and_inventory_do_not_request_or_release_supplier_holds(make):
     source_calls = []
     async def source(*args):
@@ -391,7 +427,10 @@ def test_authenticated_cycle_api_accepts_scoped_cutoff_and_rejects_coercion(tmp_
         for value in [True, "1060"]:
             assert client.post("/api/v1/companion/autonomy/cycles", json={"stop_at": value}).status_code == 422
         assert client.post("/api/v1/companion/autonomy/cycles", json={"stop_at": 87401}).status_code == 409
-        result = client.post("/api/v1/companion/autonomy/cycles", json={"stop_at": 1060, "exclude_product_ids": ["9532"]})
+        assert client.post("/api/v1/companion/autonomy/cycles", json={"product_ids": [str(identifier) for identifier in range(1, 1002)]}).status_code == 422
+        assert client.post("/api/v1/companion/autonomy/cycles", json={"exclude_product_ids": [str(identifier) for identifier in range(1, 101)]}).status_code == 422
+        result = client.post("/api/v1/companion/autonomy/cycles", json={"stop_at": 1060, "exclude_product_ids": ["9532"], "product_ids": [str(identifier) for identifier in range(1, 301)]})
         assert result.status_code == 200
         assert result.json()["stop_at"] == 1060 and result.json()["scope"]["exclude_product_ids"] == ["9532"]
+        assert len(result.json()["scope"]["product_ids"]) == 300
     asyncio.run(service.close())

@@ -27,7 +27,8 @@ class CycleRequest(BaseModel):
     kind: StrictStr = "manual"
     baseline: dict | None = None
     category_slugs: list[StrictStr] | None = Field(default=None, min_length=1, max_length=10)
-    product_ids: list[StrictStr] | None = Field(default=None, min_length=1, max_length=99)
+    # Bulk manual scope is independent of the 99-active / 99-next windows.
+    product_ids: list[StrictStr] | None = Field(default=None, min_length=1, max_length=1000)
     exclude_product_ids: list[StrictStr] | None = Field(default=None, min_length=1, max_length=99)
     stop_at: StrictFloat | StrictInt | None = Field(default=None, allow_inf_nan=False)
 
